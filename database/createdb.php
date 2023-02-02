@@ -10,13 +10,14 @@ $conn = new mysqli($servername, $username, $password);
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 } else {
- echo "Connection Successful";
+ echo "Connection Successful".PHP_EOL;
 }
 
 // Create database
-$sql = "CREATE DATABASE IT490;
-	grant all privileges on IT490.* to 'testuser'@'localhost';
-	flush privileges;";
+$sql = "CREATE DATABASE IT490;"; 
+"GRANT ALL PRIVILEGES ON IT490 to 'testuser'@'localhost';". 
+" FLUSH PRIVILEGES;";
+
 if ($conn->query($sql) === TRUE) {
   echo "Database created successfully";
 } else {
@@ -25,3 +26,4 @@ if ($conn->query($sql) === TRUE) {
 
 $conn->close();
 ?>
+

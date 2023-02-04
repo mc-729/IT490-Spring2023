@@ -17,9 +17,11 @@ if (isset ($_POST["email"]))
 else{
 
   $uname ="test";}
-  if (isset ($_POST["pw"]))
+  if (isset ($_POST["password"]))
 {
-        $password = $_POST["pw"];
+        $password = $_POST["password"];
+		$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+		$password = $hashedPassword;
 }
 else{
 

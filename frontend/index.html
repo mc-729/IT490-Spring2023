@@ -44,7 +44,7 @@ function SendLoginRequest(form)
         <div class="collapse navbar-collapse" id="navContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                
-                    <li class="nav-item"><a class="nav-link" href="/register.php">Register</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/register.html">Register</a></li>
               
             
                 
@@ -54,7 +54,7 @@ function SendLoginRequest(form)
 </nav>
 <div class="container-fluid">
     <h1>Login</h1>
-    <form  action="login.php" >
+    <form  method="POST"action="login.php" >
         <div class="mb-3">
             <label class="form-label" for="email">Username/Email</label>
             <input class="form-control" type="text" id="email" name="email" required />

@@ -6,40 +6,41 @@ require_once('rabbitMQLib.inc');
 
 
 
-/*
 
-$client = new rabbitMQClient("testRabbitMQ.ini","testServer");
-if (isset($argv[1]))
+
+
+
+if (isset ($_POST["email"]))
 {
-  $msg = $argv[1];
-}
-else
-{
-  $msg = "test message";
-}
-*/
-if (isset ($_GET["email"]))
-{
-        $uname = $_GET["email"];
+        $uname = $_POST["email"];
 }
 else{
 
   $uname ="test";}
-  if (isset ($_GET["pw"]))
+  if (isset ($_POST["pw"]))
 {
-        $password = $_GET["pw"];
+        $password = $_POST["pw"];
 }
 else{
 
   $password ="test_password";}
- /* 
-$client = new rabbitMQClient("testRabbitMQ.ini","testServer");
-$request = array();
-$request['type'] = "Login";
-$request['username'] = $uname;
-$request['password'] = $password;
-$request['message'] = $msg;
-$response = $client->send_request($request);
+ 
+  $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
+  if (isset($argv[1]))
+  {
+    $msg = $argv[1];
+  }
+  else
+  {
+    $msg = "test message";
+  }
+  
+  $request = array();
+  $request['type'] = "Login";
+  $request['username'] = $uname;
+  $request['password'] = $password;
+  $request['message'] = $msg;
+  $response = $client->send_request($request);
 //$response = $client->publish($request);
 
 echo "client received response: ".PHP_EOL;
@@ -47,7 +48,6 @@ print_r($response);
 echo "\n\n";
 
 echo $argv[0]." END".PHP_EOL;
-*/
 ?>
 
 

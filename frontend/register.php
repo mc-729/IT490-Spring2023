@@ -3,7 +3,10 @@ code<html>
 </html>
 
 <?php
-$continue = True;
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
+
 if (isset ($_POST["username"]))
 {
         $uname = $_POST["username"];
@@ -45,22 +48,12 @@ if ($password != $confPassword)
 }
 
 
-?>
-
-<html>
-        <body>
-       hooray you have submitted a registration form!!!!!!
-        </body>
-</html>
-
-<?php
 
 
 
 
-require_once('path.inc');
-require_once('get_host_info.inc');
-require_once('rabbitMQLib.inc');
+
+
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 if (isset($argv[1]))

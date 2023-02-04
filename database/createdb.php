@@ -19,7 +19,7 @@ $sql = "CREATE DATABASE IT490;";
 " FLUSH PRIVILEGES;";
 
 if ($conn->query($sql) === TRUE) {
-  echo "Database created successfully";
+  echo "Database created successfully".PHP_EOL;
 } else {
   echo "Error creating database: " . $conn->error;
 }

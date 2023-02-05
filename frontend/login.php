@@ -27,7 +27,7 @@ else{
 
   $password ="test_password";}
  
-  $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
+  $client = new rabbitMQClient("RabbitMQConfig.ini","testServer");
   if (isset($argv[1]))
   {
     $msg = $argv[1];

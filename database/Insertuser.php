@@ -17,13 +17,13 @@ if ($conn->connect_error) {
 
 // sql to create table Users
 $sql = "INSERT INTO IT490.Users (User_ID, F_Name, L_Name, Email, Password)
-VALUES (1, Bob, Smith, bsmith@gmail.com, password);";
+VALUES ('1', 'Bob', 'Smith', 'bsmith@gmail.com', 'password');";
 
 
 if ($conn->query($sql) === TRUE) {
-  echo "Table Users created successfully".PHP_EOL;
+  echo "Users added successfully".PHP_EOL;
 } else {
-  echo "Error creating table Users: " . $conn->error;
+  echo "Error adding Users: " . $conn->error;
 }
 
 $conn->close();

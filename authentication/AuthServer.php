@@ -32,9 +32,9 @@ function requestProcessor($request)
 
 $server = new rabbitMQServer("RabbitMQConfig.ini","testServer");
 
-echo "testRabbitMQServer BEGIN".PHP_EOL;
+echo "Authentication Server BEGIN".PHP_EOL;
 $server->process_requests('requestProcessor');
-echo "testRabbitMQServer END".PHP_EOL;
+echo "Authentication Server END".PHP_EOL;
 exit();
 
 

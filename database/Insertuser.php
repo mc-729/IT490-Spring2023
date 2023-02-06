@@ -17,7 +17,7 @@ if ($conn->connect_error) {
 
 // sql to create table Users
 $sql = "INSERT INTO IT490.Users (User_ID, F_Name, L_Name, Email, Password)
-VALUES ('1', 'Bob', 'Smith', 'bsmith@gmail.com', 'password');";
+VALUES ('1', 'Bob', 'Smith', 'bsmith@gmail.com', '$2y$10$K25uvHFoJ5eA10wOMt8xIueKOw3WtD6gooHcOQAGCUX14RL9hyUrS');";
 
 
 if ($conn->query($sql) === TRUE) {

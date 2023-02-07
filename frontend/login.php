@@ -2,6 +2,7 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+require_once('nav.php');
 
 
 
@@ -69,3 +70,22 @@ echo $argv[0]." END".PHP_EOL;
 ?>
 we in hurrr????
   <div>
+
+
+  <div class="container-fluid">
+    <h1>Login</h1>
+    <form  method="POST"action="login.php" >
+        <div class="mb-3">
+            <label class="form-label" for="email">Username/Email</label>
+            <input class="form-control" type="text" id="email" name="email" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="pw">Password</label>
+            <input class="form-control" type="password" id="pw" name="password" required minlength="4" />
+        </div>
+        <input type="submit" class="mt-3 btn btn-primary" value="Login" />
+    </form>
+    <div id="textResponse">
+        awaiting response
+        </div>
+</div>

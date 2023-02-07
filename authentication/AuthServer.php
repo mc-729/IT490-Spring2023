@@ -31,6 +31,15 @@ function doLogin($username,$password)
 		echo "Login Succesful".PHP_EOL;
 		return "true";
 	}
+	/*elseif($count == 1)
+	{
+		echo "Login Success".PHP_EOL;
+		return "true";
+	}
+	else{
+		break;
+	}
+	 */
 	else
 	{
 		echo "Login Failed".PHP_EOL;
@@ -55,7 +64,8 @@ function requestProcessor($request)
     case "validate_session":
       return doValidate($request['sessionId']);
   }
-  return array("returnCode" => '0', 'message'=>"Server received request and processed!!!!!!!!!");
+  //$callLogin = array($callLogin => doLogin($username,$password)
+  return array("returnCode" => '0', 'message'=>"Server received the request and processed it.");
 }
 
 $server = new rabbitMQServer("RabbitMQConfig.ini","testServer");

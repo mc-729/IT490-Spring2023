@@ -5,13 +5,27 @@ require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
 function doLogin($username,$password)
-{
-    // lookup username in databas
-    // check password
-    return true;
-    //return false if not valid
-}
+{	
+    // lookup username in database
+	$sql = "SELECT * FROM IT490.Users WHERE username = '$username' AND password = '$password'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($reult, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
 
+	if($count != 0)
+	{
+		echo "Login Succesful".PHP_EOL;
+		return true;
+	}
+	else
+	{
+		echo "Login Failed".PHP_EOL;
+		return false;
+	}
+}//End function doLogin
+
+
+//
 function requestProcessor($request)
 {
   echo "received request".PHP_EOL;

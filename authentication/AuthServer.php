@@ -46,6 +46,21 @@ function requestProcessor($request)
 
 $server = new rabbitMQServer("RabbitMQConfig.ini","testServer");
 
+$servername = "localhost";
+$username = "testuser";
+$password = "12345";
+$dbname = "IT490";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+} else 
+{
+        echo "Successfully Connected!".PHP_EOL;
+}
+
 echo "Authentication Server BEGIN".PHP_EOL;
 $server->process_requests('requestProcessor');
 echo "Authentication Server END".PHP_EOL;

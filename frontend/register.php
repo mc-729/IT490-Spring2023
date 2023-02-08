@@ -1,11 +1,11 @@
-code<html>
-<h1>Register Page</h1>
-</html>
+
 
 <?php
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+require_once('nav.php');
+
 
 if (isset ($_POST["username"]))
 {
@@ -27,26 +27,11 @@ else
 if (isset ($_POST["password"]))
 {
         $password = $_POST["password"];
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $password = $hashedPassword;
+       
 }
 else
 {
 	$password="not recieved";
-}
-if (isset ($_POST["confirm"]))
-{
-        $confPassword = $_POST["confirm"];
-}
-else
-{$confPassword = "not recieved";
-	
-}
-
-if ($password != $confPassword)
-{
-	echo "Passwords do not match".PHP_EOL;
-	
 }
 
 

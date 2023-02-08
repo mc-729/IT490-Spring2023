@@ -20,8 +20,8 @@ else{
   if (isset ($_POST["password"]))
 {
         $password = $_POST["password"];
-		$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-		$password = $hashedPassword;
+//		$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+//		$password = $hashedPassword;
 }
 else{
 

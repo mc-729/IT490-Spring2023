@@ -23,9 +23,11 @@ function loginAuth($username,$password)
 
 // Hashing password
 	$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+	echo $hashedPassword.PHP_EOL;
+
 	
 // lookup username in database
-	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username' and Password = 'hashedPassword'";
+	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username' and Password = '$hashedPassword'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
@@ -48,7 +50,7 @@ function loginAuth($username,$password)
 	else
 	{
 		echo "Login Failed".PHP_EOL;
-		$resp = array("login_status" => "true");
+		$resp = array("login_status" => "false");
                 return $resp;
 
 	}

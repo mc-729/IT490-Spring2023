@@ -4,7 +4,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-function doLogin($username,$password)
+function loginAuth($username,$password)
 {
 	$servername = "localhost";
 	$uname = "testuser";
@@ -13,15 +13,19 @@ function doLogin($username,$password)
 
 // Create connection
 	$conn = new mysqli($servername, $uname, $pw, $dbname);
+
 // Check connection
 	if ($conn->connect_error) {
   		die("Connection failed: " . $conn->connect_error);
 	} else {
         echo "Successfully Connected!".PHP_EOL;
 	}
+
+// Hashing password
+	$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 	
 // lookup username in database
-	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
+	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username' and Password = 'hashedPassword'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
@@ -29,9 +33,8 @@ function doLogin($username,$password)
 	if($count != 0)
 	{
 		echo "Login Succesful".PHP_EOL;
-		$array = array("login_status" => "true");
-//return an array instead of T or F to the web browser side
-		return $array;
+		$resp = array("login_status" => "true");
+		return $resp;
 	}
 	/*elseif($count == 1)
 	{
@@ -45,9 +48,11 @@ function doLogin($username,$password)
 	else
 	{
 		echo "Login Failed".PHP_EOL;
-		return "false";
+		$resp = array("login_status" => "true");
+                return $resp;
+
 	}
-}//End function doLogin
+}//End function loginAuth
 
 
 //
@@ -62,7 +67,7 @@ function requestProcessor($request)
   switch ($request['type'])
   {
     case "Login":
-      return doLogin($request['username'],$request['password']);
+      return loginAuth($request['username'],$request['password']);
     case "validate_session":
       return doValidate($request['sessionId']);
   }

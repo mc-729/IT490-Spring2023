@@ -25,11 +25,13 @@ function doLogin($username,$password)
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
-
+	
 	if($count != 0)
 	{
 		echo "Login Succesful".PHP_EOL;
-		return "true";
+		$array = array("login_status" => "true");
+//return an array instead of T or F to the web browser side
+		return $array;
 	}
 	/*elseif($count == 1)
 	{

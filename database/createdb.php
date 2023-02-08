@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 
 // Create database
 $sql = "CREATE DATABASE IT490;"; 
-"GRANT ALL PRIVILEGES ON IT490 to 'testuser'@'localhost';". 
+"GRANT ALL PRIVILEGES ON IT490.* to 'testuser'@'localhost';". 
 " FLUSH PRIVILEGES;";
 
 if ($conn->query($sql) === TRUE) {

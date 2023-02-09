@@ -11,9 +11,32 @@ require_once('safer_echo.php');
 
 if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
 
+<<<<<<< HEAD
+
+
+if (isset ($_POST["email"]))
+{
+        $uname = $_POST["email"];
+}
+else{
+
+  $uname ="test";}
+  if (isset ($_POST["password"]))
+{
+        $password = $_POST["password"];
+//		$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+//		$password = $hashedPassword;
+}
+else{
+
+  $password ="test_password";}
+ 
+  $client = new rabbitMQClient("RabbitMQConfig.ini","testServer");
+=======
   $uname = $_POST["email"];
   $password = $_POST["password"];
   $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
+>>>>>>> 107de7ad134063ef9acd6e504962629c3cebd07d
   if (isset($argv[1]))
   {
     $msg = $argv[1];

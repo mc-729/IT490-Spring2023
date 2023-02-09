@@ -1,6 +1,7 @@
 <?php
 
 require_once('nav.php');
+require_once(__DIR__ . '/../helper%20files')
 
 
 ?>

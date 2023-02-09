@@ -15,7 +15,7 @@ require_once(__DIR__ . '/../helper%20files')
 
   <div class="container-fluid">
     <h1>Login</h1>
-    <form  method="POST" action="login.php">
+    <form  method="POST" onsubmit="return validate(this)" >
         <div class="mb-3">
             <label class="form-label" for="email">Username/Email</label>
             <input class="form-control" type="text" id="email" name="email" required />
@@ -28,3 +28,26 @@ require_once(__DIR__ . '/../helper%20files')
     </form>
  
 </div>
+<script>
+     function validate(form) {
+
+        let isValid = true;
+        let email = form.email.value;
+        let password = form.password.value;
+
+        if(!email.includes("@")){
+            flash("Client side - Invalid email, no @ symbol", "warning");
+        }
+
+        if (email.includes("@")) {
+
+            if (!isValidEmail(email)) {
+
+                isValid = false;
+                
+            flash("Client Side - Invalid email", "warning");
+            }
+            return isValid;
+     }
+    }
+</script>

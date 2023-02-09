@@ -4,15 +4,39 @@ require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 require_once('nav.php');
 require_once('safer_echo.php');
+require_once(__DIR__ .'/../helper%20files');
 
 
+// server-side validation
+
+if (isset($_POST["email"]) && isset($_POST["password"])) {    
+  $hasError = false;
+
+  // checking for empty email
+  if(empty($email)){
+    flash('Email must not be empty', 'danger');
+    $hasError = true;
+  }
+  // sanitizing email and checking for valid characters
+  if(str_contains($email,'@')){
+    $email = sanitize_email($email);
+
+    if(!is_valid_email($email)){
+      flash('Invalid Email Address');
+      $hasError = true;
+    }
+  }
+  if (!is_valid_password($password)){
+    flash('Invalid password, must be atleast 4 characters');
+    $hasError = true;
+  }
+  }
 
 
-
-if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
-
+if (!$hasError){
   $uname = $_POST["email"];
   $password = $_POST["password"];
+
   $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
   if (isset($argv[1]))
   {

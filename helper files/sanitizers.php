@@ -14,7 +14,7 @@ function is_valid_username($username)
 }
 function is_valid_password($password)
 {
-    return strlen($password) >= 8;
+    return strlen($password) >= 4;
 }
 
 

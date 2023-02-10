@@ -1,5 +1,0 @@
-{
-    "require": {
-        "web-token/jwt-framework": "^3.1"
-    }
-}

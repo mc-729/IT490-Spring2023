@@ -21,6 +21,8 @@ function loginAuth($username,$password)
         echo "Successfully Connected!".PHP_EOL;
 	}
 	
+
+	
 // lookup username in database
 	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
 	$result = mysqli_query($conn, $sql);
@@ -54,7 +56,26 @@ function loginAuth($username,$password)
 
 	}
 }//End function loginAuth
+function SessionGen($user_ID){
 
+
+
+	$servername = "localhost";
+	$uname = "testuser";
+	$pw = "12345";
+	$dbname = "IT490";
+
+// Create connection
+	$conn = new mysqli($servername, $uname, $pw, $dbname);
+	$sessionID=rand(1000,99999999);
+	$query="INSERT into IT490.sessions(UID,SessionID)VALUES('$user_ID','$sessionID')";
+	$result=mysqli_query($conn,$query);
+	return $sessionID;
+
+
+
+
+}
 function doValidate($sessionid){
 
 	$servername = "localhost";

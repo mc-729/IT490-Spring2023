@@ -20,35 +20,34 @@ function loginAuth($username,$password)
 	} else {
         echo "Successfully Connected!".PHP_EOL;
 	}
-
-// Hashing password
-	$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-	echo $hashedPassword.PHP_EOL;
-
 	
 // lookup username in database
-	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username' and Password = '$hashedPassword'";
+	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
 	
 	if($count != 0)
 	{
-		echo "Login Succesful".PHP_EOL;
-		$resp = array("login_status" => "true");
-		return $resp;
-	}
-	/*elseif($count == 1)
-	{
-		echo "Login Success".PHP_EOL;
-		return "true";
-	}
-	else{
-		break;
-	}
-	 */
-	else
-	{
+		echo "User Found".PHP_EOL;
+// Verify password
+		$sql2 = "SELECT Password FROM IT490.Users WHERE Email = '$username'";
+		$result2 = mysqli_query($conn, $sql2);
+		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+		$hashedpass = $row2['Password'];
+		echo $hashedpass.PHP_EOL;
+ 
+		if(password_verify($password, $hashedpass))
+		{
+			echo "Login Successful".PHP_EOL;
+			$resp = array("login_status" => "true");
+			return $resp;
+		} else {
+			echo "Login Failed".PHP_EOL;
+        	        $resp = array("login_status" => "false");
+                	return $resp;
+		}
+	} else {
 		echo "Login Failed".PHP_EOL;
 		$resp = array("login_status" => "false");
                 return $resp;
@@ -56,7 +55,48 @@ function loginAuth($username,$password)
 	}
 }//End function loginAuth
 
+function doValidate($sessionid){
 
+	$servername = "localhost";
+	$uname = "testuser";
+	$pw = "12345";
+	$dbname = "IT490";
+
+// Create connection
+	$conn = new mysqli($servername, $uname, $pw, $dbname);
+
+// Check connection
+	if ($conn->connect_error) {
+  		die("Connection failed: " . $conn->connect_error);
+	} else {
+        echo "Successfully Connected!".PHP_EOL;
+	}
+
+
+	$sql = "SELECT * FROM IT490.sessions WHERE session_ID = '$sessionid'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+	if($count != 0)
+	{
+		echo "Session is valid".PHP_EOL;
+		
+
+		return true;
+	}
+
+	else
+	{
+		
+		echo "Session is not valid".PHP_EOL;
+                return false;}
+
+
+
+
+
+}
 //
 function requestProcessor($request)
 {

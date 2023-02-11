@@ -14,7 +14,7 @@ if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
   $uname = $_POST["email"];
   $password = $_POST["password"];
   $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
-  $client = new rabbitMQClient("RabbitMQConfig.ini","testServer");
+
 
   if (isset($argv[1]))
   {

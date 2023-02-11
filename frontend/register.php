@@ -35,6 +35,20 @@ else
 }
 
 
+if (isset ($_POST["fname"]))
+{
+        $first_name = $_POST["fname"];
+       
+}
+
+
+
+if (isset ($_POST["lname"]))
+{
+        $first_name = $_POST["lname"];
+       
+}
+
 
 
 

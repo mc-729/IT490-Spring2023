@@ -1,6 +1,6 @@
 <?php
 
-require_once('nav.php');
+require('nav.php');
 
 
 ?>
@@ -21,6 +21,14 @@ require_once('nav.php');
         <div class="mb-3">
             <label class="form-label" for="username">Username</label>
             <input class="form-control" type="text" id="username"name="username" required maxlength="30" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="fname">First Name</label>
+            <input class="form-control" type="text" id="fname"name="fname" required maxlength="30" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="lname">Last Name</label>
+            <input class="form-control" type="text" id="lname"name="lname" required maxlength="30" />
         </div>
         <div class="mb-3">
             <label class="form-label" for="pw">Password</label>

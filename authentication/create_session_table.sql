@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS `sessions` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `UID` int NOT NULL,
+    `SessionID` int NOT NULL,
+    `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE (`SessionID`) ,
+    FOREIGN KEY (`UID`) REFERENCES Users(`User_ID`)
+)

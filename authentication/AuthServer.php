@@ -67,21 +67,30 @@ function loginAuth($username,$password)
 
 
 //Start function registrationInsert
-/*function registrationCheck
+
+/*
+function registrationCheck(//needs variables)
 {// Check if Username/Email already exists for registering new account
         $sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$username'";
         $resultRegi = mysqli_query($conn, $sqlRegi);
         $rowRegi = mysqli_fetch_array($resultRegi, MYSQLI_ASSOC);
         $countRegi = mysqli_num_rows($resultRegi);
 
-        if($countRegi != 0)
+        if($countRegi == 1)// ==1 means found an already existing Username/Email in IT490.Users
         {
                 echo "Username/Email already exists, please use a different one.".PHP_EOL;
-
-
-}
- */
-
+		return false;
+	}
+	else //If Username/Email is not found in database/doesn't exist, do this
+	{
+		$sqlRegi = "INSERT into IT490.Users ()
+			VALUES ()";
+		$resultRegi = mysqli_query();
+		echo "New user registered, welcome.";
+		return true;
+	}
+} 
+*/
 
 //Start function requestProcessor
 function requestProcessor($request)
@@ -101,7 +110,7 @@ function requestProcessor($request)
     /*
    
     case "Registration":
-      return registrationInsert($request['']);
+      return registrationInsert($request['Whatever variables where used in registrationCheck(here)']);
    
     */
     

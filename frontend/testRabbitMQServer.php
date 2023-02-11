@@ -27,7 +27,7 @@ function requestProcessor($request)
     case "validate_session":
       return doValidate($request['sessionId']);
   }
-  return array("returnCode" => '0', 'message'=>"Server received request and processed");
+  return array("returnCode" => '0', 'message'=>"Server received request and processed","username",$request['username'],"password",$request['password']);
 }
 
 $server = new rabbitMQServer("RabbitMQConfig.ini","testServer");

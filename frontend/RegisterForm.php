@@ -1,6 +1,6 @@
 <?php
 
-require_once('nav.php');
+require('nav.php');
 
 
 ?>

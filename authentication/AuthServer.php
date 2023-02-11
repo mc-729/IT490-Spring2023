@@ -21,21 +21,24 @@ function loginAuth($username, $password)
 		echo "Successfully Connected!" . PHP_EOL;
 	}
 
+	
+// lookup username in database
 
-
-	// lookup username in database
 	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
 
+
 	if ($count != 0) {
 		echo "User Found" . PHP_EOL;
 		// Verify password
+
 		$sql2 = "SELECT Password FROM IT490.Users WHERE Email = '$username'";
 		$result2 = mysqli_query($conn, $sql2);
 		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
 		$hashedpass = $row2['Password'];
+
 		echo $hashedpass . PHP_EOL;
 
 		if (password_verify($password, $hashedpass)) {
@@ -78,6 +81,7 @@ function SessionGen($user_ID)
 function doValidate($sessionid)
 {
 
+
 	$servername = "localhost";
 	$uname = "testuser";
 	$pw = "12345";
@@ -92,6 +96,7 @@ function doValidate($sessionid)
 	} else {
 		echo "Successfully Connected!" . PHP_EOL;
 	}
+
 
 
 	$sql = "SELECT * FROM IT490.sessions WHERE session_ID = '$sessionid'";
@@ -110,7 +115,8 @@ function doValidate($sessionid)
 		return false;
 	}
 }
-//
+
+
 function requestProcessor($request)
 {
 	echo "received request" . PHP_EOL;

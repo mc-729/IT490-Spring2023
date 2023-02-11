@@ -34,6 +34,7 @@ else
 	$password="not recieved";
 }
 
+
 if (isset ($_POST["fname"]))
 {
         $first_name = $_POST["fname"];

@@ -3,14 +3,12 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
-
-function loginAuth($username, $password)
+function dbConnection()
 {
 	$servername = "localhost";
 	$uname = "testuser";
 	$pw = "12345";
 	$dbname = "IT490";
-
 	// Create connection
 	$conn = new mysqli($servername, $uname, $pw, $dbname);
 
@@ -21,9 +19,16 @@ function loginAuth($username, $password)
 		echo "Successfully Connected!" . PHP_EOL;
 	}
 
-	
-// lookup username in database
+	return $conn;
+}
+function loginAuth($username, $password)
+{
 
+
+
+
+	// lookup username in database
+	$conn = dbConnection();
 	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -59,46 +64,20 @@ function loginAuth($username, $password)
 function SessionGen($user_ID)
 {
 
-	$servername = "localhost";
-	$uname = "testuser";
-	$pw = "12345";
-	$dbname = "IT490";
-
-	// Create connection
-	$conn = new mysqli($servername, $uname, $pw, $dbname);
+	$conn = dbConnection();
 	$check = "SELECT * from IT490.sessions where UID = $user_ID";
 	$query = mysqli_query($conn, $check);
 	$count = mysqli_num_rows($query);
-
-	
-		$sessionID = rand(1000, 99999999);
-		$query2 = "INSERT into IT490.sessions(UID,SessionID)VALUES('$user_ID','$sessionID')";
-		$result = mysqli_query($conn, $query2);
-		return $sessionID;
-	
+	$sessionID = rand(1000, 99999999);
+	$query2 = "INSERT into IT490.sessions(UID,SessionID)VALUES('$user_ID','$sessionID')";
+	$result = mysqli_query($conn, $query2);
+	return $sessionID;
 }
 
 function doValidate($sessionid)
 {
 
-
-	$servername = "localhost";
-	$uname = "testuser";
-	$pw = "12345";
-	$dbname = "IT490";
-
-	// Create connection
-	$conn = new mysqli($servername, $uname, $pw, $dbname);
-
-	// Check connection
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	} else {
-		echo "Successfully Connected!" . PHP_EOL;
-	}
-
-
-
+	$conn = dbConnection();
 	$sql = "SELECT * FROM IT490.sessions WHERE session_ID = '$sessionid'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);

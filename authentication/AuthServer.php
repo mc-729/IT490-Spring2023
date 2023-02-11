@@ -67,17 +67,12 @@ function SessionGen($user_ID)
 	$query = mysqli_query($conn, $check);
 	$count = mysqli_num_rows($query);
 
-	if ($count != 0) {
-		$data = mysqli_fetch_array($query, MYSQLI_ASSOC);
-		return $data['SessionID'];
-	} else {
-
-echo $count;
+	
 		$sessionID = rand(1000, 99999999);
 		$query2 = "INSERT into IT490.sessions(UID,SessionID)VALUES('$user_ID','$sessionID')";
 		$result = mysqli_query($conn, $query2);
 		return $sessionID;
-	}
+	
 }
 
 function doValidate($sessionid)

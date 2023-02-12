@@ -3,7 +3,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
-$connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+$connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test');
 $channel = $connection->channel();
 
 $channel->exchange_declare('direct_logs', 'direct', false, false, false);

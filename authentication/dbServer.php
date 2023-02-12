@@ -75,14 +75,14 @@ function SessionGen($user_ID)
 }
 
 function doValidate($sessionid)
-{
-
+{ $count=0;
+if(!is_null($sessionid)){
 	$conn = dbConnection();
-	$sql = "SELECT * FROM IT490.sessions WHERE session_ID = '$sessionid'";
+	$sql = "SELECT * FROM IT490.sessions WHERE SessionID = '$sessionid'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-
+	$count = mysqli_num_rows($result);}
+	echo $count;
 	if ($count != 0) {
 		echo "Session is valid" . PHP_EOL;
 
@@ -93,6 +93,16 @@ function doValidate($sessionid)
 		echo "Session is not valid" . PHP_EOL;
 		return false;
 	}
+}
+
+function logout($sessionid){
+
+	$conn = dbConnection();
+	$query = "DELETE FROM IT490.sessions WHERE SessionID = '$sessionid'";
+
+	if(mysqli_query($conn, $query)){return true;}
+	else return false;
+
 }
 
 
@@ -107,7 +117,9 @@ function requestProcessor($request)
 		case "Login":
 			return loginAuth($request['username'], $request['password']);
 		case "validate_session":
-			return doValidate($request['sessionId']);
+			return doValidate($request['sessionID']);
+			case "Logout":
+				return logout($request['sessionID']);
 	}
 	//$callLogin = array($callLogin => doLogin($username,$password)
 	return array("returnCode" => '0', 'message' => "Server received the request and processed it.");

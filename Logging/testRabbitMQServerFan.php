@@ -16,9 +16,8 @@ function doLog($msg)
 {
     // write message to a log file
     $logFileName = "logfile.txt";
-    $logFile = fopen($logFileName, "w");
-    file_put_contents($logFileName, $msg);
-    fclose($logFile);
+    $logFileName = file_put_contents($logFileName, $msg.PHP_EOL , FILE_APPEND | LOCK_EX);
+   
 }
 
 function requestProcessor($request)

@@ -11,7 +11,9 @@ if (isset($argv[1]))
 }
 else
 {
-  $msg = "This is the error message 2 \n";
+  $date = new DateTime('now');
+  $date = $date->format("y:m:d h:i:s");
+  $msg = "$date This is the error message 4 \n";
 }
 
 $request = array();

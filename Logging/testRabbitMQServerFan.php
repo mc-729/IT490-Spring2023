@@ -14,7 +14,7 @@ function doLogin($username,$password)
 
 function doLog($msg)
 {
-    // write message to a log file
+    // write message to a log file, creates in current dir if doesn't exist
     $logFileName = "logfile.txt";
     $logFileName = file_put_contents($logFileName, $msg.PHP_EOL , FILE_APPEND | LOCK_EX);
    

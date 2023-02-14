@@ -11,13 +11,14 @@ if (isset($argv[1]))
 }
 else
 {
-  $date = new DateTime('now');
-  $date = $date->format("m/d/y h:i:s");
-  $msg = "$date This is the error message 7 \n";
+  //$date = new DateTime('now');
+  //$date = $date->format("m/d/y h:i:s");
+  $msg = "This is the error message 9 this is to systemctl and logging to var logs\n";
 }
 
 $request = array();
 $request['type'] = "error";
+$request['service'] = "frontend";
 $request['message'] = $msg;
 //$response = $client->send_request($request);
 $response = $client->publish($request);

@@ -4,36 +4,32 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-function doLogin($username,$password)
-{
-    // lookup username in databas
-    // check password
-    return true;
-    //return false if not valid
-}
 
-function doLog($msg)
+function doLog($msg,$type,$origin)
 {
-    // write message to a log file, creates in current dir if doesn't exist
-    $logFileName = "logfile.txt";
-    $logFileName = file_put_contents($logFileName, $msg.PHP_EOL , FILE_APPEND | LOCK_EX);
-   
+  $date = new DateTime('now');
+  $date = $date->format("m/d/y h:i:s");
+  echo "[$date] $origin [Type of msg: $type] [LOG: $msg]";
+    
 }
 
 function requestProcessor($request)
 {
   echo "received request".PHP_EOL;
-  var_dump($request);
   if(!isset($request['type']))
   {
     return "ERROR: unsupported message type";
   }
-  switch ($request['type'])
+  switch ($request['service'])
   {
-    case "login":
-      return doLogin($request['username'],$request['password']);
-    case "error":
-      return doLog($request['message']);
+
+    case "database":
+      $originator = 'Database Server:';
+      return doLog($request['message'], $request['type'], $originator);
+    
+    case "frontend":
+      $originator = 'Frontend Server:';
+      return doLog($request['message'], $request['type'], $originator);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

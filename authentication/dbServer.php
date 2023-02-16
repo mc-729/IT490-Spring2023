@@ -61,6 +61,42 @@ function loginAuth($username, $password)
 		return $resp;
 	}
 } //End function loginAuth
+
+
+function registrationInsert($username,$password,$email,$firstName,$lastName)
+{// Check if Username/Email already exists for registering new account
+	$servername = "localhost";
+        $uname = "testuser";
+	$pw = "12345";
+ 	$dbname = "IT490"; 
+	$conn = dbConnection();
+
+        $sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$email'";
+        $resultRegi = mysqli_query($conn, $sqlRegi);
+        $rowRegi = mysqli_fetch_array($resultRegi, MYSQLI_ASSOC);
+        $countRegi = mysqli_num_rows($resultRegi);
+        $hashPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        if($countRegi == 1)// ==1 means found an already existing Username/Email in IT490.Users
+        {
+                echo "Username/Email already exists, please use a different one.".PHP_EOL;
+                return false;
+        }
+        else //If Username/Email is not found in database/doesn't exist, do this
+        {
+                $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, Email, Password)
+                        VALUES ('$username','$firstName','$lastName','$email','$hashPassword')";
+                
+               
+                
+				if(mysqli_query($conn, $sqlInsert)){
+					echo "New user registered, welcome. ";
+					echo $sqlInsert;
+				return true;}
+        }
+} // End funtion registrationInsert
+
+
 function SessionGen($user_ID)
 {
 
@@ -116,6 +152,8 @@ function requestProcessor($request)
 	switch ($request['type']) {
 		case "Login":
 			return loginAuth($request['username'], $request['password']);
+		case "Register":
+      			return registrationInsert($request['username'],$request['password'],$request['email'],$request['firstName'],$request['lastName']);
 		case "validate_session":
 			return doValidate($request['sessionID']);
 			case "Logout":
@@ -129,5 +167,6 @@ $server = new rabbitMQServer("RabbitMQConfig.ini", "testServer");
 
 echo "Authentication Server BEGIN" . PHP_EOL;
 $server->process_requests('requestProcessor');
+
 echo "Authentication Server END" . PHP_EOL;
 exit();

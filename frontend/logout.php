@@ -11,12 +11,10 @@ $request['sessionID'] = $_SESSION['DB_ID'];
 
 $response = $client->send_request($request);
 if($response){
-
     session_unset();
     session_destroy();
     session_start();
     die(header("Location: /landingPage.php"));
-
 }
 ?>
 

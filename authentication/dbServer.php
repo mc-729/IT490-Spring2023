@@ -3,14 +3,12 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
-
-function loginAuth($username, $password)
+function dbConnection()
 {
 	$servername = "localhost";
 	$uname = "testuser";
 	$pw = "12345";
 	$dbname = "IT490";
-
 	// Create connection
 	$conn = new mysqli($servername, $uname, $pw, $dbname);
 
@@ -21,9 +19,16 @@ function loginAuth($username, $password)
 		echo "Successfully Connected!" . PHP_EOL;
 	}
 
-	
-// lookup username in database
+	return $conn;
+}
+function loginAuth($username, $password)
+{
 
+
+
+
+	// lookup username in database
+	$conn = dbConnection();
 	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -57,31 +62,14 @@ function loginAuth($username, $password)
 	}
 } //End function loginAuth
 
-function dbConnection()
-{
-	$servername = "localhost";
-        $uname = "testuser";
-	$pw = "12345";
- 	$dbname = "IT490"; 
-  // Create connection
-          $conn = new mysqli($servername, $uname, $pw, $dbname);
-  
-  // Check connection
-          if ($conn->connect_error) {
-                  die("Connection failed: " . $conn->connect_error);
-          } else {
-         echo "Successfully Connected!".PHP_EOL;
-          }
-		  return $conn;
 
-}
 function registrationInsert($username,$password,$email,$firstName,$lastName)
 {// Check if Username/Email already exists for registering new account
 	$servername = "localhost";
         $uname = "testuser";
 	$pw = "12345";
  	$dbname = "IT490"; 
-	$conn = new mysqli($servername, $uname, $pw, $dbname);
+	$conn = dbConnection();
 
         $sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$email'";
         $resultRegi = mysqli_query($conn, $sqlRegi);
@@ -112,51 +100,25 @@ function registrationInsert($username,$password,$email,$firstName,$lastName)
 function SessionGen($user_ID)
 {
 
-	$servername = "localhost";
-	$uname = "testuser";
-	$pw = "12345";
-	$dbname = "IT490";
-
-	// Create connection
-	$conn = new mysqli($servername, $uname, $pw, $dbname);
+	$conn = dbConnection();
 	$check = "SELECT * from IT490.sessions where UID = $user_ID";
 	$query = mysqli_query($conn, $check);
 	$count = mysqli_num_rows($query);
-
-	
-		$sessionID = rand(1000, 99999999);
-		$query2 = "INSERT into IT490.sessions(UID,SessionID)VALUES('$user_ID','$sessionID')";
-		$result = mysqli_query($conn, $query2);
-		return $sessionID;
-	
+	$sessionID = rand(1000, 99999999);
+	$query2 = "INSERT into IT490.sessions(UID,SessionID)VALUES('$user_ID','$sessionID')";
+	$result = mysqli_query($conn, $query2);
+	return $sessionID;
 }
 
 function doValidate($sessionid)
-{
-
-
-	$servername = "localhost";
-	$uname = "testuser";
-	$pw = "12345";
-	$dbname = "IT490";
-
-	// Create connection
-	$conn = new mysqli($servername, $uname, $pw, $dbname);
-
-	// Check connection
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	} else {
-		echo "Successfully Connected!" . PHP_EOL;
-	}
-
-
-
-	$sql = "SELECT * FROM IT490.sessions WHERE session_ID = '$sessionid'";
+{ $count=0;
+if(!is_null($sessionid)){
+	$conn = dbConnection();
+	$sql = "SELECT * FROM IT490.sessions WHERE SessionID = '$sessionid'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-
+	$count = mysqli_num_rows($result);}
+	echo $count;
 	if ($count != 0) {
 		echo "Session is valid" . PHP_EOL;
 
@@ -167,6 +129,16 @@ function doValidate($sessionid)
 		echo "Session is not valid" . PHP_EOL;
 		return false;
 	}
+}
+
+function logout($sessionid){
+
+	$conn = dbConnection();
+	$query = "DELETE FROM IT490.sessions WHERE SessionID = '$sessionid'";
+
+	if(mysqli_query($conn, $query)){return true;}
+	else return false;
+
 }
 
 
@@ -183,7 +155,9 @@ function requestProcessor($request)
 		case "Register":
       			return registrationInsert($request['username'],$request['password'],$request['email'],$request['firstName'],$request['lastName']);
 		case "validate_session":
-			return doValidate($request['sessionId']);
+			return doValidate($request['sessionID']);
+			case "Logout":
+				return logout($request['sessionID']);
 	}
 	//$callLogin = array($callLogin => doLogin($username,$password)
 	return array("returnCode" => '0', 'message' => "Server received the request and processed it.");

@@ -57,11 +57,31 @@ function loginAuth($username, $password)
 	}
 } //End function loginAuth
 
+function dbConnection()
+{
+	$servername = "localhost";
+        $uname = "testuser";
+	$pw = "12345";
+ 	$dbname = "IT490"; 
+  // Create connection
+          $conn = new mysqli($servername, $uname, $pw, $dbname);
+  
+  // Check connection
+          if ($conn->connect_error) {
+                  die("Connection failed: " . $conn->connect_error);
+          } else {
+         echo "Successfully Connected!".PHP_EOL;
+          }
+		  return $conn;
 
+}
 function registrationInsert($username,$password,$email,$firstName,$lastName)
 {// Check if Username/Email already exists for registering new account
-
-        $conn = dbConnection();
+	$servername = "localhost";
+        $uname = "testuser";
+	$pw = "12345";
+ 	$dbname = "IT490"; 
+	$conn = new mysqli($servername, $uname, $pw, $dbname);
 
         $sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$email'";
         $resultRegi = mysqli_query($conn, $sqlRegi);
@@ -77,10 +97,14 @@ function registrationInsert($username,$password,$email,$firstName,$lastName)
         else //If Username/Email is not found in database/doesn't exist, do this
         {
                 $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, Email, Password)
-                        VALUES ($username,$firstName,$lastName,$email,$hashPassword)";
-                $resultRegi = mysqli_query($conn, $sqlRegi);
-                echo "New user registered, welcome.";
-                return true;
+                        VALUES ('$username','$firstName','$lastName','$email','$hashPassword')";
+                
+               
+                
+				if(mysqli_query($conn, $sqlInsert)){
+					echo "New user registered, welcome. ";
+					echo $sqlInsert;
+				return true;}
         }
 } // End funtion registrationInsert
 
@@ -169,5 +193,6 @@ $server = new rabbitMQServer("RabbitMQConfig.ini", "testServer");
 
 echo "Authentication Server BEGIN" . PHP_EOL;
 $server->process_requests('requestProcessor');
+
 echo "Authentication Server END" . PHP_EOL;
 exit();

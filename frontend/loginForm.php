@@ -33,6 +33,15 @@ if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
     $request['password'] = $password;
     $response = $client->send_request($request);
     // $response = $client->publish($request);
+
+     //logging client
+    $clientLog = new rabbitMQClient("testRabbitMQ.ini","logServer");
+    $msg = "sent login request to database";
+    $request = array();
+    $request['type'] = "Login";
+    $request['service'] = "frontend";
+    $request['message'] = $msg;
+    $response = $clientLog->send_request($request);
   print_r($response);
    if($response[0]==1){
     echo "success";

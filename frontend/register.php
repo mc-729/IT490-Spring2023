@@ -57,6 +57,7 @@ if (isset ($_POST["lname"]))
 
 
 $client = new rabbitMQClient("RabbitMQConfig.ini","testServer");
+$clientLog = new rabbitMQClient("testRabbitMQ.ini","logServer");
 if (isset($argv[1]))
 {
   $msg = $argv[1];
@@ -79,6 +80,13 @@ echo "client received response: ".PHP_EOL;
 print_r($response);
 echo "\n\n";
 echo $argv[0]." END".PHP_EOL;
+
+$msg = "sent Registration request to database";
+$request = array();
+$request['type'] = "Register";
+$request['service'] = "frontend";
+$request['message'] = $msg;
+$response = $clientLog->send_request($request);
 
 /*if ($response["returnCode"] == '0')
 {

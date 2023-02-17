@@ -6,7 +6,7 @@ require_once('rabbitMQLib.inc');
 
 function loginAuth($username, $password)
 {
-	$servername = "localhost";
+/*	$servername = "localhost";
 	$uname = "testuser";
 	$pw = "12345";
 	$dbname = "IT490";
@@ -20,7 +20,9 @@ function loginAuth($username, $password)
 	} else {
 		echo "Successfully Connected!" . PHP_EOL;
 	}
+*/
 
+$conn = dbConnection();
 	
 // lookup username in database
 
@@ -59,8 +61,9 @@ function loginAuth($username, $password)
 
 function dbConnection()
 {
+	$clientLog = new rabbitMQClient("RabbitMQConfig.ini","logServer");
 	$servername = "localhost";
-        $uname = "testuser";
+    $uname = "testuser";
 	$pw = "12345";
  	$dbname = "IT490"; 
   // Create connection
@@ -68,7 +71,9 @@ function dbConnection()
   
   // Check connection
           if ($conn->connect_error) {
-                  die("Connection failed: " . $conn->connect_error);
+            $clientLog->publish($conn->connect_error);      
+			echo "Failed to connect to MySQL: " . $conn -> connect_error;
+  			exit();
           } else {
          echo "Successfully Connected!".PHP_EOL;
           }
@@ -76,12 +81,20 @@ function dbConnection()
 
 }
 function registrationInsert($username,$password,$email,$firstName,$lastName)
-{// Check if Username/Email already exists for registering new account
+{
+	
+	$clientLog = new rabbitMQClient("RabbitMQConfig.ini","logServer");
+	// Check if Username/Email already exists for registering new account
+	
+/*	
 	$servername = "localhost";
         $uname = "testuser";
 	$pw = "12345";
  	$dbname = "IT490"; 
 	$conn = new mysqli($servername, $uname, $pw, $dbname);
+*/
+
+	$conn = dbConnection();
 
         $sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$email'";
         $resultRegi = mysqli_query($conn, $sqlRegi);
@@ -104,14 +117,21 @@ function registrationInsert($username,$password,$email,$firstName,$lastName)
 				if(mysqli_query($conn, $sqlInsert)){
 					echo "New user registered, welcome. ";
 					echo $sqlInsert;
-				return true;}
+				return true;} else {
+					$msg = "Error with query";
+					$request = array();
+					$request['type'] = "Error";
+					$request['service'] = "database";
+					$request['message'] = $msg;
+					$clientLog->send_request($request);
+				}
         }
 } // End funtion registrationInsert
 
 
 function SessionGen($user_ID)
 {
-
+/*
 	$servername = "localhost";
 	$uname = "testuser";
 	$pw = "12345";
@@ -119,6 +139,9 @@ function SessionGen($user_ID)
 
 	// Create connection
 	$conn = new mysqli($servername, $uname, $pw, $dbname);
+*/
+	$conn = dbConnection();
+
 	$check = "SELECT * from IT490.sessions where UID = $user_ID";
 	$query = mysqli_query($conn, $check);
 	$count = mysqli_num_rows($query);
@@ -134,7 +157,7 @@ function SessionGen($user_ID)
 function doValidate($sessionid)
 {
 
-
+/*
 	$servername = "localhost";
 	$uname = "testuser";
 	$pw = "12345";
@@ -149,8 +172,9 @@ function doValidate($sessionid)
 	} else {
 		echo "Successfully Connected!" . PHP_EOL;
 	}
+*/
 
-
+	$conn = dbConnection();
 
 	$sql = "SELECT * FROM IT490.sessions WHERE session_ID = '$sessionid'";
 	$result = mysqli_query($conn, $sql);
@@ -190,6 +214,7 @@ function requestProcessor($request)
 }
 
 $server = new rabbitMQServer("RabbitMQConfig.ini", "testServer");
+
 
 echo "Authentication Server BEGIN" . PHP_EOL;
 $server->process_requests('requestProcessor');

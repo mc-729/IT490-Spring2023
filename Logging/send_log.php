@@ -1,13 +1,13 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-$connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test');
+$connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test','testHost');
 $channel = $connection->channel();
 
-$channel->exchange_declare('logs', 'fanout', false, false, false);
+$channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
 
 $data = implode(' ', array_slice($argv, 1));
 if (empty($data)) {
@@ -15,7 +15,7 @@ if (empty($data)) {
 }
 $msg = new AMQPMessage($data);
 
-$channel->basic_publish($msg, 'logs');
+$channel->basic_publish($msg, 'eventFanout1');
 
 echo ' [x] Sent ', $data, "\n";
 

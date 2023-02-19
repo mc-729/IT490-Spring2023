@@ -11,25 +11,28 @@ $channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
 list($queue_name, ,) = $channel->queue_declare("", false, false, true, false);
 $channel->queue_bind($queue_name,'eventFanout1');
 
-echo "Starting Logs Server";
+echo "Starting Logs Server".PHP_EOL;
 function doLog($msg,$type,$origin)
 {
   $date = new DateTime('now');
   $date = $date->format("m/d/y h:i:s");
-  echo "[$date] $origin [Type of msg: $type] [LOG: $msg]";
+  echo "[$date] $origin [Type of msg: $type] [LOG: $msg]".PHP_EOL;
     
 }
 
 $callback = function ($msg) {
     
-    switch ($msg['service']){
-        case "database":
-            $originator = 'Database Server:';
-            return doLog($msg['message'], $msg['type'], $originator);
+    $body = $msg->getBody();
+    $decodedMsg = json_decode($body, true);
 
+    switch ($decodedMsg['service']){
         case "database":
             $originator = 'Database Server:';
-            return doLog($msg['message'], $msg['type'], $originator);
+            return doLog($decodedMsg['message'], $decodedMsg['type'], $originator,);
+
+        case "frontend":
+            $originator = 'Frontend Server:';
+            return doLog($decodedMsg['message'], $decodedMsg['type'], $originator,);
         
         }
 };

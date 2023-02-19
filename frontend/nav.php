@@ -24,7 +24,8 @@
             <li class="nav-item"><a class="nav-link" href="/logout.php">Logout</a></li>
             <?php endif; ?>        
             <li class="nav-item"><a class="nav-link" href="/RegisterForm.php">Register</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/validate_test.php">session valid?</a></li>              
+            <li class="nav-item"><a class="nav-link" href="/validate_test.php">session valid?</a></li> 
+            <li class="nav-item"><a class="nav-link" href="/myliqourCabinet.php">my Liqour Cabinet</a></li>                
             </ul>
         </div>
     </div>

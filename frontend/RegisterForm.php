@@ -1,7 +1,41 @@
 <?php
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
+require_once('helper.inc');
+require_once('safer_echo.php');
 
 require('nav.php');
+session_start();
+if (isset($_POST["username"]) && isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["lname"]) && isset($_POST["lname"])) {
+    $uname = $_POST["username"];
+    $email = sanitize_email( $_POST["email"]);
+    $password = $_POST["password"];
+    $first_name = $_POST["fname"];
+    $last_name = $_POST["lname"];
+    $confirm=$_POST["confirm"];
+echo "function test ".is_valid_name($first_name);
+if(is_valid_name($first_name) and is_valid_name($last_name) and passwordConfirm($password,$confirm and is_valid_email($email))){
+    $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
+    $request = array();
+    $request['type'] = "Register";
+    $request['username'] = $uname;
+    $request['password'] = $password;
+    $request['email'] = $email;
+    $request['firstName'] = $first_name;
+    $request['lastName'] = $last_name;
+    $response = $client->send_request($request);
 
+    if($response){
+
+       // die(header("Location: /loginForm.php"));
+  
+    }
+
+}
+else{echo "something went wrong";}
+
+}
 
 ?>
 
@@ -46,31 +80,4 @@ require('nav.php');
 
 
 
-<?php
 
-
-if (isset($_POST["username"]) && isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["lname"]) && isset($_POST["lname"])) {
-    $uname = $_POST["username"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $first_name = $_POST["fname"];
-    $last_name = $_POST["lname"];
-
-    $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
-    $request = array();
-    $request['type'] = "Register";
-    $request['username'] = $uname;
-    $request['password'] = $password;
-    $request['email'] = $email;
-    $request['firstName'] = $first_name;
-    $request['lastName'] = $last_name;
-    $response = $client->send_request($request);
-
-    if($response){
-
-        die(header("Location: /loginForm.php"));
-    }
-
-    else echo "something went wrong ";
-}
-?>

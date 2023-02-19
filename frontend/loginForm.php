@@ -4,6 +4,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 require('nav.php');
+
 //require_once('../Logging/send_log.php');
 ?>
 </script>
@@ -24,11 +25,12 @@ require('nav.php');
     </form>
 </div>
 <?php 
-function sendLog ($message){
 
+function sendLog ($message){
+  
   $encodedMessage = json_encode($message);    
 
-  $connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test','testHost');
+  $connection = new AMQPStreamConnection('192.168.191.200', 5672, 'test', 'test','testHost');
   $channel = $connection->channel();
   $channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
 
@@ -41,6 +43,7 @@ function sendLog ($message){
   $channel->close();
   $connection->close();
 }
+
 if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
     $uname = $_POST["email"];
     $password = $_POST["password"];
@@ -49,16 +52,11 @@ if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
     $request['type'] = "Login";
     $request['username'] = $uname;
     $request['password'] = $password;
+    $request['service'] = "Frontend";
+    $request['message'] = "Sent Login request to DB server";
     $response = $client->send_request($request);
+    sendLog($request);
     // $response = $client->publish($request);
-
-     //logging client
-     $request = array();
-     $request['type'] = "Login";
-     $request['service'] = "Frontend";
-     $request['message'] = "Sent Login request to DB server";
-     sendLog($request);
-
 
   print_r($response);
    if($response[0]==1){

@@ -30,11 +30,4 @@ function sendLog ($message){
     $connection->close();
 }
 
-$request = array();
-$request['type'] = "error";
-$request['service'] = "database";
-$request['message'] = "Test Message";
-
-sendLog($request);
-
 ?>

@@ -3,7 +3,9 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
-require_once('../Logging/send_log.php');
+require_once('../Logging/send_log.inc');
+//require_once __DIR__ . '/../vendor/autoload.php';
+
 
 function loginAuth($username, $password)
 {
@@ -60,10 +62,16 @@ function dbConnection()
 		$request = array();
 		$request['type'] = "error";
 		$request['service'] = "database";
-		$request['message'] = $conn->connect_error;
+		$request['message'] = "DB CONNECTION FAILED";
+		//$conn->connect_error;
 		sendLog($request);
 		exit();
 	} else {
+		$request = array();
+		$request['type'] = "error";
+		$request['service'] = "database";
+		$request['message'] = "DB CONNECTION SUCCESSFUL";
+		sendLog($request);
 		echo "Successfully Connected!" . PHP_EOL;
 	}
 	return $conn;

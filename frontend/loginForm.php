@@ -4,7 +4,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 require('nav.php');
-require_once('../Logging/send_log.php');
+//require_once('../Logging/send_log.php');
 ?>
 </script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -24,6 +24,23 @@ require_once('../Logging/send_log.php');
     </form>
 </div>
 <?php 
+function sendLog ($message){
+
+  $encodedMessage = json_encode($message);    
+
+  $connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test','testHost');
+  $channel = $connection->channel();
+  $channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
+
+  $msg = new AMQPMessage($encodedMessage);
+
+  $channel->basic_publish($msg, 'eventFanout1');
+
+  echo ' [x] Sent ', $encodedMessage, "\n";
+
+  $channel->close();
+  $connection->close();
+}
 if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
     $uname = $_POST["email"];
     $password = $_POST["password"];

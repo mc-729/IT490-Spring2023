@@ -4,3 +4,4 @@ composer.phar
 composer.json
 composer.lock
 logfile.txt
+installer

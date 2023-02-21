@@ -51,8 +51,6 @@ print_r($response);
         <input type="submit" class="mt-3 btn btn-primary" value="Login" />
     </form>
 </div>
-<<<<<<< HEAD
-=======
 <?php 
 
 function sendLog ($message){
@@ -96,4 +94,3 @@ if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
 
 ?>
 
->>>>>>> 9df5203ed2cfeb8a5efa9fdb38bfdc794ad9cfb0

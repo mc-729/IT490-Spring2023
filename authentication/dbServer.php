@@ -48,7 +48,7 @@ function loginAuth($username, $password)
 
 		if (password_verify($password, $hashedpass)) {
 			echo "Login Successful" . PHP_EOL;
-			$resp = array(true, SessionGen($row['User_ID']), $row['User_ID']);
+			$resp = array(true, SessionGen($row['User_ID']), $row['User_ID'],$row['F_Name'],$row['L_Name'],$row['Username'], $row['Email']);
 			return $resp;
 		} else {
 			echo "Login Failed" . PHP_EOL;

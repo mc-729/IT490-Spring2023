@@ -8,8 +8,10 @@ require('helper.php');
 // Start the session
 
 session_start();
-if (isset($_SESSION['DB_ID'])) {echo "session survived between pages";}
-if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
+if (isset($_SESSION['DB_ID'])) {
+    echo "session survived between pages";
+}
+if (isset($_POST["password"]) and isset($_POST["email"])) {
     $uname = $_POST["email"];
     $password = $_POST["password"];
     $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
@@ -19,25 +21,28 @@ if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
     $request['password'] = $password;
     $response = $client->send_request($request);
     // $response = $client->publish($request);
-print_r($response);
-   if($response[0]==1){
-    echo "success :";
-    $_SESSION['DB_ID']=$response[1];
-    $_SESSION['isLogin'] = true;
-    session_commit();
-    echo $_SESSION['DB_ID'];
-    die(header("Location: /landingPage.php"));
-   
-   }
-  }
+
+    if ($response[0] == 1) {
+        echo "success :";
+        $_SESSION['DB_ID'] = $response[1];
+        $_SESSION["FirstName"] = $response[3];
+        $_SESSION["LastName"] = $response[4];
+        $_SESSION["Username"] = $response[5];
+        $_SESSION["Email"] = $response[6];
+        print_r($response);
+        session_commit();
+        echo $_SESSION['DB_ID'];
+        die(header("Location: /landingPage.php"));
+    }
+}
 
 ?>
 </script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-  <div class="container-fluid">
+<div class="container-fluid">
     <h1>Login</h1>
-    <form  method="POST" action="loginForm.php">
+    <form method="POST" action="loginForm.php">
         <div class="mb-3">
             <label class="form-label" for="email">Username/Email</label>
             <input class="form-control" type="text" id="email" name="email" required />

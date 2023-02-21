@@ -1,13 +1,14 @@
 import requests
 import json
 import os
+import api_keys
 
 url = "https://the-cocktail-db.p.rapidapi.com/"
 
 #testDict = {"operation": "s",
 #            "ingredient":"vodka" } 
 headers = {
-	"X-RapidAPI-Key": "509c55d7acmshf862d4642a84cf4p1d5f04jsn0aeab560c6b7", # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
+	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
     "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
 	"Content-Type": "application/json"                                                                      
 }
@@ -36,7 +37,7 @@ def search_by_name(dictionary):
 
     # turns response to json and prints it nicely
     response = response.json()
-    #print(json.dumps(response, indent=2))
+    print(json.dumps(response, indent=2))
 
 
 def search_by_single_ingredient(dictionary):

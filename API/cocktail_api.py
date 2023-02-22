@@ -11,17 +11,7 @@ headers = {
     "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
 	"Content-Type": "application/json"                                                                      
 }
-def to_json_file(response,fileName):
-    # add response to json file
-    os.chdir('json_cache_files/')
-    cwd = os.getcwd() + "/"
-    fileName = "/" + fileName 
-    path = cwd + fileName
-    print("Results count: " +str(len(response['drinks'])))
     
-    with open(path,"w") as write_file:
-        #json.dump(results_count, write_file)
-        json.dump(response, write_file, indent=2)
 
 def search_by_name(dictionary):
     # returns all cocktails with Ingredient in the name ex Vodka -> Vodka fizz, Vodka Martini
@@ -32,7 +22,7 @@ def search_by_name(dictionary):
     response = requests.request("GET", url, headers=headers, params=querystring)
 
     #make a call to json to file function to cache data
-    to_json_file(response.json(),"vodka_search_results.json")
+   
 
     # turns response to json and prints it nicely
     response = response.json()

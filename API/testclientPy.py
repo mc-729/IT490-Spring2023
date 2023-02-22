@@ -36,13 +36,13 @@ class FibonacciRpcClient(object):
                 reply_to=self.callback_queue,
                 correlation_id=self.corr_id,
             ),
-            body=str(n))
+            body= n)
         self.connection.process_data_events(time_limit=None)
-        return int(self.response)
+        return str(self.response)
 
-
+testDict = {"operation": "s","ingredient":"vodka" }
 fibonacci_rpc = FibonacciRpcClient()
 
 print(" [x] Requesting fib(30)")
-response = fibonacci_rpc.call(30)
+response = fibonacci_rpc.call(testDict)
 print(" [.] Got %r" % response)

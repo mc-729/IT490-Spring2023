@@ -10,7 +10,7 @@ channel.exchange_declare(exchange='testExchange', exchange_type='topic', passive
 
 
 message = 'Test from API to Rabbit'
-channel.basic_request(exchange='direct_logs', body=message)
+channel.basic_publish(exchange='direct_logs', routing_key="",body=message)
 
 print(" [x] Sent %r" % (message))
 connection.close()

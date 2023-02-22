@@ -14,10 +14,10 @@ async def main():
         return
     channel = connection.channel()
 
-   # channel.exchange_declare(exchange='testExchange', exchange_type='topic')
+    channel.exchange_declare(exchange='testExchange', exchange_type='topic', passive=False,durable=True,internal=False)
     print("Declaring queue variables...")
-    channel.queue_declare(queue="testQueue", durable=True, arguments={"x-queue-type:": "quorum"})
-   # channel.queue_bind(exchange='testExchange', queue="testQueue")
+    channel.queue_declare(queue="testQueue", durable=True, arguments={"x-queue-type:": "classic"})
+    channel.queue_bind(exchange='testExchange', queue="testQueue")
 
     def callback(ch, method, properties, body):
         print(" [x] %r" % (body))

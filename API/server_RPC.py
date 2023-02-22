@@ -4,12 +4,13 @@ import requests
 import json
 import os
 import api_keys
-from API import cocktail_api
 
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('127.0.0.1', '5672', 'testHost', pika.PlainCredentials('test', 'test')))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 
 channel = connection.channel()
+
+channel.queue_declare(queue='rpc_queue')
 
 channel.queue_declare(queue='rpc_queue')
 headers = {
@@ -38,10 +39,10 @@ def api_call(body):
 def on_request(ch, method, props, body):
    
     # n = int(body)
-    n = body
+    n = json.loads(body)
 
     print("we recieved" % n)
-    response = api_call(n)
+    response = n
 
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,

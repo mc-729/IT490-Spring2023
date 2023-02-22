@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import pika
 import uuid
+import json
 
 
 class FibonacciRpcClient(object):
@@ -36,12 +37,13 @@ class FibonacciRpcClient(object):
                 reply_to=self.callback_queue,
                 correlation_id=self.corr_id,
             ),
-            body= n)
+            body= json.dumps(n))
         self.connection.process_data_events(time_limit=None)
         return str(self.response)
 
-testDict = {"operation": "s","ingredient":"vodka" }
+testDict = {'operation': 's','ingredient':'vodka' }
 testdict = json.dumps(testDict)
+print("huh"+ testdict)
 fibonacci_rpc = FibonacciRpcClient()
 
 print(" [x] Requesting fib(30)")

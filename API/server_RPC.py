@@ -4,6 +4,23 @@ import requests
 import json
 import os
 import api_keys
+class SearchByName:
+    @staticmethod
+    def get_result(dictionary:{}):
+        url = "https://the-cocktail-db.p.rapidapi.com/search.php"    
+        querystring = {dictionary['operation']:dictionary['ingredient']}
+        print(querystring)
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        response = response.json()
+        return response
+        print(json.dumps(response, indent=2))
+
+    #make a call to json to file function to cache data
+
+
+    # turns response to json and prints it nicely
+  
+
 
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -31,7 +48,7 @@ def search_by_name(dictionary):
 
     # turns response to json and prints it nicely
     response = response.json()
-    return response
+  
     print(json.dumps(response, indent=2))
     #print(json.dumps(response, indent=2))
 def api_call(body):
@@ -41,13 +58,14 @@ def api_call(body):
 def on_request(ch, method, props, body):
    
     # n = int(body)
-   # n = json.loads(body)
+    n = json.loads(body)
     testDict = {'operation': 's','ingredient':'vodka' }
 
-   
-    print("we recieved" % testDict)
-    response = json.dumps(search_by_name(testDict))
-    print(json.dumps(search_by_name(testDict), indent=2))
+
+    
+    print("we recieved" % n)
+    response = json.dumps(SearchByName.get_result(n))
+    #print(json.dumps(search_by_name(testDict), indent=2))
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \

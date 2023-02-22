@@ -31,6 +31,8 @@ def search_by_name(dictionary):
 
     # turns response to json and prints it nicely
     response = response.json()
+    return response
+    print(json.dumps(response, indent=2))
     #print(json.dumps(response, indent=2))
 def api_call(body):
      return search_by_name(body)
@@ -39,11 +41,13 @@ def api_call(body):
 def on_request(ch, method, props, body):
    
     # n = int(body)
-    n = json.loads(body)
+   # n = json.loads(body)
+    testDict = {'operation': 's','ingredient':'vodka' }
 
-    print("we recieved" % n)
-    response = n
-
+   
+    print("we recieved" % testDict)
+    response = json.dumps(search_by_name(testDict))
+    print(json.dumps(search_by_name(testDict), indent=2))
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \

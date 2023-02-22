@@ -7,3 +7,4 @@ composer.lock
 logfile.txt
 installer
 api_keys.py
+env

@@ -2,7 +2,6 @@ import requests
 import json
 import os
 import api_keys
-
 url = "https://the-cocktail-db.p.rapidapi.com/"
 
 #testDict = {"operation": "s",

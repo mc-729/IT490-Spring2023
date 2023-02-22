@@ -41,8 +41,9 @@ class FibonacciRpcClient(object):
         self.connection.process_data_events(time_limit=None)
         return str(self.response)
 
-testDict = {'operation': 's','ingredient':'vodka' }
-testdict = json.dumps(testDict)
+testDict = {'operation': 's','ingredient':'whiskey' }
+test=str(testDict)
+testdict = json.dumps(test)
 print("huh"+ testdict)
 fibonacci_rpc = FibonacciRpcClient()
 

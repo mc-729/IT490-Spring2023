@@ -116,7 +116,7 @@ def list_popular_cocktails():
 
 
 def search_ingredient_info(dictionary):
-    # justin
+    # Justin
     # return information about input ingredient ex: Gin -> will return what gin is and how it is made
     # example query string querystring = {"i":"vodka"}
 

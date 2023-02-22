@@ -37,10 +37,11 @@ def search_by_name(dictionary):
 
     # turns response to json and prints it nicely
     response = response.json()
-    print(json.dumps(response, indent=2))
+    #print(json.dumps(response, indent=2))
 
 
 def search_by_single_ingredient(dictionary):
+    # Paul
     # return all cocktails with that include this ingredient ex Vodka -> 102 items that contain Vodka as an ingredient
     # Only returns Drink name, Drink Pic, Drink ID
     # example query string querystring = {"i":"Vodka"}
@@ -52,6 +53,7 @@ def search_by_single_ingredient(dictionary):
     
 
 def get_cocktail_details_by_id(id):
+    # Matt
     # returns full details for cocktail by its ID
     # example query string querystring = {"i":"11007"}
 
@@ -62,6 +64,7 @@ def get_cocktail_details_by_id(id):
 
 
 def random_10_cocktails():
+    # Paul
     # returns all details about these 10 random cocktails
     # example query string N/A
 
@@ -71,6 +74,7 @@ def random_10_cocktails():
 
 
 def filter_by_category(dictionary):
+    # Jon
     # returns Drinks of that Type such as Cocktails, Oridinary Drink, etc
     # example query string querystring = {"c":"Cocktail"}
 
@@ -81,6 +85,7 @@ def filter_by_category(dictionary):
 
 
 def filter_by_multi_ingredient(dictionary):
+    # Paul
     # returns drinks with the input ingredients in their details ex Dry_Vermouth,Gin,Anis -> returns Drink Name, image, ID
     # example query string querystring = {"i":"Dry_Vermouth,Gin,Anis"}
 
@@ -91,6 +96,7 @@ def filter_by_multi_ingredient(dictionary):
 
 
 def list_ingredients():
+    # done 
     # returns all ingredients
     # example query string N/A
 
@@ -100,6 +106,7 @@ def list_ingredients():
 
 
 def list_popular_cocktails():
+    # Done
     # returns same 20 cocktails that are "popular"
     # example query string N/A
 
@@ -109,6 +116,7 @@ def list_popular_cocktails():
 
 
 def search_ingredient_info(dictionary):
+    # justin
     # return information about input ingredient ex: Gin -> will return what gin is and how it is made
     # example query string querystring = {"i":"vodka"}
 

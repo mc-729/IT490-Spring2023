@@ -12,12 +12,12 @@ require('nav.php');
             <div class="col-md-6">
                 <div class="profile-head">
                         <h5>
-                            Username: "Maybe a variable here that displays the username of whoever is logged in"
+                            Username:
                         </h5>
                         <h6>
-                            Maybe Email or some sort of alternative short phrase or title Example "The Beer Lad", "Wine Mom", or "It's Happy Hour somewhere!"
+                            Email:
                         </h6>
-                        <p class="proile-rating">RANKINGS : <span>8/10</span></p>
+                        <p class="proile-rating">Place Holder</p>
                         <div class="mb-3">
                 <div class="form-check form-switch">
                     <input name="visibility" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" <?php if ($public) echo "checked"; ?>>

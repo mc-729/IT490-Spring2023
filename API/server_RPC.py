@@ -18,8 +18,95 @@ class SearchByName:
     #make a call to json to file function to cache data
 
 
-    # turns response to json and prints it nicely
-  
+class SearchBySingleIngredient:
+    @staticmethod
+    def get_result(dictionary:{}):
+    # Paul
+    # return all cocktails with that include this ingredient ex Vodka -> 102 items that contain Vodka as an ingredient
+    # Only returns Drink name, Drink Pic, Drink ID
+    # example query string querystring = {"i":"Vodka"}
+        url = "https://the-cocktail-db.p.rapidapi.com/filter.php"
+        querystring = {}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        response = response.json()
+        return response
+
+class GetCocktailDetailsByID:
+    @staticmethod
+    def get_result(dictionary:{}):
+    # Matt
+    # returns full details for cocktail by its ID
+    # example query string querystring = {"i":"11007"}
+
+        url = "https://the-cocktail-db.p.rapidapi.com/lookup.php"
+        querystring = {}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        response = response.json()
+        return response
+
+class Random10Cocktails:
+    @staticmethod
+    def get_result(dictionary:{}):
+    # Done 
+    # returns all details about these 10 random cocktails
+    # example query string N/A
+
+        url = "https://the-cocktail-db.p.rapidapi.com/randomselection.php"
+        response = requests.request("GET", url, headers=headers)
+        response = response.json()
+        return response
+
+class FilterByCategory:
+    @staticmethod
+    def get_result(dictionary:{}):
+    # Jon
+    # returns Drinks of that Type such as Cocktails, Oridinary Drink, etc
+    # example query string querystring = {"c":"Cocktail"}
+
+        url = "https://the-cocktail-db.p.rapidapi.com/filter.php"
+        querystring = {}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        response = response.json()
+        return response
+
+class ListIngredients:
+    @staticmethod
+    def get_result(dictionary:{}):
+    # done 
+    # returns all ingredients
+    # example query string N/A
+
+        url = "www.thecocktaildb.com/api/json/v1/1/list.php?i=list"
+        response = requests.request("GET", url, headers=headers)
+        response = response.json()
+        return response
+
+class SearchIngredientInfo:
+    @staticmethod
+    def get_result(dictionary:{}):
+    # Justin
+    # return information about input ingredient ex: Gin -> will return what gin is and how it is made
+    # example query string querystring = {"i":"vodka"}
+
+        url = "https://the-cocktail-db.p.rapidapi.com/search.php"
+        querystring = {}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        response = response.json()
+        return response
+
+class ToJsonFile:
+    @staticmethod
+    def to_json_file(response,fileName):
+        # add response to json file
+        os.chdir('json_cache_files/')
+        cwd = os.getcwd() + "/"
+        fileName = "/" + fileName 
+        path = cwd + fileName
+        print("Results count: " +str(len(response['drinks'])))
+        
+        with open(path,"w") as write_file:
+            #json.dump(results_count, write_file)
+            json.dump(response, write_file, indent=2)  
 
 
 
@@ -35,24 +122,8 @@ headers = {
     "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
 	"Content-Type": "application/json"                                                                      
 }
-def search_by_name(dictionary):
-    # returns all cocktails with Ingredient in the name ex Vodka -> Vodka fizz, Vodka Martini
-    url = "https://the-cocktail-db.p.rapidapi.com/search.php"
-    
-    querystring = {dictionary['operation']:dictionary['ingredient']}
-    print(querystring)
-    response = requests.request("GET", url, headers=headers, params=querystring)
-
-    #make a call to json to file function to cache data
 
 
-    # turns response to json and prints it nicely
-    response = response.json()
-  
-    print(json.dumps(response, indent=2))
-    #print(json.dumps(response, indent=2))
-def api_call(body):
-     return search_by_name(body)
 
 
 def on_request(ch, method, props, body):

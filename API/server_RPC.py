@@ -4,9 +4,10 @@ import requests
 import json
 import os
 import api_keys
+import ast
 class SearchByName:
     @staticmethod
-    def get_result(dictionary:{}):
+    def get_result(dictionary:{"type":"","operation":"","ingredient":""}):
         url = "https://the-cocktail-db.p.rapidapi.com/search.php"    
         querystring = {dictionary['operation']:dictionary['ingredient']}
         print(querystring)
@@ -107,7 +108,23 @@ class ToJsonFile:
         with open(path,"w") as write_file:
             #json.dump(results_count, write_file)
             json.dump(response, write_file, indent=2)  
-
+class APIRoute:
+    @staticmethod
+    def get_result(dictionary):
+        instruments = {'flute': 2,'trumpet': 5,'oboe': 1,'percussion': 4,'guitar': 9}   
+        test2=json.dumps(str(dictionary))
+        dictionary=ast.literal_eval(dictionary)
+        #test3=ast.lit
+      
+        print(type(dictionary))
+       
+     
+        match dictionary['type']:
+            case 'SearchByName':
+               response = json.dumps(SearchByName.get_result(dictionary))
+               return response
+        return dictionary
+                
 
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -131,15 +148,15 @@ def on_request(ch, method, props, body):
     # n = int(body)
     n = json.loads(body)
     testDict = {'operation': 's','ingredient':'vodka' }
-
-    match n['type']:
-        case 'SearchByName':
-            response = json.dumps(SearchByName.get_result(n))
-
-
+    val = json.dumps(str(n))
+    val2=ast.literal_eval(n)
+    print(type(val))
+    print(type(val2))
+    #response=json.dumps(SearchByName.get_result(val))
     
-    print("we recieved" % n)
-    #response = json.dumps(SearchByName.get_result(n))
+    print(str(n))
+  
+    response = json.dumps(APIRoute.get_result(n))
     #print(json.dumps(search_by_name(testDict), indent=2))
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,

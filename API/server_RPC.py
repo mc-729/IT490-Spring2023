@@ -132,10 +132,14 @@ def on_request(ch, method, props, body):
     n = json.loads(body)
     testDict = {'operation': 's','ingredient':'vodka' }
 
+    match n['type']:
+        case 'SearchByName':
+            response = json.dumps(SearchByName.get_result(n))
+
 
     
     print("we recieved" % n)
-    response = json.dumps(SearchByName.get_result(n))
+    #response = json.dumps(SearchByName.get_result(n))
     #print(json.dumps(search_by_name(testDict), indent=2))
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,

@@ -44,9 +44,13 @@ class FibonacciRpcClient(object):
 testDict = {'operation': 's','ingredient':'whiskey' }
 test=str(testDict)
 testdict = json.dumps(test)
+
+newDict = {'type':'SearchByName','operation': '','ingredient':'whiskey' }
+newDicttest = str(newDict)
+newDict = json.dumps(newDicttest)
 print("huh"+ testdict)
 fibonacci_rpc = FibonacciRpcClient()
 
 print(" [x] Requesting fib(30)")
-response = fibonacci_rpc.call(testDict)
+response = fibonacci_rpc.call(newDict)
 print(" [.] Got %r" % response)

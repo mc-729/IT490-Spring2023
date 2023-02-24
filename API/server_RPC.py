@@ -14,7 +14,7 @@ class SearchByName:
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
         return response
-        print(json.dumps(response, indent=2))
+        
 
     #make a call to json to file function to cache data
 
@@ -111,14 +111,7 @@ class ToJsonFile:
 class APIRoute:
     @staticmethod
     def get_result(dictionary):
-        instruments = {'flute': 2,'trumpet': 5,'oboe': 1,'percussion': 4,'guitar': 9}   
-        test2=json.dumps(str(dictionary))
         dictionary=ast.literal_eval(dictionary)
-        #test3=ast.lit
-      
-        print(type(dictionary))
-       
-     
         match dictionary['type']:
             case 'SearchByName':
                response = json.dumps(SearchByName.get_result(dictionary))
@@ -145,19 +138,9 @@ headers = {
 
 def on_request(ch, method, props, body):
    
-    # n = int(body)
+ 
     n = json.loads(body)
-    testDict = {'operation': 's','ingredient':'vodka' }
-    val = json.dumps(str(n))
-    val2=ast.literal_eval(n)
-    print(type(val))
-    print(type(val2))
-    #response=json.dumps(SearchByName.get_result(val))
-    
-    print(str(n))
-  
     response = json.dumps(APIRoute.get_result(n))
-    #print(json.dumps(search_by_name(testDict), indent=2))
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \

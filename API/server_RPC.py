@@ -139,7 +139,7 @@ def on_request(ch, method, props, body):
    
  
     n = json.loads(body)
-    response = json.dumps(APIRoute.get_result(n))
+    response = json.dumps(APIRoute.get_result(n),indent=2)
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \

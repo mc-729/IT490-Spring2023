@@ -3,6 +3,7 @@ require('nav.php');
 require('helper.php');
 require('safer_echo.php');
 session_start();
+
 ?>
 
 </script>
@@ -26,7 +27,7 @@ session_start();
                     <label class="form-check-label" for="flexSwitchCheckDefault">Make Profile Public</label>
                 </div>
             </div>
-                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" id="About Me-tab" data-toggle="tab" href="/AboutMe.php" role="tab" aria-controls="AboutMe" aria-selected="true">About Me</a>
                             </li>
@@ -38,5 +39,6 @@ session_start();
                             </li>
                         </ul>
                 </div>
-    </div>
+            </div>
+            <h3>About Me</h3>
 </form>

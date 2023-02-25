@@ -130,7 +130,16 @@ if(!is_null($sessionid)){
 		return false;
 	}
 }
+/*
+//Begin function updateProfile
 
+function updateProfile(){
+	$conn = dbConnection();
+
+}
+//End function updateProfile
+
+*/
 function logout($sessionid){
 
 	$conn = dbConnection();
@@ -154,9 +163,11 @@ function requestProcessor($request)
 			return loginAuth($request['username'], $request['password']);
 		case "Register":
       			return registrationInsert($request['username'],$request['password'],$request['email'],$request['firstName'],$request['lastName']);
+		//case "Update":
+			//return updateProfile($request['curPW'],$request['newPW'],$request['conPW']);
 		case "validate_session":
 			return doValidate($request['sessionID']);
-			case "Logout":
+		case "Logout":
 				return logout($request['sessionID']);
 	}
 	//$callLogin = array($callLogin => doLogin($username,$password)

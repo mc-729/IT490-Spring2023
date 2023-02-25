@@ -7,9 +7,9 @@ import api_keys
 import ast
 class SearchByName:
     @staticmethod
-    def get_result(dictionary:{"type":"","operation":"","ingredient":""}):
+    def get_result(dictionary:{"type":"","operation":"","name":""}):
         url = "https://the-cocktail-db.p.rapidapi.com/search.php"    
-        querystring = {dictionary['operation']:dictionary['ingredient']}
+        querystring = {dictionary['operation']:dictionary['name']}
         print(querystring)
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
@@ -19,15 +19,12 @@ class SearchByName:
     #make a call to json to file function to cache data
 
 
-class SearchBySingleIngredient:
+class SearchByIngredient:
     @staticmethod
-    def get_result(dictionary:{}):
-    # Paul
-    # return all cocktails with that include this ingredient ex Vodka -> 102 items that contain Vodka as an ingredient
-    # Only returns Drink name, Drink Pic, Drink ID
-    # example query string querystring = {"i":"Vodka"}
+    def get_result(dictionary:{"type":"","operation":"","ingredient":""}):
         url = "https://the-cocktail-db.p.rapidapi.com/filter.php"
-        querystring = {}
+        querystring = {dictionary['operation']:dictionary['ingredient']}
+        print(querystring)
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
         return response
@@ -115,6 +112,24 @@ class APIRoute:
         match dictionary['type']:
             case 'SearchByName':
                response = json.dumps(SearchByName.get_result(dictionary))
+               return response
+            case 'SearchBySingleIngredient':
+               response = json.dumps(SearchByIngredient.get_result(dictionary))
+               return response
+            case 'GetCocktailDetailsByID':
+               response = json.dumps(GetCocktailDetailsByID.get_result(dictionary))
+               return response
+            case 'Random10Cocktails':
+               response = json.dumps(Random10Cocktails.get_result(dictionary))
+               return response
+            case 'FilterByCategory':
+               response = json.dumps(FilterByCategory.get_result(dictionary))
+               return response
+            case 'ListIngredients':
+               response = json.dumps(ListIngredients.get_result(dictionary))
+               return response
+            case 'SearchIngredientInfo':
+               response = json.dumps(SearchIngredientInfo.get_result(dictionary))
                return response
         return dictionary
                 

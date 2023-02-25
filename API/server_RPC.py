@@ -7,23 +7,19 @@ import api_keys
 import ast
 class SearchByName:
     @staticmethod
-    def get_result(dictionary:{"type":"","operation":"","name":""}):
+    def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
         url = "https://the-cocktail-db.p.rapidapi.com/search.php"    
-        querystring = {dictionary['operation']:dictionary['name']}
+        querystring = {dictionary['operation']:dictionary['searchTerm']}
         print(querystring)
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
         return response
-        
-
-    #make a call to json to file function to cache data
-
 
 class SearchByIngredient:
     @staticmethod
-    def get_result(dictionary:{"type":"","operation":"","ingredient":""}):
+    def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
         url = "https://the-cocktail-db.p.rapidapi.com/filter.php"
-        querystring = {dictionary['operation']:dictionary['ingredient']}
+        querystring = {"i":dictionary['searchTerm']}
         print(querystring)
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
@@ -45,10 +41,6 @@ class GetCocktailDetailsByID:
 class Random10Cocktails:
     @staticmethod
     def get_result(dictionary:{}):
-    # Done 
-    # returns all details about these 10 random cocktails
-    # example query string N/A
-
         url = "https://the-cocktail-db.p.rapidapi.com/randomselection.php"
         response = requests.request("GET", url, headers=headers)
         response = response.json()
@@ -70,10 +62,6 @@ class FilterByCategory:
 class ListIngredients:
     @staticmethod
     def get_result(dictionary:{}):
-    # done 
-    # returns all ingredients
-    # example query string N/A
-
         url = "www.thecocktaildb.com/api/json/v1/1/list.php?i=list"
         response = requests.request("GET", url, headers=headers)
         response = response.json()
@@ -82,12 +70,9 @@ class ListIngredients:
 class SearchIngredientInfo:
     @staticmethod
     def get_result(dictionary:{}):
-    # Justin
-    # return information about input ingredient ex: Gin -> will return what gin is and how it is made
-    # example query string querystring = {"i":"vodka"}
-
         url = "https://the-cocktail-db.p.rapidapi.com/search.php"
-        querystring = {}
+        querystring = {"i":dictionary['searchTerm']}
+        print(querystring)
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
         return response

@@ -9,21 +9,26 @@ require('nav.php');
 
 
 
-$type = $_POST['ans'];  
-$searchByName= $_POST['searchValue'];
+$type = $_POST['ans'];
+$searchByName = $_POST['searchValue'];
 
-if(isset($type) && isset($searchByName)){
+if (isset($type) && isset($searchByName)) {
 
 
     $client = new rabbitMQClient("RabbitMQConfig.ini", "APIServer");
-    $request = '{"type":"'.$type.'","operation": "s","searchTerm": "'.$searchByName.'" }';
-    $response = $client->send_request($request);
-    print_r($response);
 
+    $request = '{"type":"'.$type.'","operation": "s","searchTerm": "'.$searchByName.'" }';
+
+    $response = $client->send_request($request);
+
+    $obj = json_decode($response, true);
 }
 
+$count = 0
+//change radio button names/values to test new api functionality 
 
-//if(!empty('itenName')){}
+
+
 ?>
 
 </script>
@@ -44,9 +49,34 @@ Search Ingredients Info<input type="radio" name="ans" value="SearchIngredientInf
             <label class="form-label" for="searchValue">search here</label>
             <input class="form-control" type="text" id="searchValue" name="searchValue" />
         </div>
+
 </form>
 
+<div class="container list-group infinite-scroll" id="basic" style="max-height: 1000px; overflow-y: scroll;">
 
-
-
-
+    <ul class="container list-group infinite-scroll" id="basic-example" style="max-height: 400px; overflow-y: scroll;">
+        <?php if (isset($type) && isset($searchByName)) : ?>
+            <?php foreach ($obj['drinks'] as $num) : ?>
+                <div class="card" style="width: 60rem;">
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title"> <?php $count++; se($obj['drinks'][$count]['strDrink']); ?></h5>
+                        <p class="card-text"> Instructions: <?php se($obj['drinks'][$count]['strInstructions']); ?></p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <?php for ($x = 0; $x <= 15; $x++) : ?>
+                            <?php $strIngredient = "strIngredient" . $x;
+                            if (!empty($obj['drinks'][$count][$strIngredient])) : ?>
+                                <li class="list-group-item">Ingredient <?php se($x) ?>: <?php se($obj['drinks'][$count][$strIngredient]) ?></li>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </ul>
+                    <div class="card-body">
+                        <a href="#" class="card-link">Card link</a>
+                        <a href="#" class="card-link">Another link</a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </ul>
+</div>

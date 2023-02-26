@@ -16,7 +16,9 @@ if (isset($type) && isset($searchByName)) {
 
 
     $client = new rabbitMQClient("RabbitMQConfig.ini", "APIServer");
-    $request = '{"type":"' . $type . '","operation": "s","ingredient": "' . $searchByName . '" }';
+
+    $request = '{"type":"'.$type.'","operation": "s","searchTerm": "'.$searchByName.'" }';
+
     $response = $client->send_request($request);
 
     $obj = json_decode($response, true);
@@ -35,15 +37,19 @@ $count = 0
 
 <h1>Search Type</h1>
 <form action="apt_search.php" class="form-inline" method="post">
-    Search By Name <input type="radio" name="ans" value="SearchByName" /><br />
-    Whiskey <input type="radio" name="ans" value="whiskey" /><br />
-    Beer <input type="radio" name="ans" value="beer" /><br />
-    Wine <input type="radio" name="ans" value="wine" /><br />
-    <input type="submit" value="submit" />
-    <div class="mb-3">
-        <label class="form-label" for="searchValue">search here</label>
-        <input class="form-control" type="text" id="searchValue" name="searchValue" />
-    </div>
+Search By Name <input type="radio" name="ans" value="SearchByName" /><br />
+Search By Ingredient <input type="radio" name="ans" value="SearchbyIngredient"  /><br />
+Search by ID <input type="radio" name="ans" value="GetCocktailDetailsByID"  /><br />
+Random 10 Cocktails <input type="radio" name="ans" value="Random10Cocktails"  /><br />
+Filter by Category <input type="radio" name="ans" value="FilterByCategory"  /><br />
+List Ingredients <input type="radio" name="ans" value="ListIngredients"  /><br />
+Search Ingredients Info<input type="radio" name="ans" value="SearchIngredientInfo"  /><br />
+  <input type="submit" value="submit" />
+  <div class="mb-3">
+            <label class="form-label" for="searchValue">search here</label>
+            <input class="form-control" type="text" id="searchValue" name="searchValue" />
+        </div>
+
 </form>
 
 <div class="container list-group infinite-scroll" id="basic" style="max-height: 1000px; overflow-y: scroll;">
@@ -51,7 +57,6 @@ $count = 0
     <ul class="container list-group infinite-scroll" id="basic-example" style="max-height: 400px; overflow-y: scroll;">
         <?php if (isset($type) && isset($searchByName)) : ?>
             <?php foreach ($obj['drinks'] as $num) : ?>
-
                 <div class="card" style="width: 60rem;">
                     <img src="..." class="card-img-top" alt="...">
                     <div class="card-body">
@@ -63,7 +68,6 @@ $count = 0
                             <?php $strIngredient = "strIngredient" . $x;
                             if (!empty($obj['drinks'][$count][$strIngredient])) : ?>
                                 <li class="list-group-item">Ingredient <?php se($x) ?>: <?php se($obj['drinks'][$count][$strIngredient]) ?></li>
-
                             <?php endif; ?>
                         <?php endfor; ?>
                     </ul>

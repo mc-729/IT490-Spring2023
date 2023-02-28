@@ -5,3 +5,4 @@ sudo pip install requests
 sudo pip install json
 sudo pip install pika
 sudo pip install asyncio
+sudo pip install google-serp-api

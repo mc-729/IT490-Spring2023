@@ -6,7 +6,7 @@ require_once('rabbitMQLib.inc');
 require('nav.php');
 
 //require_once('../Logging/send_log.php');
-require('helper.php');
+require('helper.inc');
 // Start the session
 
 session_start();
@@ -55,51 +55,4 @@ if (isset($_POST["password"]) and isset($_POST["email"])) {
         </div>
         <input type="submit" class="mt-3 btn btn-primary" value="Login" />
     </form>
-<<<<<<< HEAD
 </div>
-=======
-</div>
-<?php 
-
-function sendLog ($message){
-  
-  $encodedMessage = json_encode($message);    
-
-  $connection = new AMQPStreamConnection('192.168.191.200', 5672, 'test', 'test','testHost');
-  $channel = $connection->channel();
-  $channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
-
-  $msg = new AMQPMessage($encodedMessage);
-
-  $channel->basic_publish($msg, 'eventFanout1');
-
-  echo ' [x] Sent ', $encodedMessage, "\n";
-
-  $channel->close();
-  $connection->close();
-}
-
-if (isset($_POST["password"] ) and isset($_POST["email"]) ) {
-    $uname = $_POST["email"];
-    $password = $_POST["password"];
-    $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
-    $request = array();
-    $request['type'] = "Login";
-    $request['username'] = $uname;
-    $request['password'] = $password;
-    $request['service'] = "Frontend";
-    $request['message'] = "Sent Login request to DB server";
-    $response = $client->send_request($request);
-    sendLog($request);
-    // $response = $client->publish($request);
-
-  print_r($response);
-   if($response[0]==1){
-    echo "success";
-   }
-  }
-
-
-?>
-
->>>>>>> 8118d9fe735368b30fb42de41a23617619bf6446

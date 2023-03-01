@@ -63,38 +63,42 @@ function loginAuth($username, $password)
 } //End function loginAuth
 
 
-function registrationInsert($username,$password,$email,$firstName,$lastName)
-{// Check if Username/Email already exists for registering new account
-	$servername = "localhost";
-    $uname = "testuser";
-	$pw = "12345";
- 	$dbname = "IT490"; 
+function registrationInsert($username, $password, $email, $firstName, $lastName)
+{
+
 	$conn = dbConnection();
 
-        $sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$email'";
-        $resultRegi = mysqli_query($conn, $sqlRegi);
-        $rowRegi = mysqli_fetch_array($resultRegi, MYSQLI_ASSOC);
-        $countRegi = mysqli_num_rows($resultRegi);
-        $hashPassword = password_hash($password, PASSWORD_DEFAULT);
+	$sqlRegi = "SELECT * FROM IT490.Users WHERE Email = '$email'";
+	$resultRegi = mysqli_query($conn, $sqlRegi);
+	$rowRegi = mysqli_fetch_array($resultRegi, MYSQLI_ASSOC);
+	$countRegi = mysqli_num_rows($resultRegi);
+	$hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        if($countRegi == 1)// ==1 means found an already existing Username/Email in IT490.Users
-        {
-                echo "Username/Email already exists, please use a different one.".PHP_EOL;
-                return false;
-        }
-        else //If Username/Email is not found in database/doesn't exist, do this
-        {
-                $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, Email, Password)
+	if ($countRegi == 1) // ==1 means found an already existing Username/Email in IT490.Users
+	{
+		echo "Username/Email already exists, please use a different one." . PHP_EOL;
+		return false;
+	} else //If Username/Email is not found in database/doesn't exist, do this
+	{
+		$sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, Email, Password)
                         VALUES ('$username','$firstName','$lastName','$email','$hashPassword')";
-                
-               
-                
-				if(mysqli_query($conn, $sqlInsert)){
-					echo "New user registered, welcome. ";
-					echo $sqlInsert;
-				return true;}
-        }
-} // End funtion registrationInsert
+
+
+
+		if (mysqli_query($conn, $sqlInsert)) {
+			echo "New user registered, welcome. ";
+			echo $sqlInsert;
+			return true;
+		} else {
+			$msg = "Error with query";
+			$request = array();
+			$request['type'] = "error";
+			$request['service'] = "database";
+			$request['message'] = $msg;
+			sendLog($request);
+		}
+	}
+} // End registrationInsert
 
 
 function SessionGen($user_ID)
@@ -138,13 +142,13 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
     $conn = dbConnection();
     
     // Build the SQL statement
-    $sql = "UPDATE users SET";
+    $sql = "UPDATE Users SET";
    
     if(doValidate($sessionid)) {
 		$sql2 = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
 		$result = mysqli_query($conn, $sql2);
 		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-		$userid = $row['User_ID'];
+		$userid = $row['UID'];
 
    
     if (!empty($newpassword) && !empty($oldpassword)) {
@@ -153,21 +157,22 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
 		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
 		$hashedpass = $row2['Password'];
 		if (password_verify($oldpassword, $hashedpass)) {
-			$sql .= " password='".mysqli_real_escape_string($conn, $newpassword)."',"; }
+			$hashPassword = password_hash($newpassword, PASSWORD_DEFAULT);
+			$sql .= " Password='".mysqli_real_escape_string($conn, $hashPassword)."',"; } 
     }
   
 	if (!empty($username)) {
-        $sql .= " username='".mysqli_real_escape_string($conn, $username)."',";
+        $sql .= " Username='".mysqli_real_escape_string($conn, $username)."',";
     }
    
     if (!empty($email)) {
-        $sql .= " email='".mysqli_real_escape_string($conn, $email)."',";
+        $sql .= " Email='".mysqli_real_escape_string($conn, $email)."',";
     }
     if (!empty($firstName)) {
-        $sql .= " first_name='".mysqli_real_escape_string($conn, $firstName)."',";
+        $sql .= " f_name='".mysqli_real_escape_string($conn, $firstName)."',";
     }
     if (!empty($lastName)) {
-        $sql .= " last_name='".mysqli_real_escape_string($conn, $lastName)."',";
+        $sql .= " l_name='".mysqli_real_escape_string($conn, $lastName)."',";
     }
     
     // Remove the trailing comma from the SQL statement

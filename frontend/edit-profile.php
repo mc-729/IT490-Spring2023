@@ -7,11 +7,19 @@ require 'helper.inc';
 require 'safer_echo.php';
 session_start();
 ?>
-
+   <title>Edit Profile</title>
+   <head>
 </script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+ <!-- Bootstrap CSS -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-ZViMeuL6X9eh6yWim0G1OASOgzfKgjT7rbQ/kvl48OMI7MhO95/j9gmKtssYP/Bt" crossorigin="anonymous">
 
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-QWo7pfQgLbP5nf7jbVvU7Z6XpoqVuKTfP2v+5f5WQL2MlrxMop6k1p1a6lgPLvoG" crossorigin="anonymous"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-Hb4AETyn8m3m3l4/wmQoZktzIVZSpfF9KjSWhSdL0xkwOweyhoKj3q4t2wzkyfzm" crossorigin="anonymous"></script>
+
+<head>
 <form method="POST" onsubmit="return validate(this);">
     <div class="container-fluid">
         <h1> Welcome </h1>
@@ -179,33 +187,31 @@ if (
 
 <?php function display_error_modal($error_message)
 {
-    echo '<script type="text/javascript">
-            $(document).ready(function(){
-                $("#errorModal .modal-body").html("' .
-        $error_message .
-        '");
-                $("#errorModal").modal("show");
-            });
-          </script>';
-
-    // Bootstrap modal markup
-    echo '<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="errorModalLabel">Error</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Error message will be displayed here -->
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
+    ?>
+    <!-- Error modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><?php echo $error_message; ?></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
                 </div>
             </div>
-          </div>';
+        </div>
+    </div>
+
+    <!-- JavaScript to display the modal -->
+    <script>
+        $(document).ready(function() {
+            $('#errorModal').modal('show');
+        });
+    </script>
+    <?php
 }
 ?>

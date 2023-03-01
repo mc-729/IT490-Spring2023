@@ -4,7 +4,7 @@ require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 require_once('nav.php');
 
-/*
+
 if (isset($_POST["username"])) {
         $uname = $_POST["username"];
 } else {
@@ -22,24 +22,8 @@ if (isset($_POST["password"])) {
 }
 
 
-if (isset($_POST["fname"])) {
-        $first_name = $_POST["fname"];
-}
-
-
-
-if (isset($_POST["lname"])) {
-        $last_name = $_POST["lname"];
-}
-
-*/
-
-
-
-
-
-
 $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
+$clientLog = new rabbitMQClient("testRabbitMQ.ini","logServer");
 if (isset($argv[1])) {
         $msg = $argv[1];
 } else {
@@ -62,14 +46,12 @@ print_r($response);
 echo "\n\n";
 echo $argv[0] . " END" . PHP_EOL;
 
-/*if ($response["returnCode"] == '0')
-{
-        echo "Succesfully Register new Account, Redirecting to Login Page".PHP_EOL;
-        header("refresh: 3, url=index.html");
-}
-else
-{
-        echo "Registering Account Failed, Please Try Again".PHP_EOL;
-}
-*/
+$msg = "Sent Update request to database";
+$request = array();
+$request['type'] = "Update";
+$request['service'] = "frontend";
+$request['message'] = $msg;
+$response = $clientLog->send_request($request);
+
+
 ?>

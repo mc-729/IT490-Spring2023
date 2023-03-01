@@ -54,9 +54,37 @@ session_start();
                 <input class="form-control" type="newPW" name="newPW" id="newPW" required minlength="8" />
             </div>
             <div class="mb-3">
-                <label class="form-label" for="conPW">Confirm Password</label>
+                <label class="form-label" for="conPW">Confirm New Password</label>
                 <input class="form-control" type="conPW" name="conPW" id="conPW" required minlength="8" />
             </div>
             <input type="submit" class="mt-3 btn btn-primary" value="Update Password" name="save" />
             </form>
 </form>
+
+
+<?php
+
+if (isset($_POST["username"]) && isset($_POST["email"]) && isset($_POST["password"])) {
+    $uname = $_POST["username"];
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+
+
+$client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
+$request = array();
+$request['type'] = "Update";
+$request['email'] = $email;
+$request['username'] = $uname;
+$request['curPW'] = $curPW;
+$request['newPW'] = $newPW;
+$request['conPW'] = $conPW;
+$response = $client->send_request($request);
+
+if($response){
+
+    die(header("Location: /Profile.php"));
+} else echo "Updating Password Failed";
+
+}
+
+?>

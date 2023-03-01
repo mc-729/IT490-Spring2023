@@ -66,7 +66,7 @@ function loginAuth($username, $password)
 function registrationInsert($username,$password,$email,$firstName,$lastName)
 {// Check if Username/Email already exists for registering new account
 	$servername = "localhost";
-        $uname = "testuser";
+    $uname = "testuser";
 	$pw = "12345";
  	$dbname = "IT490"; 
 	$conn = dbConnection();
@@ -130,16 +130,28 @@ if(!is_null($sessionid)){
 		return false;
 	}
 }
-/*
+
 //Begin function updateProfile
 
-function updateProfile(){
+/*function updateProfile($username,$oldPW,$newPW,$conPW){
+	$servername = "localhost";
+    $uname = "testuser";
+	$pw = "12345";
+ 	$dbname = "IT490";
 	$conn = dbConnection();
 
-}
+	$sqliUpdatePW = "SELECT FROM IT490.Users WHERE Password = '$oldPW'"
+
+	if($newPW === $conPW){
+		$sql = "SELECT 'Password' FROM IT490.Users WHERE 'User_ID' = "
+	}
+
+
+
+}*/
 //End function updateProfile
 
-*/
+
 function logout($sessionid){
 
 	$conn = dbConnection();
@@ -163,8 +175,8 @@ function requestProcessor($request)
 			return loginAuth($request['username'], $request['password']);
 		case "Register":
       			return registrationInsert($request['username'],$request['password'],$request['email'],$request['firstName'],$request['lastName']);
-		//case "Update":
-			//return updateProfile($request['curPW'],$request['newPW'],$request['conPW']);
+		case "Update":
+			return updateProfile($request['curPW'],$request['newPW'],$request['conPW']);
 		case "validate_session":
 			return doValidate($request['sessionID']);
 		case "Logout":

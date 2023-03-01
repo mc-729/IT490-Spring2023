@@ -133,22 +133,43 @@ if(!is_null($sessionid)){
 
 //Begin function updateProfile
 
-/*function updateProfile($username,$oldPW,$newPW,$conPW){
-	$servername = "localhost";
-    $uname = "testuser";
-	$pw = "12345";
- 	$dbname = "IT490";
-	$conn = dbConnection();
+function updateProfile($username,$new_pass,$old_pass,$con_pass)
+{
 
-	$sqliUpdatePW = "SELECT FROM IT490.Users WHERE Password = '$oldPW'"
+$sqlSelect = "SELECT Username AND Password FROM IT490.Users WHERE Username = '$username' AND Password = PASSWORD('$old_pass')";
+$result = mysqli_query($conn, $sqlSelect);
+$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+$count = mysqli_num_rows($row);
+        
+if ($count == 1){
+	echo "Username and password found in database".PHP_EOL;
 
-	if($newPW === $conPW){
-		$sql = "SELECT 'Password' FROM IT490.Users WHERE 'User_ID' = "
+	if ($new_pass === $con_pass){
+
+
+		$sqlUpdate = "UPDATE IT490.Users SET Password = $con_pass WHERE Username = $username AND Password = $old_pass";
+		mysqli_query($conn, $sqlUpdate);
+		echo "Password updated.";
+
+		}else echo "Passwords do not match."
 	}
+}
 
+/*
+if(newpass and current password have value){
+*retrieve hashed password from db ,compare against sent password
+*update db with info
 
+}
+else if(other value other then pass set)
+update db with new value
 
-}*/
+}
+else
+*eat rocks users
+
+} so here is pseudo code that might help
+*/
 //End function updateProfile
 
 
@@ -176,7 +197,7 @@ function requestProcessor($request)
 		case "Register":
       			return registrationInsert($request['username'],$request['password'],$request['email'],$request['firstName'],$request['lastName']);
 		case "Update":
-			return updateProfile($request['curPW'],$request['newPW'],$request['conPW']);
+			return updateProfile($request['username'],$request['oldPW'],$request['newPW'],$request['conPW'],$request['email'],$request['firstName'],$request['lastName']);
 		case "validate_session":
 			return doValidate($request['sessionID']);
 		case "Logout":

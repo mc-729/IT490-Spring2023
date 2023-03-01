@@ -7,31 +7,46 @@ require_once('rabbitMQLib.inc');
 require_once('nav.php');
 
 
-if (isset($_POST["username"])) {
+if (isset ($_POST["username"]))
+{
         $uname = $_POST["username"];
-} else {
-        $uname = "not recieved";
 }
-if (isset($_POST["email"])) {
+else
+{
+        $uname="not recieved";
+	
+}
+if (isset ($_POST["email"]))
+{
         $email = $_POST["email"];
-} else {
-        $email = "not recieved";
 }
-if (isset($_POST["password"])) {
+else
+{
+        $email ="not recieved";
+}
+if (isset ($_POST["password"]))
+{
         $password = $_POST["password"];
-} else {
-        $password = "not recieved";
+       
+}
+else
+{
+	$password="not recieved";
 }
 
 
-if (isset($_POST["fname"])) {
+if (isset ($_POST["fname"]))
+{
         $first_name = $_POST["fname"];
+       
 }
 
 
 
-if (isset($_POST["lname"])) {
-        $last_name = $_POST["lname"];
+if (isset ($_POST["lname"]))
+{
+        $first_name = $_POST["lname"];
+       
 }
 
 
@@ -41,11 +56,15 @@ if (isset($_POST["lname"])) {
 
 
 
-$client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
-if (isset($argv[1])) {
-        $msg = $argv[1];
-} else {
-        $msg = "Default Register Message";
+$client = new rabbitMQClient("RabbitMQConfig.ini","testServer");
+$clientLog = new rabbitMQClient("testRabbitMQ.ini","logServer");
+if (isset($argv[1]))
+{
+  $msg = $argv[1];
+}
+else
+{
+  $msg = "Default Register Message";
 }
 
 $request = array();
@@ -53,16 +72,21 @@ $request['type'] = "Register";
 $request['username'] = $uname;
 $request['password'] = $password;
 $request['email'] = $email;
-$request['firstName'] = $first_name;
-$request['lastName'] = $last_name;
 $request['message'] = $msg;
 $response = $client->send_request($request);
 //$response = $client->publish($request);
 
-echo "client received response: " . PHP_EOL;
+echo "client received response: ".PHP_EOL;
 print_r($response);
 echo "\n\n";
-echo $argv[0] . " END" . PHP_EOL;
+echo $argv[0]." END".PHP_EOL;
+
+$msg = "sent Registration request to database";
+$request = array();
+$request['type'] = "Register";
+$request['service'] = "frontend";
+$request['message'] = $msg;
+$response = $clientLog->send_request($request);
 
 /*if ($response["returnCode"] == '0')
 {

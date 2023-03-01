@@ -15,12 +15,21 @@ if (isset($_POST["email"])) {
 } else {
         $email = "not recieved";
 }
-if (isset($_POST["password"])) {
-        $password = $_POST["password"];
+if (isset($_POST["oldPW"])) {
+        $password = $_POST["oldPW"];
 } else {
         $password = "not recieved";
 }
-
+if (isset($_POST["newPW"])) {
+        $password = $_POST["newPW"];
+} else {
+        $password = "not recieved";
+}
+if (isset($_POST["conPW"])) {
+        $password = $_POST["conPW"];
+} else {
+        $password = "not recieved";
+}
 
 $client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
 $clientLog = new rabbitMQClient("testRabbitMQ.ini","logServer");
@@ -34,7 +43,7 @@ $request = array();
 $request['type'] = "Update";
 $request['email'] = $email;
 $request['username'] = $uname;
-$request['curPW'] = $curPW;
+$request['oldPW'] = $oldPW;
 $request['newPW'] = $newPW;
 $request['conPW'] = $conPW;
 $request['message'] = $msg;

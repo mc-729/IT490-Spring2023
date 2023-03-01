@@ -64,7 +64,7 @@ session_start();
 
 <?php
 
-if (isset($_POST["username"]) && isset($_POST["email"]) && isset($_POST["password"])) {
+if (isset($_POST["username"]) && isset($_POST["email"]) && isset($_POST["oldPW"]) && isset($_POST["newPW"]) && isset($_POST["conPW"])) {
     $uname = $_POST["username"];
     $email = $_POST["email"];
     $password = $_POST["password"];
@@ -75,7 +75,7 @@ $request = array();
 $request['type'] = "Update";
 $request['email'] = $email;
 $request['username'] = $uname;
-$request['curPW'] = $curPW;
+$request['oldPW'] = $oldPW;
 $request['newPW'] = $newPW;
 $request['conPW'] = $conPW;
 $response = $client->send_request($request);

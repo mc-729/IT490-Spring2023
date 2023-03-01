@@ -106,8 +106,7 @@ $email = $_POST['email'];
 $password = $_POST['password'];
 $hasError = false;
 if (
-    isset($_POST['curPW']) &&
-    isset($_POST['conPW']) &&
+    (isset($_POST['curPW']) && isset($_POST['conPW'])) ||
     isset($_POST['newPW'])
 ) {
     if ($conPW != $newPW) {
@@ -140,7 +139,13 @@ if ($_POST['email'] != $_SESSION['Email']) {
         : ($hasError = true);
 }
 
-if (!$hasError) {
+if (
+    (!$hasError && !empty($email)) ||
+    !empty($uname) ||
+    !empty($Firstname) ||
+    !empty($Lastname) ||
+    !empty($newPW)
+) {
     $client = new rabbitMQClient('RabbitMQConfig.ini', 'testServer');
     $request = [];
     $request['type'] = 'Update';
@@ -157,8 +162,8 @@ if (!$hasError) {
 
     if ($response) {
         die(header('Location: /Profile.php'));
-    } else {
-        echo 'Updating Password Failed';
+    } elseif (!$response) {
+        die(header('Location: /logout.php'));
     }
 }
 

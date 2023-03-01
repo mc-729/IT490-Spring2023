@@ -1,9 +1,8 @@
 <?php
-require('nav.php');
-require('helper.php');
-require('safer_echo.php');
+require 'nav.php';
+require 'helper.php';
+require 'safer_echo.php';
 session_start();
-
 ?>
 
 </script>
@@ -23,7 +22,11 @@ session_start();
                         </h6>
                     <div class="mb-3">
                         <div class="form-check form-switch">
-                            <input name="visibility" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" <?php if ($public) echo "checked"; ?>>
+                            <input name="visibility" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" <?php if (
+                                $public
+                            ) {
+                                echo 'checked';
+                            } ?>>
                             <label class="form-check-label" for="flexSwitchCheckDefault">Make Profile Public</label>
                         </div>
                     </div>
@@ -43,8 +46,33 @@ session_start();
         
             <!-- DO NOT PRELOAD PASSWORD -->
 
-            <div class="mb-3"><h3>Password Reset</h3></div>
-            <form action="updateProfile.php" method="POST">
+           
+            <form action="edit-profile.php" method="POST">
+            <div class="mb-3">
+            <label class="form-label" for="email" value="<?php se(
+                $_SESSION['Email']
+            ); ?>">Email</label>
+            <input class="form-control" type="email" id="email" name="email" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="username">Username</label>
+            <input class="form-control" type="text" id="username" name="username" value = "<?php se(
+                $_SESSION['Username']
+            ); ?>"required maxlength="30" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="fname">First Name</label>
+            <input class="form-control" type="text" id="fname" name="fname" value = "<?php se(
+                $_SESSION['FirstName']
+            ); ?>" required maxlength="30" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="lname">Last Name</label>
+            <input class="form-control" type="text" id="lname" name="lname" value = "<?php se(
+                $_SESSION['LastName']
+            ); ?>" required maxlength="30" />
+        </div>
+        <div class="mb-3"><h3>Password Reset</h3></div>
             <div class="mb-3">
                 <label class="form-label" for="cp">Current Password</label>
                 <input class="form-control" type="curPW" name="curPW" id="curPW" />
@@ -63,28 +91,76 @@ session_start();
 
 
 <?php
-
-if (isset($_POST["username"]) && isset($_POST["email"]) && isset($_POST["oldPW"]) && isset($_POST["newPW"]) && isset($_POST["conPW"])) {
-    $uname = $_POST["username"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-
-
-$client = new rabbitMQClient("RabbitMQConfig.ini", "testServer");
-$request = array();
-$request['type'] = "Update";
-$request['email'] = $email;
-$request['username'] = $uname;
-$request['oldPW'] = $oldPW;
-$request['newPW'] = $newPW;
-$request['conPW'] = $conPW;
-$response = $client->send_request($request);
-
-if($response){
-
-    die(header("Location: /Profile.php"));
-} else echo "Updating Password Failed";
-
+$uname;
+$email;
+$lastName;
+$Firstname;
+$oldPW;
+$newPW;
+$conPW;
+if ($_POST['username'] != $_SESSION['Username']) {
+    $uname = $_POST['username'];
 }
+
+$email = $_POST['email'];
+$password = $_POST['password'];
+$hasError = false;
+if (
+    isset($_POST['curPW']) &&
+    isset($_POST['conPW']) &&
+    isset($_POST['newPW'])
+) {
+    if ($conPW != $newPW) {
+        $hasError = true;
+    } else {
+        $oldPW = $_POST['curPW'];
+        $newPW = $_POST['newPW'];
+        $conPW == $_POST['conPW'];
+    }
+}
+
+if ($_POST['username'] != $_SESSION['Username']) {
+    is_valid_name($_POST['username'])
+        ? ($uname = $_POST['username'])
+        : ($hasError = true);
+}
+if ($_POST['fname'] != $_SESSION['FirstName']) {
+    is_valid_name($_POST['fname'])
+        ? ($Firstname = $_POST['fname'])
+        : ($hasError = true);
+}
+if ($_POST['lname'] != $_SESSION['LastName']) {
+    is_valid_name($_POST['lname'])
+        ? ($lastName = $_POST['lname'])
+        : ($hasError = true);
+}
+if ($_POST['email'] != $_SESSION['Email']) {
+    is_valid_email($_POST['email'])
+        ? ($email = sanitize_email($_POST['email']))
+        : ($hasError = true);
+}
+
+if (!$hasError) {
+    $client = new rabbitMQClient('RabbitMQConfig.ini', 'testServer');
+    $request = [];
+    $request['type'] = 'Update';
+    $request['sessionID'] = $_SESSION['DB_ID'];
+    $request['email'] = $email;
+    $request['username'] = $uname;
+    $request['firstName'] = $Firstname;
+    $request['lastName'] = $lastName;
+    $request['oldPW'] = $oldPW;
+    if ($conPW == $newPW && isset($oldPW)) {
+        $request['newPW'] = $newPW;
+    }
+    $response = $client->send_request($request);
+
+    if ($response) {
+        die(header('Location: /Profile.php'));
+    } else {
+        echo 'Updating Password Failed';
+    }
+}
+
 
 ?>

@@ -133,26 +133,58 @@ if(!is_null($sessionid)){
 
 //Begin function updateProfile
 
-function updateProfile($username,$new_pass,$old_pass,$con_pass)
-{
+function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
+    // Connect to the database
+    $conn = dbConnection();
+    
+    // Build the SQL statement
+    $sql = "UPDATE users SET";
+   
+    if(doValidate($sessionid)) {
+		$sql2 = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+		$result = mysqli_query($conn, $sql2);
+		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+		$userid = $row['User_ID'];
 
-$sqlSelect = "SELECT Username AND Password FROM IT490.Users WHERE Username = '$username' AND Password = PASSWORD('$old_pass')";
-$result = mysqli_query($conn, $sqlSelect);
-$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-$count = mysqli_num_rows($row);
-        
-if ($count == 1){
-	echo "Username and password found in database".PHP_EOL;
+   
+    if (!empty($newpassword) && !empty($oldpassword)) {
+		$sql2 = "SELECT Password FROM IT490.Users WHERE User_ID = '$userid'";
+		$result2 = mysqli_query($conn, $sql2);
+		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+		$hashedpass = $row2['Password'];
+		if (password_verify($oldpassword, $hashedpass)) {
+			$sql .= " password='".mysqli_real_escape_string($conn, $newpassword)."',"; }
+    }
+  
+	if (!empty($username)) {
+        $sql .= " username='".mysqli_real_escape_string($conn, $username)."',";
+    }
+   
+    if (!empty($email)) {
+        $sql .= " email='".mysqli_real_escape_string($conn, $email)."',";
+    }
+    if (!empty($firstName)) {
+        $sql .= " first_name='".mysqli_real_escape_string($conn, $firstName)."',";
+    }
+    if (!empty($lastName)) {
+        $sql .= " last_name='".mysqli_real_escape_string($conn, $lastName)."',";
+    }
+    
+    // Remove the trailing comma from the SQL statement
+    $sql = rtrim($sql, ",");
+    
+    // Add the WHERE clause to the SQL statement
+    $sql .= " WHERE User_ID=".$userid;
+    
+    // Execute the SQL statement
+    $result = mysqli_query($conn, $sql);
+	if($result){return true;}
 
-	if ($new_pass === $con_pass){
 
+}
 
-		$sqlUpdate = "UPDATE IT490.Users SET Password = $con_pass WHERE Username = $username AND Password = $old_pass";
-		mysqli_query($conn, $sqlUpdate);
-		echo "Password updated.";
+	else {logout($sessionid);}
 
-		}else echo "Passwords do not match."
-	}
 }
 
 /*
@@ -197,7 +229,7 @@ function requestProcessor($request)
 		case "Register":
       			return registrationInsert($request['username'],$request['password'],$request['email'],$request['firstName'],$request['lastName']);
 		case "Update":
-			return updateProfile($request['username'],$request['oldPW'],$request['newPW'],$request['conPW'],$request['email'],$request['firstName'],$request['lastName']);
+			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
 		case "validate_session":
 			return doValidate($request['sessionID']);
 		case "Logout":

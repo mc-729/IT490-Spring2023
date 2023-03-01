@@ -1,7 +1,7 @@
 <?php
-require_once('path.inc');
-require_once('get_host_info.inc');
-require_once('rabbitMQLib.inc');
+require_once 'path.inc';
+require_once 'get_host_info.inc';
+require_once 'rabbitMQLib.inc';
 require 'nav.php';
 require 'helper.inc';
 require 'safer_echo.php';
@@ -26,10 +26,10 @@ session_start();
                 <div class="mb-3">
                     <div class="form-check form-switch">
                         <input name="visibility" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" <?php if (
-                                                                                                                            $public
-                                                                                                                        ) {
-                                                                                                                            echo 'checked';
-                                                                                                                        } ?>>
+                            $public
+                        ) {
+                            echo 'checked';
+                        } ?>>
                         <label class="form-check-label" for="flexSwitchCheckDefault">Make Profile Public</label>
                     </div>
                 </div>
@@ -54,26 +54,26 @@ session_start();
             <div class="mb-3">
                 <label class="form-label" for="email" v>Email</label>
                 <input class="form-control" value="<?php se(
-                                                        $_SESSION['Email']
-                                                    ); ?>" type="email" id="email" name="email" required />
+                    $_SESSION['Email']
+                ); ?>" type="email" id="email" name="email" required />
             </div>
             <div class="mb-3">
                 <label class="form-label" for="username">Username</label>
                 <input class="form-control" type="text" id="username" name="username" value="<?php se(
-                                                                                                    $_SESSION['Username']
-                                                                                                ); ?>" required maxlength="30" />
+                    $_SESSION['Username']
+                ); ?>" required maxlength="30" />
             </div>
             <div class="mb-3">
                 <label class="form-label" for="fname">First Name</label>
                 <input class="form-control" type="text" id="fname" name="fname" value="<?php se(
-                                                                                            $_SESSION['FirstName']
-                                                                                        ); ?>" required maxlength="30" />
+                    $_SESSION['FirstName']
+                ); ?>" required maxlength="30" />
             </div>
             <div class="mb-3">
                 <label class="form-label" for="lname">Last Name</label>
                 <input class="form-control" type="text" id="lname" name="lname" value="<?php se(
-                                                                                            $_SESSION['LastName']
-                                                                                        ); ?>" required maxlength="30" />
+                    $_SESSION['LastName']
+                ); ?>" required maxlength="30" />
             </div>
             <div class="mb-3">
                 <h3>Password Reset</h3>
@@ -143,7 +143,9 @@ if ($_POST['email'] != $_SESSION['Email']) {
         ? ($email = sanitize_email($_POST['email']))
         : ($hasError = true);
 }
-
+if ($hasError) {
+    display_error_modal('Oops, something went wrong!');
+}
 if (
     (!$hasError && !empty($email)) ||
     !empty($uname) ||
@@ -171,6 +173,39 @@ if (
         die(header('Location: /logout.php'));
     }
 }
+?>
 
 
+
+<?php function display_error_modal($error_message)
+{
+    echo '<script type="text/javascript">
+            $(document).ready(function(){
+                $("#errorModal .modal-body").html("' .
+        $error_message .
+        '");
+                $("#errorModal").modal("show");
+            });
+          </script>';
+
+    // Bootstrap modal markup
+    echo '<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Error message will be displayed here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+          </div>';
+}
 ?>

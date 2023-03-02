@@ -27,8 +27,10 @@
                     <li class="nav-item"><a class="nav-link" href="/validate_test.php">session valid?</a></li>
                     <?php if (isset($_SESSION['DB_ID'])): ?>
             <li class="nav-item"><a class="nav-link" href="/Profile.php">Profile</a></li>
-            <?php endif; ?>              
+            <?php endif; ?>  
+                    
             </ul>
+            
         </div>
     </div>
 </nav>

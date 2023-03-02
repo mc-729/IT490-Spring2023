@@ -1,6 +1,6 @@
 <?php
 require('nav.php');
-require('helper.php');
+require('helper.inc');
 session_start();
 
 ?>

@@ -1,34 +1,33 @@
 <?php
 
-require_once('path.inc');
-require_once('get_host_info.inc');
-require_once('rabbitMQLib.inc');
-require('safer_echo.php');
-require('nav.php');
-
-
-
+require_once 'path.inc';
+require_once 'get_host_info.inc';
+require_once 'rabbitMQLib.inc';
+require 'safer_echo.php';
+require 'nav.php';
 
 $type = $_POST['ans'];
 $searchByName = $_POST['searchValue'];
 
 if (isset($type) && isset($searchByName)) {
-
-
-    $client = new rabbitMQClient("RabbitMQConfig.ini", "APIServer");
-
-    $request = '{"type":"' . $type . '","operation": "s","searchTerm": "' . $searchByName . '" }';
+    $client = new rabbitMQClient('RabbitMQConfig.ini', 'testServer');
+    $request = [];
+    $request['type'] = 'API_CALL';
+    $request['key'] =
+        '{"type":"' .
+        $type .
+        '","operation": "s","searchTerm": "' .
+        $searchByName .
+        '" }';
 
     $response = $client->send_request($request);
 
     $obj = json_decode($response, true);
 }
 
-$count = 0
-//change radio button names/values to test new api functionality 
+$count = 0;
 
-
-
+//change radio button names/values to test new api functionality
 ?>
 
 </script>
@@ -54,10 +53,12 @@ $count = 0
 <div class="container list-group infinite-scroll" id="basic" style="max-height: 1000px; overflow-y: scroll;">
 
     <ul class="container list-group infinite-scroll" id="basic-example" style="max-height: 400px; overflow-y: scroll;">
-        <?php if (isset($type) && isset($searchByName)) : ?>
-            <?php foreach ($obj['drinks'] as $num) : ?>
-                <?php foreach ($obj['drinks'][$count++] as $key => $value) : ?>
-                    <li class="list-group-item">The key is <?php se($key); ?> and the value is <?php se($value); ?> </li>
+        <?php if (isset($type) && isset($searchByName)): ?>
+            <?php foreach ($obj['drinks'] as $num): ?>
+                <?php foreach ($obj['drinks'][$count++] as $key => $value): ?>
+                    <li class="list-group-item">The key is <?php se(
+                        $key
+                    ); ?> and the value is <?php se($value); ?> </li>
                 <?php endforeach; ?>
             <?php endforeach; ?>
         <?php endif; ?>

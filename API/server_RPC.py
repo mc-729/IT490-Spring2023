@@ -5,6 +5,7 @@ import json
 import os
 import api_keys
 import ast
+import sys
 class SearchByName:
     @staticmethod
     def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
@@ -93,30 +94,38 @@ class ToJsonFile:
 class APIRoute:
     @staticmethod
     def get_result(dictionary):
-        dictionary=ast.literal_eval(dictionary)
-        match dictionary['type']:
-            case 'SearchByName':
-               response = json.dumps(SearchByName.get_result(dictionary))
-               return response
-            case 'SearchByIngredient':
-               response = json.dumps(SearchByIngredient.get_result(dictionary))
-               return response
-            case 'GetCocktailDetailsByID':
-               response = json.dumps(GetCocktailDetailsByID.get_result(dictionary))
-               return response
-            case 'Random10Cocktails':
-               response = json.dumps(Random10Cocktails.get_result(dictionary))
-               return response
-            case 'FilterByCategory':
-               response = json.dumps(FilterByCategory.get_result(dictionary))
-               return response
-            case 'ListIngredients':
-               response = json.dumps(ListIngredients.get_result(dictionary))
-               return response
-            case 'SearchIngredientInfo':
-               response = json.dumps(SearchIngredientInfo.get_result(dictionary))
-               return response
-        return dictionary
+     
+        try:
+            dictionary=ast.literal_eval(dictionary)
+            match dictionary['type']:
+                
+                case 'SearchByName':
+                    response = json.dumps(SearchByName.get_result(dictionary))
+                    return response
+                case 'SearchByIngredient':
+                    response = json.dumps(SearchByIngredient.get_result(dictionary))
+                    return response
+                case 'GetCocktailDetailsByID':
+                    response = json.dumps(GetCocktailDetailsByID.get_result(dictionary))
+                    return response
+                case 'Random10Cocktails':
+                    response = json.dumps(Random10Cocktails.get_result(dictionary))
+                    return response
+                case 'FilterByCategory':
+                    response = json.dumps(FilterByCategory.get_result(dictionary))
+                    return response
+                case 'ListIngredients':
+                    response = json.dumps(ListIngredients.get_result(dictionary))
+                    return response
+                case 'SearchIngredientInfo':
+                    response = json.dumps(SearchIngredientInfo.get_result(dictionary))
+                    return response
+            return dictionary
+        except Exception as err:
+            msg = 'No API route found'
+            print(f"Unexpected {err=}, {type(err)=}")
+            #print("we have an error")
+            return msg
                 
 
 

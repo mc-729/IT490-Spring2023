@@ -158,10 +158,14 @@ session_start();
             !empty($Lastname) ||
             !empty($newPW)
         ) {
-            $_SESSION["FirstName"] = $Firstname;
-            $_SESSION["LastName"] = $lastName;
-            $_SESSION["Username"] = $uname;
-            $_SESSION["Email"] = $email;
+            
+           
+            if(empty($uname)){$uname=   $_SESSION["Username"];}
+            if(empty($Firstname)){  $Firstname=$_SESSION["FirstName"] ;}
+            if(empty($Lastname)){ $lastName= $_SESSION["LastName"];}
+            if(empty($$email)){ $email= $_SESSION["Email"];}
+           $sessionid= $_SESSION['DB_ID'];
+         
             session_commit();
             $client = new rabbitMQClient('RabbitMQConfig.ini', 'testServer');
             $request = [];
@@ -179,24 +183,21 @@ session_start();
             if ($response) {
                 echo '<script>alert("Success!!!")</script>';
                 die(header('Location: /Profile.php'));
+                 session_unset();
+    session_destroy();
+    session_start();
+                   $_SESSION["FirstName"] = $Firstname;
+            $_SESSION["LastName"] = $lastName;
+            $_SESSION["Username"] = $uname;
+            $_SESSION["Email"] = $email;
+                $_SESSION['DB_ID'];
               
             } elseif (!$response) {
                 die(header('Location: /logout.php'));
             }
         }
 
-        //Destroy the old session that had old User values
-        session_destroy();
-        
-        //Start new session
-        session_start();
-        
-        //Set the new session with the new/updated User values
-        
-        $_SESSION["Email"] = $email;
-        $_SESSION["Username"] = $uname;
-        $_SESSION["FirstName"] = $Firstname;
-        $_SESSION["LastName"] = $lastName;
+      
         
 
         //Should refresh the page? At the very least redirect user back to the same page

@@ -11,6 +11,7 @@ $memcached = new Memcached();
 
 // Add server(s) to the Memcached instance
 $memcached->addServer('localhost', 11211);
+global $memcached;
 
 function loginAuth($username, $password)
 {
@@ -109,6 +110,7 @@ function registrationInsert($username, $password, $email, $firstName, $lastName)
 			$request = [];
 			$request['type'] = 'error';
 			$request['service'] = 'database';
+
 			$request['message'] = $msg;
 			sendLog($request);
 		}
@@ -198,29 +200,58 @@ function fetchSearchResultsFromCache($query)
 
 function storeSearchResultsInCache($query, $searchResults)
 {
-	echo " we are storing";
-	global $memcached;
-	$key = ($query);
-	$memcached->set($key, $searchResults, 3600); // Cache for 1 hour
+	
+	// Convert results to JSON
+	$json = json_encode($searchResults);
+	$filtered_json = "[".filter_var($json)."]";
+
+	//print_r($json);
+
+	
+	// Insert JSON data into database using prepared statement
+
+	$conn = dbConnection();
+	$stmt = $conn->prepare('INSERT INTO IT490.Cache (SearchKey, Results) VALUES (?,?)');
+	$stmt->bind_param('ss', $query, $filtered_json);
+	$result = $stmt->execute();
+	echo $result;
+	$stmt->close();
+	$conn->close();
+
+	// Check for errors and return result
+	if ($result) {
+		echo "It has been added to the cache";
+		return true;
+	} else {
+		echo "Something went wrong in the cache";
+		return false;
+	}
+	
+	
 }
 function fetchSearchResultsCached($query)
 {
-	global $memcached;
-	echo $query;
-	echo gettype($query);
+	$conn=dbConnection();
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$query'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+
+
 	$searchResults = "";
-	if (!$memcached->get($query)) {
+	if ($count == 0) {
 		echo "it was not in cache";
 		$client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
-
-		
-
 		$searchResults = $client->send_request($query);
-		$obj = json_decode($searchResults, true);
-		$memcached->set($query, $searchResults, 3600); 
-	} else {
+		if(storeSearchResultsInCache($query,$searchResults)) echo"we stored to cache";
+		else echo "something went wrong";
+		
+		
+	} else if($count!=0) {
 		echo "it was in cache";
-		$searchResults = $memcached->get($query);
+		$searchResults = $row['Results'];
+		print_r($searchResults);
 	}
 	return $searchResults;
 }

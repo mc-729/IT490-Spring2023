@@ -184,4 +184,22 @@ session_start();
                 die(header('Location: /logout.php'));
             }
         }
+
+        //Destroy the old session that had old User values
+        session_destroy();
+        
+        //Start new session
+        session_start();
+        
+        //Set the new session with the new/updated User values
+        
+        $_SESSION["Email"] = $email;
+        $_SESSION["Username"] = $uname;
+        $_SESSION["FirstName"] = $Firstname;
+        $_SESSION["LastName"] = $lastName;
+        
+
+        //Should refresh the page? At the very least redirect user back to the same page
+        header("Location: /edit-profile.php");
+        exit();
         ?>

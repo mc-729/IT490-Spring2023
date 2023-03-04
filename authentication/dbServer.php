@@ -195,6 +195,21 @@ function storeSearchResultsInCache($query, $searchResults)
 }
 function fetchSearchResultsCached($query)
 {
+	global $channel;
+    $searchResults = fetchSearchResultsFromCache($query);
+    if (!$searchResults) {
+        // Send a message to the caching queue
+        $message = ['query' => $query];
+        $channel->basic_publish(
+            new AMQPMessage(json_encode($message)),
+            '',
+            'search_results_cache'
+        );
+
+        // Fetch search results from the API
+        $searchResults = fetchSearchResults($query);
+    }
+    return $searchResults;
 }
 function requestProcessor($request)
 {

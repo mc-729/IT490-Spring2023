@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Hello, World{% endblock %}
+{% block content %}
+
+    <h2>Users</h2>
+    <h3>User Count = {{ users|length }}</h3>
+    {% if users|length == 0 -%}
+        No Records Found
+    {% else -%}
+        {% for user in users %}
+            <hr>
+            <a href="{{ url_for('authentication.user_by_id', user_id=user.id )}}">{{ user.email }}</a>
+        {% endfor %}
+    {% endif %}
+
+{% endblock %}

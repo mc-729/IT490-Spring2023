@@ -8,3 +8,4 @@ logfile.txt
 installer
 api_keys.py
 env
+Lib/*

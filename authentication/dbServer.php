@@ -63,14 +63,14 @@ function dbConnection()
         $request['service'] = 'database';
         $request['message'] = 'DB CONNECTION FAILED';
         //$conn->connect_error;
-        sendLog($request);
+        //sendLog($request);
         exit();
     } else {
         $request = [];
         $request['type'] = 'error';
         $request['service'] = 'database';
         $request['message'] = 'DB CONNECTION SUCCESSFUL';
-        sendLog($request);
+        //sendLog($request);
         echo 'Successfully Connected!' . PHP_EOL;
     }
     return $conn;

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 
-from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQServer, RabbitMQClient
+from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 
 from application.bp.authentication.forms import RegisterForm
 
@@ -35,7 +35,7 @@ def registration():
         first_name = request.form['fname']
         last_name = request.form['lname']
 
-        client = RabbitMQClient('RabbitMQConfig.ini', 'testServer')
+        client = RabbitMQClient('testServer')
         request_data = {
             'type': 'Register',
             'username': uname,
@@ -47,7 +47,7 @@ def registration():
         response = client.send_request(request_data)
 
         if response:
-            return redirect('/loginForm')
+            return "hells ya baby"
         else:
             return 'Something went wrong.'
 

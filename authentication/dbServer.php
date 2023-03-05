@@ -6,11 +6,7 @@ require_once 'rabbitMQLib.inc';
 require_once '../Logging/send_log.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
 
-// Create a Memcached object
-$memcached = new Memcached();
 
-// Add server(s) to the Memcached instance
-$memcached->addServer('localhost', 11211);
 
 function loginAuth($username, $password)
 {
@@ -105,12 +101,13 @@ function registrationInsert($username, $password, $email, $firstName, $lastName)
             echo $sqlInsert;
             return true;
         } else {
-            $msg = 'Error with query';
+           /* $msg = 'Error with query';
             $request = [];
             $request['type'] = 'error';
             $request['service'] = 'database';
             $request['message'] = $msg;
-            sendLog($request);
+            sendLog($request); */
+            echo "we failed to insert bbby";
         }
     }
 } // End registrationInsert

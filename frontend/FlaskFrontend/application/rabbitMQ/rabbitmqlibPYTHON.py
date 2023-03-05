@@ -1,79 +1,138 @@
 import json
 import pika
-from application.rabbitMQ.getHost import get_host_info
-class RabbitMQServer:
-    def __init__(self, machine, server='rabbitMQ'):
-        self.machine = get_host_info([machine])
-        self.broker_host = self.machine[server]['BROKER_HOST']
-        self.broker_port = self.machine[server]['BROKER_PORT']
-        self.user = self.machine[server]['USER']
-        self.password = self.machine[server]['PASSWORD']
-        self.vhost = self.machine[server]['VHOST']
-        self.exchange = self.machine[server]['EXCHANGE']
-        self.queue = self.machine[server]['QUEUE']
-        if 'EXCHANGE_TYPE' in self.machine[server]:
-            self.exchange_type = self.machine[server]['EXCHANGE_TYPE']
-        else:
-            self.exchange_type = 'topic'
-        if 'AUTO_DELETE' in self.machine[server]:
-            self.auto_delete = self.machine[server]['AUTO_DELETE']
-        else:
-            self.auto_delete = False
-        self.routing_key = '*'
-        self.conn_queue = None
-        self.callback = None
+import uuid
+from configparser import ConfigParser
+from config import Config
+def getServer(servername:str):
+    if servername == "testServer":
+        return {
+            'BROKER_HOST': '127.0.0.1',
+            'BROKER_PORT': '5672',
+            'USER': 'test',
+            'PASSWORD': 'test',
+            'VHOST': 'testHost',
+            'EXCHANGE': 'testExchange',
+            'QUEUE': 'testQueue2',
+            'EXCHANGE_TYPE': 'topic',
+            'AUTO_DELETE': True
+        }
+    elif servername == 'APIServer':
+        return {
+            'BROKER_HOST': '127.0.0.1',
+            'BROKER_PORT': '5672',
+            'USER': 'test',
+            'PASSWORD': 'test',
+            'VHOST': 'testHost',
+            'EXCHANGE': 'testExchange',
+            'QUEUE': 'API_QUEUE',
+            'EXCHANGE_TYPE': 'topic',
+            'AUTO_DELETE': True
+        }
+    else:
+        raise ValueError(f"Invalid server name: {servername}")
 
-    def process_message(self, ch, method, properties, body):
-        if method.routing_key != '*':
-            return
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-        try:
-            if properties.reply_to:
-                payload = json.loads(body)
-                response = None
-                if self.callback is not None:
-                    response = self.callback(payload)
-                conn = pika.BlockingConnection(pika.ConnectionParameters(
-                    host=self.broker_host, port=self.broker_port, virtual_host=self.vhost,
-                    credentials=pika.PlainCredentials(self.user, self.password)))
-                channel = conn.channel()
-                exchange = channel.exchange_declare(
-                    exchange=self.exchange, exchange_type=self.exchange_type, auto_delete=self.auto_delete)
-                conn_queue = channel.queue_declare(queue=properties.reply_to, auto_delete=True)
-                channel.queue_bind(queue=properties.reply_to, exchange=self.exchange, routing_key=self.routing_key + '.response')
-                channel.basic_publish(
-                    exchange=self.exchange, routing_key=self.routing_key + '.response',
-                    properties=pika.BasicProperties(correlation_id=properties.correlation_id),
-                    body=json.dumps(response))
-                conn.close()
-                return
-        except Exception as e:
-            print(f"error: rabbitMQServer: process_message: exception caught: {e}")
-        payload = json.loads(body)
-        if self.callback is not None:
-            self.callback(payload)
-        print("processed one-way message")
+import pika
+import json
+import uuid
 
-    def process_requests(self, callback):
-        try:
-            self.callback = callback
-            conn = pika.BlockingConnection(pika.ConnectionParameters(
-                host=self.broker_host, port=self.broker_port, virtual_host=self.vhost,
-                credentials=pika.PlainCredentials(self.user, self.password)))
-            channel = conn.channel()
-            exchange = channel.exchange_declare(
-                exchange=self.exchange, exchange_type=self.exchange_type, auto_delete=self.auto_delete)
-            self.conn_queue = channel.queue_declare(queue=self.queue, auto_delete=True)
-            channel.queue_bind(queue=self.queue, exchange=self.exchange, routing_key=self.routing_key)
-            channel.basic_consume(queue=self.queue, on_message_callback=self.process_message)
-            channel.start_consuming()
-        except Exception as e:
-            print(f"Failed to start request processor: {e}")
 
 class RabbitMQClient:
-    def __init__(self, machine, server='rabbitMQ'):
-        self.machine = get_host_info([machine])
-        self.broker_host = self.machine[server]['BROKER_HOST']
-        self.broker_port = self.machine[server]['BROKER_PORT']
-        self.user = self.machine[server]['USER']
-    
+    def __init__(self, servername):
+        server = getServer(servername)
+
+        self.broker_host = server['BROKER_HOST']
+        self.broker_port = server['BROKER_PORT']
+        self.user = server['USER']
+        self.password = server['PASSWORD']
+        self.vhost = server['VHOST']
+        self.exchange = server['EXCHANGE']
+        self.queue = server['QUEUE']
+        self.exchange_type = 'topic'
+        self.auto_delete = server['AUTO_DELETE']
+        self.routing_key = '*'
+        self.response_queue = {}
+        self.callback_queue = None
+
+        self.credentials = pika.PlainCredentials(self.user, self.password)
+        self.parameters = pika.ConnectionParameters(
+            host=self.broker_host,
+            port=self.broker_port,
+            virtual_host=self.vhost,
+            credentials=self.credentials,
+        )
+        self.connection = pika.BlockingConnection(self.parameters)
+        self.channel = self.connection.channel()
+
+    def process_response(self, channel, method, properties, body):
+        uid = properties.correlation_id
+        if uid not in self.response_queue:
+            print("Unknown uid")
+            return
+        channel.basic_ack(delivery_tag=method.delivery_tag)
+        payload = json.loads(body)
+        if not payload:
+            payload = "[empty response]"
+        self.response_queue[uid] = payload
+
+    def send_request(self, message):
+        uid = str(uuid.uuid4())
+
+        json_message = json.dumps(message)
+        try:
+         
+
+            self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type)
+            callback_queue_name = self.queue + '_response'
+            result = self.channel.queue_declare(queue='',auto_delete=True)
+            self.callback_queue = result.method.queue
+        
+            self.channel.queue_bind(exchange=self.exchange, queue=callback_queue_name,routing_key=self.routing_key + '.response')
+         
+
+            self.channel.basic_publish(
+                exchange='',
+                routing_key=self.queue,
+                body=json_message,
+                properties=pika.BasicProperties(
+                    reply_to=self.callback_queue,
+                    correlation_id=uid
+                )
+            )
+            self.response_queue[uid] = 'waiting'
+            self.channel.basic_consume(queue=self.callback_queue, on_message_callback=self.process_response, auto_ack=True)
+
+            while self.response_queue[uid] == 'waiting':
+                self.connection.process_data_events()
+
+            response = self.response_queue[uid]
+            del self.response_queue[uid]
+            self.connection.close()
+            return response
+
+        except Exception as e:
+            print(f'failed to send message to exchange: {e}')
+            return None
+
+    def publish(self, message):
+        json_message = json.dumps(message)
+        try:
+            credentials = pika.PlainCredentials(self.user, self.password)
+            parameters = pika.ConnectionParameters(
+                host=self.broker_host,
+                port=self.broker_port,
+                virtual_host=self.vhost,
+                credentials=credentials,
+            )
+
+            connection = pika.BlockingConnection(parameters)
+            channel = connection.channel()
+
+            channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type)
+
+            self.conn_queue = channel.queue_declare(queue=self.queue)
+            channel.queue_bind(exchange=self.exchange, queue=self.conn_queue.method.queue, routing_key=self.routing_key)
+
+            channel.basic_publish(exchange=self.exchange, routing_key=self.routing_key, body=json_message)
+            connection.close()
+        except Exception as e:
+            print(f'failed to send message to exchange: {e}')

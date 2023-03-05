@@ -99,7 +99,7 @@ class RabbitMQClient:
 
             response = self.response_queue[uid]
             del self.response_queue[uid]
-            return response
+            return str(response)
         except Exception as e:
             print(f'failed to send message to exchange: {e}')
             return None

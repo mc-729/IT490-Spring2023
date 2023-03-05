@@ -32,7 +32,7 @@ function loginAuth($username, $password)
 
         if (password_verify($password, $hashedpass)) {
             echo 'Login Successful' . PHP_EOL;
-            $resp = [true, SessionGen($row['User_ID']), $row['User_ID']];
+			$resp = array(true, SessionGen($row['User_ID']), $row['User_ID'],$row['F_Name'],$row['L_Name'],$row['Username'], $row['Email']);
             return $resp;
         } else {
             echo 'Login Failed' . PHP_EOL;
@@ -207,6 +207,62 @@ function fetchSearchResultsCached($query)
         $searchResults = fetchSearchResults($query);
     }
     return $searchResults;
+}
+
+
+function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
+    // Connect to the database
+    $conn = dbConnection();
+    
+    // Build the SQL statement
+    $sql = "UPDATE Users SET";
+   
+    if(doValidate($sessionid)) {
+		$sql2 = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+		$result = mysqli_query($conn, $sql2);
+		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+		$userid = $row['UID'];
+
+   
+    if (!empty($newpassword) && !empty($oldpassword)) {
+		$sql2 = "SELECT Password FROM IT490.Users WHERE User_ID = '$userid'";
+		$result2 = mysqli_query($conn, $sql2);
+		$row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+		$hashedpass = $row2['Password'];
+		if (password_verify($oldpassword, $hashedpass)) {
+			$hashPassword = password_hash($newpassword, PASSWORD_DEFAULT);
+			$sql .= " Password='".mysqli_real_escape_string($conn, $hashPassword)."',"; } 
+    }
+  
+	if (!empty($username)) {
+        $sql .= " Username='".mysqli_real_escape_string($conn, $username)."',";
+    }
+   
+    if (!empty($email)) {
+        $sql .= " Email='".mysqli_real_escape_string($conn, $email)."',";
+    }
+    if (!empty($firstName)) {
+        $sql .= " f_name='".mysqli_real_escape_string($conn, $firstName)."',";
+    }
+    if (!empty($lastName)) {
+        $sql .= " l_name='".mysqli_real_escape_string($conn, $lastName)."',";
+    }
+    
+    // Remove the trailing comma from the SQL statement
+    $sql = rtrim($sql, ",");
+    
+    // Add the WHERE clause to the SQL statement
+    $sql .= " WHERE User_ID=".$userid;
+    
+    // Execute the SQL statement
+    $result = mysqli_query($conn, $sql);
+	if($result){return true;}
+
+
+}
+
+	else {logout($sessionid);}
+
 }
 function requestProcessor($request)
 {

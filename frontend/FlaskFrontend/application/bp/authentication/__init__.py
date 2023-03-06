@@ -1,10 +1,11 @@
 import ast
+from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from flask import session
-from application.bp.authentication.forms import RegisterForm , LoginForm
-from application.HelpFunctions.helperFunctions import User , login_required
+from application.bp.authentication.forms import RegisterForm , LoginForm, EditProfileForm
+
 
 import json
 
@@ -46,62 +47,92 @@ def login():
 
         # Check if login was successful
         if response:
-            response=eval(str(response))
-            print(response[0])
-            session['user_id']=response[1]
-            print(type(response))
-            print(response)
-            user = User(response[1],response[5],response[6],response[3],response[4])
-            print(user.get_username())
+            response=str(response).replace('"',"")
+            response=str(response)[3:]
+            response=str(response)[:-2]
+            response=str(response).split(',')
+            session['firstName']=response[3]
+            session['lastName']=response[4]
+            session['sessionID']=response[1]
+            session['username']=response[5]
+            session['email']=response[6]
+        
+         
             return redirect('/dashboard')
         else:
             flash('Login unsuccessful. Please check your username and password.', 'danger')
 
     return render_template('login.html', form=form)
 
-"""
-@authentication.route('/edit-profile', methods=['GET', 'POST'])
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("sessionID") is None:
+            flash("Fuck Off!!!", "error")
+            return redirect(url_for("authentication.login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@authentication.route('/logout')
+@login_required
+def logout():
+    # Send message to RabbitMQ to log out the user
+    client = RabbitMQClient('testServer')
+    request_data = {
+        'type': 'Logout',
+        'sessionID': session.get('sessionID')
+    }
+    response = client.send_request(request_data)
+
+    if response:
+        session.clear() 
+       
+        return redirect(url_for('authentication.login'))
+
+    return 'Something went wrong.'
+
+        
+
+@authentication.route("/edit_profile", methods=["GET", "POST"])
 @login_required
 def edit_profile():
     form = EditProfileForm()
+    form.username.data=session.get('username')
+    form.email.data=session.get('email')
+    form.last_name.data=session.get('lastName')
+    form.first_name.data=session.get('firstName')
 
     if form.validate_on_submit():
-        current_user.username = form.username.data
-        current_user.email = form.email.data
-        current_user.first_name = form.first_name.data
-        current_user.last_name = form.last_name.data
+        # Build the message payload for updating the user's profile information
+        payload = {
+            'type': 'Update',
+            "sessionID": session.get("sessionID"),
+            "firstName": form.first_name.data,
+            "lastName": form.last_name.data,
+            "email": form.email.data,
+            "username": form.username.data
+            , "newPW":form.new_password.data , "oldPW": form.old_password.data 
 
-        # create RabbitMQ client
-        client = RabbitMQClient('testServer')
-
-        # create message data
-        message_data = {
-            'type': 'UpdateProfile',
-            'user_id': current_user.session_id,
-            'username': current_user.username,
-            'email': current_user.email,
-            'first_name': current_user.first_name,
-            'last_name': current_user.last_name
         }
 
-        # send message to RabbitMQ server
-        response = client.send_request(message_data)
+        # Send the message to the RabbitMQ server for processing
+        client = RabbitMQClient('testServer')
+        response = client.send_request(payload)
 
         if response:
-            flash('Your profile has been updated.')
+            # Update session data with new values
+            session["first_name"] = form.first_name.data
+            session["last_name"] = form.last_name.data
+            session["email"] = form.email.data
+            session["username"] = form.username.data
+
+            flash("Profile information updated successfully", "success")
+            return redirect(url_for("authentication.edit_profile"))
         else:
-            flash('Something went wrong.')
+            flash("Failed to update profile information", "error")
 
-        return redirect(url_for('authentication.profile'))
-
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-        form.first_name.data = current_user.first_name
-        form.last_name.data = current_user.last_name
-
-    return render_template('edit-profile.html', form=form)
-"""
+    return render_template("edit_profile.html", form=form)
+      
 @authentication.route('/registration', methods=['GET', 'POST'])
 def registration():
     form = RegisterForm()
@@ -122,11 +153,12 @@ def registration():
             'lastName': last_name
         }
         response = client.send_request(request_data)
-        response=json.dumps(response)
+      
 
         if response:
-            return "the return data is "+response+ "the return data type is "+type(response)
-            ##return redirect(url_for('authentication.login'))
+         
+            return redirect(url_for('authentication.login'))
         else:
             return redirect(url_for('authentication.registration'))
     return render_template('registration.html',form=form)
+

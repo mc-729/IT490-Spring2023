@@ -31,8 +31,15 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <div class="navbar-nav mr-auto">
                     {{ render_nav_item('homepage.about','About' ) }}
-                    {{ render_nav_item('authentication.registration','Register' ) }}
+                   
+                    {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
+                    {{ render_nav_item('authentication.registration','Register' ) }}
+                    {% endif %}
+                    {% if session.sessionID %}
+                    {{ render_nav_item('authentication.edit_profile','Edit Profile' ) }}
+                    {{ render_nav_item('authentication.logout', 'Logout', button=True) }}
+                    {% endif %}
                 </div>
             </div>
 

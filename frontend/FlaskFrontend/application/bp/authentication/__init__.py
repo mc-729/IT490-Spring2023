@@ -93,14 +93,11 @@ def logout():
 
         
 
-@authentication.route("/edit_profile", methods=["GET", "POST"])
+@authentication.route("/edit_profile", methods=[ "GET","POST"])
 @login_required
 def edit_profile():
     form = EditProfileForm()
-    form.username.data=session.get('username')
-    form.email.data=session.get('email')
-    form.last_name.data=session.get('lastName')
-    form.first_name.data=session.get('firstName')
+ 
 
     if form.validate_on_submit():
         # Build the message payload for updating the user's profile information
@@ -121,6 +118,10 @@ def edit_profile():
 
         if response:
             # Update session data with new values
+            session.pop("username", None)
+            session.pop("first_name", None)
+            session.pop("last_name", None)
+            session.pop("email", None)
             session["first_name"] = form.first_name.data
             session["last_name"] = form.last_name.data
             session["email"] = form.email.data

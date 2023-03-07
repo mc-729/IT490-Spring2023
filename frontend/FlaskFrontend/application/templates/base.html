@@ -32,6 +32,7 @@
                 <div class="navbar-nav mr-auto">
                     {{ render_nav_item('homepage.about','About' ) }}
                     {{ render_nav_item('homepage.drinkwithyoureyes','Drink with your eyes' ) }}
+                    {{ render_nav_item('homepage.apiSearch','cocktail search' ) }}
                     {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
                     {{ render_nav_item('authentication.registration','Register' ) }}

@@ -38,3 +38,16 @@ class EditProfileForm(FlaskForm):
     new_password = PasswordField("New Password", validators=[EqualTo("confirm_password", message="Passwords must match")])
     confirm_password = PasswordField("Confirm Password")
     submit = SubmitField("Save Changes")
+
+class SearchForm(FlaskForm):
+    ans = RadioField('Search Type', choices=[
+        ('SearchByName', 'Search By Name'),
+        ('SearchBySingleIngredient', 'Search By Ingredient'),
+        ('GetCocktailDetailsByID', 'Search by ID'),
+        ('Random10Cocktails', 'Random 10 Cocktails'),
+        ('FilterByCategory', 'Filter by Category'),
+        ('ListIngredients', 'List Ingredients'),
+        ('SearchIngredientInfo', 'Search Ingredients Info')
+    ], validators=[DataRequired()])
+    searchValue = StringField('Search Value', validators=[DataRequired()])
+    submit = SubmitField("search for drinks")

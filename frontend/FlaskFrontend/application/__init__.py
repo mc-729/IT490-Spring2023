@@ -1,6 +1,5 @@
 from flask import Flask, session
 from flask_bootstrap import Bootstrap5
-from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 from requests import Session
 from flask import Flask
@@ -13,7 +12,6 @@ from application.bp.homepage import bp_homepage
 from flask import Flask, render_template, redirect, request, session
 
 
-migrate = Migrate()
 csrf = CSRFProtect()
 
 

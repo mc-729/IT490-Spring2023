@@ -229,6 +229,66 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
 
 	else {logout($sessionid);}
 
+
+}
+
+function storeSearchResultsInCache($query, $searchResults)
+{
+	
+	// Convert results to JSON
+	$json = json_encode($searchResults);
+	$filtered_json = "[".filter_var($json)."]";
+
+	//print_r($json);
+
+	
+	// Insert JSON data into database using prepared statement
+
+	$conn = dbConnection();
+	$stmt = $conn->prepare('INSERT INTO IT490.Cache (SearchKey, Results) VALUES (?,?)');
+	$stmt->bind_param('ss', $query, $filtered_json);
+	$result = $stmt->execute();
+	echo $result;
+	$stmt->close();
+	$conn->close();
+
+	// Check for errors and return result
+	if ($result) {
+		echo "It has been added to the cache";
+		return true;
+	} else {
+		echo "Something went wrong in the cache";
+		return false;
+	}
+	
+	
+}
+function fetchSearchResultsCached($query)
+{   echo"did we make it here?";
+	$conn=dbConnection();
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$query'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+
+
+	$searchResults = "";
+	if ($count == 0) {
+		echo "it was not in cache";
+		$client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
+   
+		$searchResults = $client->send_request($query);
+		if(storeSearchResultsInCache($query,$searchResults)) echo"we stored to cache";
+		else echo "something went wrong";
+		
+		
+	} else if($count!=0) {
+		echo "it was in cache";
+		$searchResults = $row['Results'];
+		print_r($searchResults);
+	}
+	return $searchResults;
 }
 function requestProcessor($request)
 {
@@ -249,12 +309,15 @@ function requestProcessor($request)
                 $request['lastName']
             );
         case 'validate_session':
-			case "Update":
-				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
-				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+		
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
+        case 'API_CALL':
+		return  fetchSearchResultsCached($request['key']);
+        case "Update":
+				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
+				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
      
     }
     //$callLogin = array($callLogin => doLogin($username,$password)

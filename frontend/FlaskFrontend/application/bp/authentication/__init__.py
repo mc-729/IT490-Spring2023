@@ -44,18 +44,20 @@ def login():
             'password': password
         }
         response = client.send_request(request_data)
+       
+        print(json.loads(response.decode("utf-8").replace("'",'"')))
+        resp=json.loads(response.decode("utf-8").replace("'",'"'))
+        print()
 
+   
         # Check if login was successful
-        if response:
-            response=str(response).replace('"',"")
-            response=str(response)[3:]
-            response=str(response)[:-2]
-            response=str(response).split(',')
-            session['firstName']=response[3]
-            session['lastName']=response[4]
-            session['sessionID']=response[1]
-            session['username']=response[5]
-            session['email']=response[6]
+        if resp['login_status']==True:
+          
+            session['firstName']=resp['first_name']
+            session['lastName']=resp['last_name']
+            session['sessionID']=resp['session_id']
+            session['username']=resp['username']
+            session['email']=resp['email']
         
          
             return redirect('/dashboard')
@@ -97,8 +99,11 @@ def logout():
 @login_required
 def edit_profile():
     form = EditProfileForm()
- 
-
+    
+    form.first_name.default= session["firstName"]
+    form.last_name.default=  session["lastName"]
+    form.email.default = session['email']
+    form.username.default= session['username']
     if form.validate_on_submit():
         # Build the message payload for updating the user's profile information
         payload = {
@@ -118,12 +123,9 @@ def edit_profile():
 
         if response:
             # Update session data with new values
-            session.pop("username", None)
-            session.pop("first_name", None)
-            session.pop("last_name", None)
-            session.pop("email", None)
-            session["first_name"] = form.first_name.data
-            session["last_name"] = form.last_name.data
+           
+            session["firstName"] = form.first_name.data
+            session["lasNname"] = form.last_name.data
             session["email"] = form.email.data
             session["username"] = form.username.data
 

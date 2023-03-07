@@ -74,7 +74,7 @@ class RabbitMQClient:
         try:
             self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type, durable=True)
 
-            result = self.channel.queue_declare(queue='', exclusive=False)
+            result = self.channel.queue_declare(queue='', exclusive=False, auto_delete=True)
             self.callback_queue = result.method.queue
 
             self.channel.queue_bind(exchange=self.exchange, queue=self.callback_queue, routing_key=self.routing_key + '.response')
@@ -91,7 +91,7 @@ class RabbitMQClient:
             self.channel.basic_consume(
                 queue=self.callback_queue,
                 on_message_callback=self.process_response,
-                auto_ack=False
+                auto_ack=True
             )
 
             while self.response_queue[uid] is None:

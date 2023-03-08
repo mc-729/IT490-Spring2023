@@ -1,3 +1,4 @@
+import ast
 import json
 from flask import Blueprint, jsonify, render_template, request
 import pika
@@ -22,31 +23,42 @@ def about():
 def drinkwithyoureyes():
     return render_template('drinkwithyoureyes.html')
 
+PER_PAGE = 3
 
 
 
+@bp_homepage.route('/data')
+def get_data(data):
+    
+    data = json.loads(data)
+    # Get the current page number from the request arguments
+ 
+    # Return the subset of S
 
-
-
+    return data[0]["drinks"]
 @bp_homepage.route('/apiSearch', methods=['GET', 'POST'])
+@csrf_exempt
 def apiSearch():
     form = SearchForm()
+    data = False
     if form.validate_on_submit():
-        type = request.form['ans']
+        searchtype = request.form['ans']
         searchTerm = request.form['searchValue']
 
-        if type and searchTerm:
+        if searchtype and searchTerm:
             client = RabbitMQClient('testServer')
             request_dict = {
                 'type': 'API_CALL',
                 'key': {
-                    'type': type,
+                    'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
                 }
             }
             response = client.send_request(request_dict)
-            obj = json.loads(response)
-            if obj is not None: print(json.dumps(obj))
-            return jsonify(obj)
-    return render_template('apiSearch.html', form=form)
+            response= json.loads(json.loads(response))[0]
+            response=json.loads(response)["drinks"]
+          
+            data=response
+           
+    return render_template('apiSearch.html', form=form,data=data)

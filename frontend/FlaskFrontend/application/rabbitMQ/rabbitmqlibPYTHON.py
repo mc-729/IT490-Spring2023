@@ -74,10 +74,11 @@ class RabbitMQClient:
         try:
             self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type, durable=True)
 
-            result = self.channel.queue_declare(queue='', exclusive=False, auto_delete=True)
+            result = self.channel.queue_declare(queue='', exclusive=False,auto_delete=True)
             self.callback_queue = result.method.queue
 
             self.channel.queue_bind(exchange=self.exchange, queue=self.callback_queue, routing_key=self.routing_key + '.response')
+          
             self.channel.basic_publish(
                 exchange=self.exchange,
                 routing_key=self.routing_key,
@@ -103,3 +104,10 @@ class RabbitMQClient:
         except Exception as e:
             print(f'failed to send message to exchange: {e}')
             return None
+    
+    def publish(self, message):
+        json_message = json.dumps(message)
+        try:
+            self.channel.basic_publish(exchange=self.exchange, routing_key=self.routing_key, body=json_message)
+        except Exception as e:
+            print(f"failed to send message to exchange: {str(e)}\n")

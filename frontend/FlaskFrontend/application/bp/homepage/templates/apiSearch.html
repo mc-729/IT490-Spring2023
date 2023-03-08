@@ -4,4 +4,85 @@
 {% block content %}
     <h1>Cocktail Search</h1>
     {{ render_form(form) }}
+    {% if data %}
+    <div class="container">
+        <div class="row" id="card-container">
+            {% for d in data %}
+            <div class="col-sm-4">
+                <div class="card">
+                    <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ d.strDrink }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                        <p class="card-text">{{ d.strInstructions }}</p>
+                   
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="col-sm-12">
+        <p>No resultsw</p>
+    </div>
+    {% endif %}
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    var page = 1;
+    var loading = false;
+
+    function loadMore() {
+        if (!loading) {
+            loading = true;
+            $.ajax({
+                type: 'GET',
+                url: '/data',
+                data: {page: page},
+                success: function(response) {
+                    if (response.length > 0) {
+                        var cards = '';
+                        $.each(response, function(i, d) {
+                            cards += '<div class="col-sm-4">';
+                            cards += '<div class="card">';
+                            cards += '<img class="card-img-top" src="' + d.strDrinkThumb + '" alt="' + d.strDrink + '">';
+                            cards += '<div class="card-body">';
+                            cards += '<h5 class="card-title">' + d.strDrink + '</h5>';
+                            cards += '<h6 class="card-subtitle mb-2 text-muted">' + d.strCategory + '</h6>';
+                            cards += '<p class="card-text">' + d.strInstructions + '</p>';
+                            cards += '<ul class="list-group list-group-flush">';
+                            cards += '<li class="list-group-item"><b>Ingredients:</b></li>';
+                            for (var j = 1; j <= 15; j++) {
+                                if (d['strIngredient' + j]) {
+                                    cards += '<li class="list-group-item">' + d['strMeasure' + j] + ' ' + d['strIngredient' + j] + '</li>';
+                                }
+                            }
+                            cards += '</ul>';
+                            cards += '</div>';
+                            cards += '</div>';
+                            cards += '</div>';
+                        });
+                        $('#card-container').append(cards);
+                        page += 1;
+                    }
+                    loading = false;
+                }
+            });
+        }
+    }
+
+    $(window).scroll(function() {
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 10) {
+            loadMore();
+        }
+    });
+
+    loadMore();
+});
+</script>
 {% endblock %}

@@ -47,11 +47,10 @@ def login():
        
         print(json.loads(response.decode("utf-8").replace("'",'"')))
         resp=json.loads(response.decode("utf-8").replace("'",'"'))
-        print()
-
+     
    
         # Check if login was successful
-        if resp['login_status']==True:
+        if resp['login_status']:
           
             session['firstName']=resp['first_name']
             session['lastName']=resp['last_name']

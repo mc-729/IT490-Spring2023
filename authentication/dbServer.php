@@ -248,21 +248,13 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
 
 }
 
-function storeSearchResultsInCache($query, $searchResults)
-{
+function storeSearchResultsInCache($query,$searchResults)
+{	
     $obj = json_decode($searchResults, true);
     echo gettype($obj);
     $count=0;
-    foreach ($obj['drinks'] as $nums){
-
-   
-     foreach ($obj['drinks'][$count] as $key => $value) {
-
-        echo "the drink count  is".$count;
-     }
-     $count++;
-     
-    }
+  
+    
 	
 	// Convert results to JSON
 	$json = json_encode($searchResults);
@@ -283,7 +275,8 @@ function storeSearchResultsInCache($query, $searchResults)
 
 	// Check for errors and return result
 	if ($result) {
-		echo "It has been added to the cache";
+		echo "It has been added to the cache ";
+      
 		return true;
 	} else {
 		echo "Something went wrong in the cache";
@@ -294,8 +287,12 @@ function storeSearchResultsInCache($query, $searchResults)
 }
 function fetchSearchResultsCached($query)
 
-{   echo"did we make it here?";
-    $strQuery=implode(',',$query);
+
+{  
+    try{
+     echo"did we make it here?";
+    
+     $strQuery=implode(',',$query);
 	$conn=dbConnection();
 	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
 	$result = mysqli_query($conn, $sql);
@@ -307,21 +304,12 @@ function fetchSearchResultsCached($query)
 
 	if ($count == 0) {
 		echo "it was not in cache";
-		$client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
-   
-		$searchResults = $client->send_request($query);
-		if(storeSearchResultsInCache($query,$searchResults)) 
-        {
-            $result = mysqli_query($conn, $sql);
-            $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-            echo"we stored to cache";
-            $searchResults = $row['Results'];
-           
+        $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
 
-            return $searchResults;
+        $searchResults = $client->send_request($query);
         
-        }
-		else echo "something went wrong";
+		storeSearchResultsInCache($query,$searchResults);
+      return $searchResults;
 		
 		
 	} else if($count!=0) {
@@ -330,7 +318,11 @@ function fetchSearchResultsCached($query)
         echo gettype($searchResults);
         return $searchResults;
 		//print_r($searchResults);
-	}
+	}}
+    catch (Exception $e) {
+        echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
+        return  $resp = ['API_REQUEST_STATUS' => false];
+    }
 	
 }
 function requestProcessor($request)
@@ -372,9 +364,9 @@ function requestProcessor($request)
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
 
-echo 'Authentication Server BEGIN' . PHP_EOL;
+echo 'Authentication Server BEGIN TRY' . PHP_EOL;
 $server->process_requests('requestProcessor');
 
-echo 'Authentication Server END' . PHP_EOL;
+echo 'Authentication Server try END' . PHP_EOL;
 exit();
 

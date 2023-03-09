@@ -275,11 +275,11 @@ function storeSearchResultsInCache($query,$searchResults)
 
 	// Check for errors and return result
 	if ($result) {
-		echo "It has been added to the cache ";
+		echo "It has been added to the cache ". PHP_EOL;
       
 		return true;
 	} else {
-		echo "Something went wrong in the cache";
+		echo "Something went wrong in the cache". PHP_EOL;
 		return false;
 	}
 	
@@ -290,7 +290,7 @@ function fetchSearchResultsCached($query)
 
 {  
     try{
-     echo"did we make it here?";
+     echo"did we make it here?". PHP_EOL;
     
      $strQuery=implode(',',$query);
 	$conn=dbConnection();

@@ -44,12 +44,28 @@ function loginAuth($username, $password)
             return $resp;
         } else {
             echo 'Login Failed' . PHP_EOL;
-            $resp = ['login_status' => false];
+            $resp =array(
+                'login_status' => false,
+                'session_id' => null,
+                'user_id' => null,
+                'first_name' => null,
+                'last_name' => null,
+                'username' => null,
+                'email' => null
+            );
             return $resp;
         }
     } else {
         echo 'Login Failed' . PHP_EOL;
-        $resp = ['login_status' => false];
+        $resp =array(
+            'login_status' => false,
+            'session_id' => null,
+            'user_id' => null,
+            'first_name' => null,
+            'last_name' => null,
+            'username' => null,
+            'email' => null
+        );
         return $resp;
     }
 } //End loginAuth
@@ -234,11 +250,24 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
 
 function storeSearchResultsInCache($query, $searchResults)
 {
+    $obj = json_decode($searchResults, true);
+    echo gettype($obj);
+    $count=0;
+    foreach ($obj['drinks'] as $nums){
+
+   
+     foreach ($obj['drinks'][$count] as $key => $value) {
+
+        echo "the drink count  is".$count;
+     }
+     $count++;
+     
+    }
 	
 	// Convert results to JSON
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
-
+    $query=implode(',',$query);
 	//print_r($json);
 
 	
@@ -264,31 +293,45 @@ function storeSearchResultsInCache($query, $searchResults)
 	
 }
 function fetchSearchResultsCached($query)
+
 {   echo"did we make it here?";
+    $strQuery=implode(',',$query);
 	$conn=dbConnection();
-	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$query'";
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
 	
 
 
-	$searchResults = "";
+
 	if ($count == 0) {
 		echo "it was not in cache";
 		$client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
    
 		$searchResults = $client->send_request($query);
-		if(storeSearchResultsInCache($query,$searchResults)) echo"we stored to cache";
+		if(storeSearchResultsInCache($query,$searchResults)) 
+        {
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+            echo"we stored to cache";
+            $searchResults = $row['Results'];
+           
+
+            return $searchResults;
+        
+        }
 		else echo "something went wrong";
 		
 		
 	} else if($count!=0) {
 		echo "it was in cache";
 		$searchResults = $row['Results'];
-		print_r($searchResults);
+        echo gettype($searchResults);
+        return $searchResults;
+		//print_r($searchResults);
 	}
-	return $searchResults;
+	
 }
 function requestProcessor($request)
 {

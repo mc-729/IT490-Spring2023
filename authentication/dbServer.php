@@ -158,7 +158,7 @@ function logout($sessionid){
 function reguestEmail($userid)
 {
 	$conn = dbConnection();
-    $query = "SELECT Email FROM UserId = $userid";
+    $query = "SELECT Email FROM IT490.sessions WHERE UserId = '$userid'";
 	$result = mysqli_query($conn, $query);
     return $result;
 } // End requestEmail

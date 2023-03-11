@@ -154,8 +154,14 @@ function logout($sessionid){
 
 	if(mysqli_query($conn, $query)){return true;}
 	else return false;
-
-}
+} // End logout
+function reguestEmail($userid)
+{
+	$conn = dbConnection();
+    $query = "SELECT Email FROM UserId = $userid";
+	$result = mysqli_query($conn, $query);
+    return $result;
+} // End requestEmail
 
 
 function requestProcessor($request)
@@ -172,8 +178,10 @@ function requestProcessor($request)
 			return registrationInsert($request['username'], $request['password'], $request['email'], $request['firstName'], $request['lastName']);
 		case "validate_session":
 			return doValidate($request['sessionID']);
-			case "Logout":
-				return logout($request['sessionID']);
+		case "Logout":
+			return logout($request['sessionID']);
+        case "Email":
+            return requestEmail($request['userid']);
 	}
 	//$callLogin = array($callLogin => doLogin($username,$password)
 	return array("returnCode" => '0', 'message' => "Server received the request and processed it.");

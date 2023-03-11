@@ -153,11 +153,14 @@ function logout($sessionid){
 	else return false;
 } // End logout
 
-function reguestEmail($userid){
+function requestEmail($userid){
 	$conn = dbConnection();
     $query = "SELECT Email FROM IT490.Users WHERE User_Id = '$userid'";
 	$result = mysqli_query($conn, $query);
-	return $result;
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$email = $row['Email'];
+	echo $email . PHP_EOL;
+	return $email;
 
 } // End requestEmail
 

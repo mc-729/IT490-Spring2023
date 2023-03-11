@@ -54,7 +54,7 @@ $request['userid'] = "3";
 $emailResponse = $client->send_request($request);
 
 echo "client received response: ".PHP_EOL;
-print_r($response);
+print_r($emailResponse);
 echo "\n\n";
 
 sendEmail($emailResponse);

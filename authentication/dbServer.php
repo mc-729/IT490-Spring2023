@@ -5,15 +5,12 @@ require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 require_once('../Logging/send_log.inc');
 //require_once __DIR__ . '/../vendor/autoload.php';
-
-
 function loginAuth($username, $password)
 {
 
 	$conn = dbConnection();
 
 	// lookup username in database
-
 	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -155,12 +152,13 @@ function logout($sessionid){
 	if(mysqli_query($conn, $query)){return true;}
 	else return false;
 } // End logout
-function reguestEmail($userid)
-{
+
+function reguestEmail($userid){
 	$conn = dbConnection();
-    $query = "SELECT Email FROM IT490.sessions WHERE UserId = '$userid'";
+    $query = "SELECT Email FROM IT490.Users WHERE User_Id = '$userid'";
 	$result = mysqli_query($conn, $query);
-    return $result;
+	return $result;
+
 } // End requestEmail
 
 
@@ -194,3 +192,6 @@ $server->process_requests('requestProcessor');
 
 echo "Authentication Server END" . PHP_EOL;
 exit();
+
+?>
+

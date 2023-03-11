@@ -51,13 +51,13 @@ else
 $request = array();
 $request['type'] = "Email";
 $request['userid'] = "3";
-//$response = $client->send_request($request);
+$emailResponse = $client->send_request($request);
 
 echo "client received response: ".PHP_EOL;
-//print_r($response);
+print_r($response);
 echo "\n\n";
 
-sendEmail('sl236@njit.edu');
+sendEmail($emailResponse);
 
 echo $argv[0]." END".PHP_EOL;
 

@@ -1,39 +1,64 @@
+#!/usr/bin/php
 <?php
+//Load Composer's autoloader
+require '../vendor/autoload.php';
 
-require_once __DIR__ . '/../vendor/autoload.php';
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+//Import PHPMailer classes into the global namespace
+use PHPMailer\PHPMailer\PHPMailer;
 
-function sendId ($message){
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
 
-    $encodedMessage = json_encode($message);    
+function sendEmail($email){
+    $mail = new PHPMailer();
+    // configure an SMTP
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'cocktailsearch@gmail.com';
+    $mail->Password = 'tbhokigmqdobsbey';
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
+    
+    $mail->setFrom('cocktailsearch@gmail.com', 'Cocktail Search');
+    $mail->addAddress($email, 'Me');
+    $mail->Subject = 'Upcoming Event!';
+    // Set HTML 
+    $mail->isHTML(TRUE);
+    $mail->Body = '<html>Hi there, we are happy to <br>inform you of your upcoming event</br></html>';
+    $mail->AltBody = 'Hi there, we are happy to inform you of your upcoming event.';
 
-    $connection = new AMQPStreamConnection('127.0.0.1', 5672, 'test', 'test','testHost');
-    $channel = $connection->channel();
-    $channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
-
-    /*
-    $data = implode(' ', array_slice($argv, 1));
-    if (empty($data)) {
-        $data = 'Hello World';
+    // send the message
+    if(!$mail->send()){
+        echo 'Message could not be sent.';
+        echo 'Mailer Error: ' . $mail->ErrorInfo;
+    } else {
+        echo 'Message has been sent';
     }
+}
 
-    $msg = new AMQPMessage($data); 
-    */
-    $msg = new AMQPMessage($encodedMessage);
-
-    $channel->basic_publish($msg, 'eventFanout1');
-
-    echo ' [x] Sent ', $encodedMessage, "\n";
-
-    $channel->close();
-    $connection->close();
+$client = new rabbitMQClient("testRabbitMQ.ini","testServer");
+if (isset($argv[1]))
+{
+  $msg = $argv[1];
+}
+else
+{
+  $msg = "test message";
 }
 
 $request = array();
 $request['type'] = "Email";
 $request['userid'] = "3";
+//$response = $client->send_request($request);
 
-sendId($request);
+echo "client received response: ".PHP_EOL;
+//print_r($response);
+echo "\n\n";
+
+sendEmail('sl236@njit.edu');
+
+echo $argv[0]." END".PHP_EOL;
 
 ?>

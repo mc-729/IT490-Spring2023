@@ -1,3 +1,42 @@
+import asyncio
+import json
+import pika
+import uuid
+from configparser import ConfigParser
+from config import Config
+def getServer(servername:str):
+    if servername == "testServer":
+        return {
+            'BROKER_HOST': '127.0.0.1',
+            'BROKER_PORT': '5672',
+            'USER': 'test',
+            'PASSWORD': 'test',
+            'VHOST': 'testHost',
+            'EXCHANGE': 'testExchange',
+            'QUEUE': 'testQueue',
+            'EXCHANGE_TYPE': 'topic',
+            'AUTO_DELETE': True
+        }
+    elif servername == 'APIServer':
+        return {
+            'BROKER_HOST': '127.0.0.1',
+            'BROKER_PORT': '5672',
+            'USER': 'test',
+            'PASSWORD': 'test',
+            'VHOST': 'testHost',
+            'EXCHANGE': 'apiExchange',
+            'QUEUE': 'API_QUEUE',
+            'EXCHANGE_TYPE': 'topic',
+            'AUTO_DELETE': True
+        }
+    else:
+        raise ValueError(f"Invalid server name: {servername}")
+
+import pika
+import json
+import uuid
+
+
 import json
 import pika
 import uuid
@@ -49,7 +88,7 @@ class RabbitMQClient:
         self.queue = server['QUEUE']
         self.exchange_type = server['EXCHANGE_TYPE']
         self.auto_delete = server['AUTO_DELETE']
-        self.routing_key = '*'
+        self.routing_key = '*'+self.queue
         self.response_queue = {}
         self.callback_queue = None
 

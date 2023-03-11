@@ -19,23 +19,42 @@ def about():
     return render_template('about.html')
 
 
-@bp_homepage.route('/drinkwithyoureyes')
+@bp_homepage.route('/drinkwithyoureyes', methods=['GET','POST'])
 def drinkwithyoureyes():
-    return render_template('drinkwithyoureyes.html')
+    data = False
+    searchtype = 'Random10Cocktails'
+
+    if searchtype:
+        client = RabbitMQClient('APIServer')
+        request_dict = {
+            'type': 'API_CALL',
+            'key': {
+            'type': searchtype,
+                }
+            }
+      
+        data=get_data(searchtype)
+      
+    if(data):   
+        return render_template('drinkwithyoureyes.html', data=data)
+    else:
+        return "something broke"
 
 PER_PAGE = 3
 
 
 
 @bp_homepage.route('/data')
-def get_data(data):
+def get_data(searchtype):
     
-    data = json.loads(data)
-    # Get the current page number from the request arguments
+    client = RabbitMQClient('APIServer')
+    request2={ 'type': searchtype} 
+    response = client.send_request(request2)
  
-    # Return the subset of S
-
-    return data[0]["drinks"]
+    response= json.loads(json.loads(response))["drinks"]
+    return response
+ 
+    
 @bp_homepage.route('/apiSearch', methods=['GET', 'POST'])
 @csrf_exempt
 def apiSearch():

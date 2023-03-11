@@ -307,10 +307,14 @@ function fetchSearchResultsCached($query)
         $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
 
         $searchResults = $client->send_request($query);
-        
+        if(isset($searchResults)){
 		storeSearchResultsInCache($query,$searchResults);
-      return $searchResults;
-		
+        $strQuery=implode(',',$query);
+        $conn=dbConnection();
+        $sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+      	return $row['Results'];}
 		
 	} else if($count!=0) {
 		echo "it was in cache";

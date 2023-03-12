@@ -164,6 +164,16 @@ function requestEmail($userid){
 
 } // End requestEmail
 
+function requestEvents($userid, $timeleft){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events WHERE UID = '$userid' AND timeleft <= '$timeleft'";
+	$result = mysqli_query($conn, $query);
+	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+	echo $rows . PHP_EOL;
+	return $rows;
+
+} // End requestEvents
+
 
 function requestProcessor($request)
 {
@@ -183,6 +193,8 @@ function requestProcessor($request)
 			return logout($request['sessionID']);
         case "Email":
             return requestEmail($request['userid']);
+		case "Events":
+			return requestEvents($request['userid'], $request['timeleft']);	
 	}
 	//$callLogin = array($callLogin => doLogin($username,$password)
 	return array("returnCode" => '0', 'message' => "Server received the request and processed it.");

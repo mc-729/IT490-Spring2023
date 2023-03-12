@@ -39,22 +39,22 @@ function sendEmail($email){
 }
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
-if (isset($argv[1]))
-{
-  $msg = $argv[1];
-}
-else
-{
-  $msg = "test message";
-}
 
 $request = array();
 $request['type'] = "Email";
 $request['userid'] = "3";
 $emailResponse = $client->send_request($request);
 
+$request2 = array();
+$request2['type'] = "Event";
+$request2['userid'] = "3";
+$request2['timeleft'] = "7";
+//$eventResponse = $client->send_request($request2);
+
 echo "client received response: ".PHP_EOL;
 print_r($emailResponse);
+echo "\n\n";
+//print_r($eventResponse);
 echo "\n\n";
 
 sendEmail($emailResponse);

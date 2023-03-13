@@ -5,25 +5,13 @@ require_once 'get_host_info.inc';
 require_once 'rabbitMQLib.inc';
 require_once '../Logging/send_log.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
-<<<<<<< HEAD
-=======
 
-
-
->>>>>>> 6dd523f202564c314e774824c289fc0b85f0e660
 function loginAuth($username, $password)
 {
     $conn = dbConnection();
 
     // lookup username in database
 
-<<<<<<< HEAD
-	// lookup username in database
-	$sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
-	$result = mysqli_query($conn, $sql);
-	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-=======
     $sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
     $result = mysqli_query($conn, $sql);
     $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -31,7 +19,6 @@ function loginAuth($username, $password)
 
     if ($count != 0) {
         echo 'User Found' . PHP_EOL;
->>>>>>> 6dd523f202564c314e774824c289fc0b85f0e660
 
         // Verify password
         $sql2 = "SELECT Password FROM IT490.Users WHERE Email = '$username'";
@@ -186,7 +173,6 @@ function doValidate($sessionid)
     }
 } // End doValidate
 
-<<<<<<< HEAD
 function logout($sessionid){
 
 	$conn = dbConnection();
@@ -219,24 +205,6 @@ function requestEvents($timeleft){
 	return $rows;
 
 } // End requestEvents
-=======
-function logout($sessionid)
-{
-    $conn = dbConnection();
-    $query = "DELETE FROM IT490.sessions WHERE SessionID = '$sessionid'";
-
-    if (mysqli_query($conn, $query)) {
-        return true;
-    } else {
-        return false;
-    }
-}
->>>>>>> 6dd523f202564c314e774824c289fc0b85f0e660
-
-
-
-
-
 
 function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
     // Connect to the database
@@ -377,29 +345,6 @@ function fetchSearchResultsCached($query)
 }
 function requestProcessor($request)
 {
-<<<<<<< HEAD
-	echo "received request" . PHP_EOL;
-	var_dump($request);
-	if (!isset($request['type'])) {
-		return "ERROR: unsupported message type";
-	}
-	switch ($request['type']) {
-		case "Login":
-			return loginAuth($request['username'], $request['password']);
-		case "Register":
-			return registrationInsert($request['username'], $request['password'], $request['email'], $request['firstName'], $request['lastName']);
-		case "validate_session":
-			return doValidate($request['sessionID']);
-		case "Logout":
-			return logout($request['sessionID']);
-        case "Email":
-            return requestEmail($request['userid']);
-		case "Events":
-			return requestEvents($request['timeleft']);	
-	}
-	//$callLogin = array($callLogin => doLogin($username,$password)
-	return array("returnCode" => '0', 'message' => "Server received the request and processed it.");
-=======
     echo 'received request' . PHP_EOL;
     var_dump($request);
     if (!isset($request['type'])) {
@@ -417,23 +362,20 @@ function requestProcessor($request)
                 $request['lastName']
             );
         case 'validate_session':
-		
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-		return  fetchSearchResultsCached($request['key']);
+			return  fetchSearchResultsCached($request['key']);
         case "Update":
-				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
-				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
-     
+			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+		case "Email":
+			return requestEmail($request['userid']);
+		case "Events":
+			return requestEvents($request['timeleft']);	
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
-    return [
-        'returnCode' => '0',
-        'message' => 'Server received the request and processed it.',
-    ];
->>>>>>> 6dd523f202564c314e774824c289fc0b85f0e660
+    return array(['returnCode' => '0', 'message' => 'Server received the request and processed it.',]);
 } // End requestProcessor
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
@@ -444,8 +386,6 @@ $server->process_requests('requestProcessor');
 echo 'Authentication Server try END' . PHP_EOL;
 exit();
 
-<<<<<<< HEAD
+
 ?>
 
-=======
->>>>>>> 6dd523f202564c314e774824c289fc0b85f0e660

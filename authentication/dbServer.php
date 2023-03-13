@@ -364,8 +364,8 @@ function requestProcessor($request)
     if (!isset($request['type'])) {
         return 'ERROR: unsupported message type';
     }
-    switch ($request['type']) {
-        case 'Login':
+    switch ($request['type']) 
+       { case 'Login':
             return loginAuth($request['username'], $request['password']);
         case 'Register':
             return registrationInsert(

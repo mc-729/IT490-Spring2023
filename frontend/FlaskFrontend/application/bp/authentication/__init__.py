@@ -46,13 +46,11 @@ def login():
             'password': password
         }
         response = client.send_request(request_data)
-       
-        print(json.loads(response.decode("utf-8").replace("'",'"')))
+    
         resp=json.loads(response.decode("utf-8").replace("'",'"'))
      
-   
         # Check if login was successful
-        if resp['login_status']:
+        if resp['login_status']==True:
           
             session['firstName']=resp['first_name']
             session['lastName']=resp['last_name']
@@ -99,12 +97,12 @@ def logout():
 @authentication.route("/edit_profile", methods=[ "GET","POST"])
 @login_required
 def edit_profile():
-    form = EditProfileForm()
+    form = EditProfileForm(first_name_placeholder= session["firstName"] 
+                           , last_name_placeholder= session["lastName"] 
+                            , username_placeholder=  session["username"]
+                            , email_placeholder=session["email"] )
     
-    form.first_name.default= session["firstName"]
-    form.last_name.default=  session["lastName"]
-    form.email.default = session['email']
-    form.username.default= session['username']
+    
     if form.validate_on_submit():
         # Build the message payload for updating the user's profile information
         payload = {
@@ -123,15 +121,16 @@ def edit_profile():
         response = client.send_request(payload)
 
         if response:
+           print("the form first name: "+ form.first_name.data+": last name "+form.last_name.data
+                 +": the email is  " + form.email.data + ": the username is" + form.username.data)
             # Update session data with new values
-           
-            session["firstName"] = form.first_name.data
-            session["lasNname"] = form.last_name.data
-            session["email"] = form.email.data
-            session["username"] = form.username.data
+           if form.first_name.data != "":session["firstName"] = form.first_name.data
+           if form.last_name.data != "": session["lastName"] = form.last_name.data
+           if form.email.data != "": session["email"] = form.email.data
+           if form.username.data != "": session["username"] = form.username.data
 
-            flash("Profile information updated successfully", "success")
-            return redirect(url_for("authentication.edit_profile"))
+           flash("Profile information updated successfully", "success")
+           return redirect(url_for("authentication.edit_profile"))
         else:
             flash("Failed to update profile information", "error")
 

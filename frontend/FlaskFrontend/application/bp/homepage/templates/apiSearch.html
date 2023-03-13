@@ -2,87 +2,95 @@
 {% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
 
 {% block content %}
-    <h1>Cocktail Search</h1>
-    {{ render_form(form) }}
-    {% if data %}
-    <div class="container">
-        <div class="row" id="card-container">
-            {% for d in data %}
-            <div class="col-sm-4">
-                <div class="card">
-                    <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ d.strDrink }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
-                        <p class="card-text">{{ d.strInstructions }}</p>
-                   
-                    </div>
+<h1>Cocktail Search</h1>
+{{ render_form(form) }}
+{% if data %}
+<div class="container">
+    <div class="row" id="card-container">
+        {% for d in data %}
+        <div class="col-sm-4">
+            <div class="card">
+                <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ d.strDrink }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#modal-{{ d.idDrink }}">Details</button>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+{% else %}
+<div class="col-sm-12">
+    <p>No results</p>
+</div>
+{% endif %}
+
+{% if data %}
+{% for d in data %}
+<div class="modal fade" id="modal-{{ d.idDrink }}" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}-label"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-{{ d.idDrink }}-label">{{ d.strDrink }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img class="img-fluid rounded" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                <h6>Instructions:</h6>
+                <p>{{ d.strInstructions }}</p>
+                <h6>Ingredients:</h6>
+                <ul>
+                    {% for i in range(1, 16) %}
+                    {% if d['strIngredient'+i|string] %}
+                    <li>{{ d['strIngredient'+i|string] }} - {{ d['strMeasure'+i|string] }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary">
+                    <i class="bi bi-heart"></i> Like
+                </button>
+            </div>
         </div>
     </div>
-    {% else %}
-    <div class="col-sm-12">
-        <p>No resultsw</p>
-    </div>
-    {% endif %}
-{% endblock %}
+</div>
 
-
-{% block scripts %}
-{{ super() }}
 <script>
-$(document).ready(function() {
-    var page = 1;
-    var loading = false;
+    $('#modal-{{ d.idDrink }}').on('shown.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var modal = $(this)
+        modal.find('.modal-title').text('{{ d.strDrink }}')
+        modal.find('.modal-body img').attr('src', '{{ d.strDrinkThumb }}')
+        modal.find('.modal-body p').text('{{ d.strInstructions }}')
 
-    function loadMore() {
-        if (!loading) {
-            loading = true;
-            $.ajax({
-                type: 'GET',
-                url: '/data',
-                data: {page: page},
-                success: function(response) {
-                    if (response.length > 0) {
-                        var cards = '';
-                        $.each(response, function(i, d) {
-                            cards += '<div class="col-sm-4">';
-                            cards += '<div class="card">';
-                            cards += '<img class="card-img-top" src="' + d.strDrinkThumb + '" alt="' + d.strDrink + '">';
-                            cards += '<div class="card-body">';
-                            cards += '<h5 class="card-title">' + d.strDrink + '</h5>';
-                            cards += '<h6 class="card-subtitle mb-2 text-muted">' + d.strCategory + '</h6>';
-                            cards += '<p class="card-text">' + d.strInstructions + '</p>';
-                            cards += '<ul class="list-group list-group-flush">';
-                            cards += '<li class="list-group-item"><b>Ingredients:</b></li>';
-                            for (var j = 1; j <= 15; j++) {
-                                if (d['strIngredient' + j]) {
-                                    cards += '<li class="list-group-item">' + d['strMeasure' + j] + ' ' + d['strIngredient' + j] + '</li>';
-                                }
-                            }
-                            cards += '</ul>';
-                            cards += '</div>';
-                            cards += '</div>';
-                            cards += '</div>';
-                        });
-                        $('#card-container').append(cards);
-                        page += 1;
-                    }
-                    loading = false;
-                }
-            });
-        }
-    }
+        var ingredientList = modal.find('.modal-body ul').first()
+        ingredientList.empty()
+        {% for i in range(1, 16) %}
+        {% if d['strIngredient' + loop.index | string] %}
+        var listItem = $('<li>').text('{{ d['strIngredient' + loop.index|string] }} - {{ d['strMeasure' + loop.index|string] }}')
+        ingredientList.append(listItem)
+        {% endif %}
+        {% endfor %}
 
-    $(window).scroll(function() {
-        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 10) {
-            loadMore();
-        }
-    });
+        var titles = modal.find('.modal-body h6')
+        titles.eq(0).text('Instructions:')
+        titles.eq(1).text('Measurements:')
 
-    loadMore();
-});
+        var likeButton = $('<button>').text('Like')
+        var likeIcon = $('<i>').addClass('bi bi-heart')
+        likeButton.append(likeIcon)
+        modal.find('.modal-footer').append(likeButton)
+    })
 </script>
+{% endfor %}
+{% endif %}
+{{ bootstrap.load_js() }}
 {% endblock %}

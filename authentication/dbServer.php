@@ -44,12 +44,28 @@ function loginAuth($username, $password)
             return $resp;
         } else {
             echo 'Login Failed' . PHP_EOL;
-            $resp = ['login_status' => false];
+            $resp =array(
+                'login_status' => false,
+                'session_id' => null,
+                'user_id' => null,
+                'first_name' => null,
+                'last_name' => null,
+                'username' => null,
+                'email' => null
+            );
             return $resp;
         }
     } else {
         echo 'Login Failed' . PHP_EOL;
-        $resp = ['login_status' => false];
+        $resp =array(
+            'login_status' => false,
+            'session_id' => null,
+            'user_id' => null,
+            'first_name' => null,
+            'last_name' => null,
+            'username' => null,
+            'email' => null
+        );
         return $resp;
     }
 } //End loginAuth
@@ -280,13 +296,18 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
 
 }
 
-function storeSearchResultsInCache($query, $searchResults)
-{
+function storeSearchResultsInCache($query,$searchResults)
+{	
+    $obj = json_decode($searchResults, true);
+    echo gettype($obj);
+    $count=0;
+  
+    
 	
 	// Convert results to JSON
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
-
+    $query=implode(',',$query);
 	//print_r($json);
 
 	
@@ -302,41 +323,59 @@ function storeSearchResultsInCache($query, $searchResults)
 
 	// Check for errors and return result
 	if ($result) {
-		echo "It has been added to the cache";
+		echo "It has been added to the cache ". PHP_EOL;
+      
 		return true;
 	} else {
-		echo "Something went wrong in the cache";
+		echo "Something went wrong in the cache". PHP_EOL;
 		return false;
 	}
 	
 	
 }
 function fetchSearchResultsCached($query)
-{   echo"did we make it here?";
+
+
+{  
+    try{
+     echo"did we make it here?". PHP_EOL;
+    
+     $strQuery=implode(',',$query);
 	$conn=dbConnection();
-	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$query'";
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
 	$result = mysqli_query($conn, $sql);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
 	
 
 
-	$searchResults = "";
+
 	if ($count == 0) {
 		echo "it was not in cache";
-		$client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
-   
-		$searchResults = $client->send_request($query);
-		if(storeSearchResultsInCache($query,$searchResults)) echo"we stored to cache";
-		else echo "something went wrong";
-		
+        $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
+
+        $searchResults = $client->send_request($query);
+        if(isset($searchResults)){
+		storeSearchResultsInCache($query,$searchResults);
+        $strQuery=implode(',',$query);
+        $conn=dbConnection();
+        $sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+      	return $row['Results'];}
 		
 	} else if($count!=0) {
 		echo "it was in cache";
 		$searchResults = $row['Results'];
-		print_r($searchResults);
-	}
-	return $searchResults;
+        echo gettype($searchResults);
+        return $searchResults;
+		//print_r($searchResults);
+	}}
+    catch (Exception $e) {
+        echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
+        return  $resp = ['API_REQUEST_STATUS' => false];
+    }
+	
 }
 function requestProcessor($request)
 {
@@ -377,9 +416,9 @@ function requestProcessor($request)
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
 
-echo 'Authentication Server BEGIN' . PHP_EOL;
+echo 'Authentication Server BEGIN TRY' . PHP_EOL;
 $server->process_requests('requestProcessor');
 
-echo 'Authentication Server END' . PHP_EOL;
+echo 'Authentication Server try END' . PHP_EOL;
 exit();
 

@@ -13,7 +13,9 @@ from flask import Flask, render_template, redirect, request, session
 
 
 csrf = CSRFProtect()
-
+csrf.exempt('application.bp.homepage.data')
+csrf.exempt('application.bp.homepage.drinkwithyoureyes')
+csrf.exempt('application.bp.homepage.apiSearch')
 
 def init_app():
     """Initialize the core application."""

@@ -8,11 +8,8 @@ function sendLog ($message){
 
     $encodedMessage = json_encode($message);    
 
-<<<<<<< HEAD
     $connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test','testHost');
-=======
-    $connection = new AMQPStreamConnection('192.168.191.15', 5672, 'test', 'test','testHost');
->>>>>>> 6dd523f202564c314e774824c289fc0b85f0e660
+
     $channel = $connection->channel();
     $channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
 

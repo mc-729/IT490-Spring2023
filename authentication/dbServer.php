@@ -66,6 +66,7 @@ function loginAuth($username, $password)
         );
         return $resp;
     }
+
 } //End loginAuth
 
 function dbConnection()
@@ -182,30 +183,6 @@ function logout($sessionid){
 	else return false;
 } // End logout
 
-function requestEmail($userid){
-	$conn = dbConnection();
-    $query = "SELECT Email FROM IT490.Users WHERE User_Id = '$userid'";
-	$result = mysqli_query($conn, $query);
-	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$email = $row['Email'];
-	echo $email . PHP_EOL;
-	mysqli_close($conn);
-	return $email;
-
-} // End requestEmail
-
-function requestEvents($timeleft){
-	$conn = dbConnection();
-    $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
-	$result = mysqli_query($conn, $query);
-	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-	//mysqli_free_result($rows);
-	//echo $rows . PHP_EOL;
-	mysqli_close($conn);
-	return $rows;
-
-} // End requestEvents
-
 function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
     // Connect to the database
     $conn = dbConnection();
@@ -315,6 +292,33 @@ function fetchSearchResultsCached($query)
 	
 
 
+	if(mysqli_query($conn, $query)){return true;}
+	else return false;
+} // End logout
+
+function requestEmail($userid){
+	$conn = dbConnection();
+    $query = "SELECT Email FROM IT490.Users WHERE User_Id = '$userid'";
+	$result = mysqli_query($conn, $query);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$email = $row['Email'];
+	echo $email . PHP_EOL;
+	mysqli_close($conn);
+	return $email;
+
+} // End requestEmail
+
+function requestEvents($timeleft){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
+	$result = mysqli_query($conn, $query);
+	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+	//mysqli_free_result($rows);
+	//echo $rows . PHP_EOL;
+	mysqli_close($conn);
+	return $rows;
+
+} // End requestEvents
 
 	if ($count == 0) {
 		echo "it was not in cache";
@@ -345,6 +349,7 @@ function fetchSearchResultsCached($query)
 }
 function requestProcessor($request)
 {
+
     echo 'received request' . PHP_EOL;
     var_dump($request);
     if (!isset($request['type'])) {
@@ -388,4 +393,5 @@ exit();
 
 
 ?>
+
 

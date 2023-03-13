@@ -25,7 +25,9 @@ def drinkwithyoureyes():
 
 PER_PAGE = 3
 
-
+@bp_homepage. route('/myliquorcabinet')
+def myliquorcabinet():
+    return render_template('myliquorcabinet.html')
 
 @bp_homepage.route('/data')
 def get_data(data):

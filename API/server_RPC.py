@@ -33,7 +33,7 @@ class GetCocktailDetailsByID:
     # example query string querystring = {"i":"11007"}
 
         url = "https://the-cocktail-db.p.rapidapi.com/lookup.php"
-        querystring = {}
+        querystring = {"i":dictionary['searchTerm']}
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
         return response
@@ -129,7 +129,7 @@ class APIRoute:
                 
 
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('127.0.0.1', '5672', 'testHost', pika.PlainCredentials('test', 'test')))
+connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.191.5', '5672', 'testHost', pika.PlainCredentials('test', 'test')))
 
 channel = connection.channel()
 

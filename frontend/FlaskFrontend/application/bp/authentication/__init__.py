@@ -29,6 +29,8 @@ def user_by_id(user_id):
 
     return render_template('user.html')
 
+
+
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -163,4 +165,10 @@ def registration():
         else:
             return redirect(url_for('authentication.registration'))
     return render_template('registration.html',form=form)
+
+
+@authentication.route('/myliquorcabinet')
+def myliquorcabinet():
+
+    return render_template('myliquorcabinet.html')
 

@@ -287,25 +287,6 @@ function storeSearchResultsInCache($query,$searchResults)
 	
 	
 }
-function fetchSearchResultsCached($query)
-
-
-{  
-    try{
-     echo"did we make it here?". PHP_EOL;
-    
-     $strQuery=implode(',',$query);
-	$conn=dbConnection();
-	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
-	$result = mysqli_query($conn, $sql);
-	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-	
-
-
-	if(mysqli_query($conn, $query)){return true;}
-	else return false;
-} // End logout
 
 function requestEmail($userid){
 	$conn = dbConnection();
@@ -330,6 +311,23 @@ function requestEvents($timeleft){
 	return $rows;
 
 } // End requestEvents
+
+function fetchSearchResultsCached($query)
+
+
+{  
+    try{
+     echo"did we make it here?". PHP_EOL;
+    
+     $strQuery=implode(',',$query);
+	$conn=dbConnection();
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+
+
 
 	if ($count == 0) {
 		echo "it was not in cache";
@@ -411,5 +409,3 @@ exit();
 
 
 ?>
-
-

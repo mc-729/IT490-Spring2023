@@ -4,7 +4,6 @@ import requests
 import json
 import os
 import api_keys
-import ast
 class SearchByName:
     @staticmethod
     def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
@@ -204,8 +203,8 @@ class rabbitMQServer:
 
     def process_message(self, channel, method, properties, body):
         # send the ack to clear the item from the queue
-        if method.routing_key != "*"+self.queue:
-            return
+        print(str(channel))
+       
         channel.basic_ack(delivery_tag=method.delivery_tag)
         try:
             if properties.reply_to:

@@ -1,7 +1,14 @@
 bin/*
 vendor/*
+__pycache__
 composer.phar
 composer.json
 composer.lock
 logfile.txt
 installer
+api_keys.py
+test.py
+env
+Lib/*
+flask_session
+pyvenv.cfg

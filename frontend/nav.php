@@ -24,7 +24,9 @@
             <li class="nav-item"><a class="nav-link" href="/logout.php">Logout</a></li>
             <?php endif; ?>        
             <li class="nav-item"><a class="nav-link" href="/RegisterForm.php">Register</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/validate_test.php">session valid?</a></li>              
+            <li class="nav-item"><a class="nav-link" href="/validate_test.php">session valid?</a></li> 
+            <li class="nav-item"><a class="nav-link" href="/apt_search.php">search</a></li>      
+            <li class="nav-item"><a class="nav-link" href="/debugSearch.php"> debug search</a></li>            
             </ul>
         </div>
     </div>

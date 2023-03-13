@@ -1,47 +1,8 @@
-import asyncio
-import json
-import pika
-import uuid
-from configparser import ConfigParser
-from config import Config
-def getServer(servername:str):
-    if servername == "testServer":
-        return {
-            'BROKER_HOST': '127.0.0.1',
-            'BROKER_PORT': '5672',
-            'USER': 'test',
-            'PASSWORD': 'test',
-            'VHOST': 'testHost',
-            'EXCHANGE': 'testExchange',
-            'QUEUE': 'testQueue',
-            'EXCHANGE_TYPE': 'topic',
-            'AUTO_DELETE': True
-        }
-    elif servername == 'APIServer':
-        return {
-            'BROKER_HOST': '127.0.0.1',
-            'BROKER_PORT': '5672',
-            'USER': 'test',
-            'PASSWORD': 'test',
-            'VHOST': 'testHost',
-            'EXCHANGE': 'apiExchange',
-            'QUEUE': 'API_QUEUE',
-            'EXCHANGE_TYPE': 'topic',
-            'AUTO_DELETE': True
-        }
-    else:
-        raise ValueError(f"Invalid server name: {servername}")
-
-import pika
-import json
-import uuid
-
 
 import json
 import pika
 import uuid
-from configparser import ConfigParser
-from config import Config
+
 def getServer(servername:str):
     if servername == "testServer":
         return {
@@ -70,9 +31,10 @@ def getServer(servername:str):
     else:
         raise ValueError(f"Invalid server name: {servername}")
 
-import pika
-import json
-import uuid
+
+
+
+
 
 
 class RabbitMQClient:
@@ -105,7 +67,8 @@ class RabbitMQClient:
     def process_response(self, ch, method, props, body):
         if props.correlation_id in self.response_queue:
             self.response_queue[props.correlation_id] = body
-
+            print(props.correlation_id)
+      
     def send_request(self, message):
         uid = str(uuid.uuid4())
 

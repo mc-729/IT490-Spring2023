@@ -100,7 +100,9 @@ class APIRoute:
                 
                 case 'SearchByName':
                     response = json.dumps(SearchByName.get_result(dictionary))
+                    
                     return response
+                    
                 case 'SearchByIngredient':
                     response = json.dumps(SearchByIngredient.get_result(dictionary))
                     return response
@@ -126,13 +128,10 @@ class APIRoute:
             #print("we have an error")
             return msg
                 
-                
-
-
 
 
 headers = {
-	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
+	"X-RapidAPI-Key": "c2f31309cfmsh05d7d208327896dp169a84jsnd60460087bc4", # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
     "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
 	"Content-Type": "application/json"                                                                      
 }
@@ -166,7 +165,7 @@ def getServer(servername:str):
             'USER': 'test',
             'PASSWORD': 'test',
             'VHOST': 'testHost',
-            'EXCHANGE': 'apiExchange',
+            'EXCHANGE': 'testExchange',
             'QUEUE': 'API_QUEUE',
             'EXCHANGE_TYPE': 'topic',
             'AUTO_DELETE': True
@@ -175,112 +174,94 @@ def getServer(servername:str):
         raise ValueError(f"Invalid server name: {servername}")
 
 
-import asyncio
-import aio_pika
-
-import aio_pika
-import asyncio
-import json
-
-
-class RabbitMQServer:
+class rabbitMQServer:
+  
     def __init__(self, servername):
-        self.server = getServer(servername)
-        self.broker_host = self.server['BROKER_HOST']
-        self.broker_port = self.server['BROKER_PORT']
-        self.user = self.server['USER']
-        self.password = self.server['PASSWORD']
-        self.vhost = self.server['VHOST']
-        self.exchange = self.server['EXCHANGE']
-        self.queue = self.server['QUEUE']
-        self.exchange_type = self.server['EXCHANGE_TYPE']
-        self.auto_delete = self.server['AUTO_DELETE']
-        self.routing_key = '*'
+        server = getServer(servername)
 
-        self.connection = None
-        self.channel = None
-        self.consumer_tag = None
-        self.conn_queue = None
+        self.broker_host = server['BROKER_HOST']
+        self.broker_port = server['BROKER_PORT']
+        self.user = server['USER']
+        self.password = server['PASSWORD']
+        self.vhost = server['VHOST']
+        self.exchange = server['EXCHANGE']
+        self.queue = server['QUEUE']
+        self.exchange_type = server['EXCHANGE_TYPE']
+        self.auto_delete = server['AUTO_DELETE']
+        self.routing_key = '*'+self.queue
         self.response_queue = {}
+        self.callback_queue = None
 
-    async def setup(self):
-        self.connection = await aio_pika.connect_robust(
+        self.credentials = pika.PlainCredentials(self.user, self.password)
+        self.parameters = pika.ConnectionParameters(
             host=self.broker_host,
             port=self.broker_port,
-            login=self.user,
-            password=self.password,
-            virtualhost=self.vhost,
+            virtual_host=self.vhost,
+            credentials=self.credentials,
         )
+        self.connection = pika.BlockingConnection(self.parameters)
+        self.channel = self.connection.channel()
 
-        self.channel = await self.connection.channel()
-
-        await self.channel.set_qos(prefetch_count=10)
-
-        exchange = await self.channel.declare_exchange(
-            self.exchange,
-            type=self.exchange_type,
-            durable=True,
-        )
-
-        self.conn_queue = await self.channel.declare_queue(
-            self.queue,
-            auto_delete=self.auto_delete,
-        )
-
-        await self.conn_queue.consume(
-            self.handle_request,
-            exclusive=False,
-        )
-
-    async def shutdown(self):
-        if self.consumer_tag:
-            await self.channel.cancel(self.consumer_tag)
-        if self.channel:
-            await self.channel.close()
-        if self.connection:
-            await self.connection.close()
-
-    async def handle_request(self, message: aio_pika.IncomingMessage):
-        async with message.process():
-            json_message = message.body.decode('utf-8')
-            message_data = json.loads(json_message)
-            response = await self.handle_request_async(message_data)
-            exchange = await self.channel.get_exchange(self.exchange)
-            routing_key = message.reply_to
-            correlation_id = message.correlation_id
-            response_json = json.dumps(response)
-            await exchange.publish(
-                aio_pika.Message(
-                    body=response_json.encode('utf-8'),
-                    content_type='application/json',
-                    correlation_id=correlation_id
-                ),
-                routing_key=routing_key
-            )
-
-    async def handle_request_async(self, request):
-        print("Received request: ", request)
+    def process_message(self, channel, method, properties, body):
+        # send the ack to clear the item from the queue
+        if method.routing_key != "*"+self.queue:
+            return
+        channel.basic_ack(delivery_tag=method.delivery_tag)
         try:
-            response = APIRoute.get_result(request)
-            return response
+            if properties.reply_to:
+                # message wants a response
+                # process request
+                payload = json.loads(body)
+                response = None
+                if self.callback is not None:
+                    response = self.callback(payload)
+                replykey = method.routing_key + ".response"
+                channel.basic_publish(
+                    exchange='testExchange',
+                    routing_key=replykey,
+                    properties=pika.BasicProperties(
+                        correlation_id=properties.correlation_id
+                    ),
+                    body=json.dumps(response)
+                )
+                return
         except Exception as e:
-            print("Error processing request: ", str(e))
-            return {"error": str(e)}
+            # ampq throws exception if get fails...
+            print(f"error: rabbitMQServer: process_message: exception caught: {e}")
+        # message does not require a response, send ack immediately
+        payload = json.loads(body)
+        if self.callback is not None:
+            self.callback(payload)
+        print("processed one-way message")
+        
+    def process_requests(self, callback):
+        self.callback = callback
+        channel = self.connection.channel()
+        channel.exchange_declare(
+            exchange=self.exchange,
+            exchange_type=self.exchange_type,
+            durable=True
+        )
+        channel.queue_declare(
+            queue=self.queue,
+            durable=True,
+            auto_delete=self.auto_delete
+        )
+        channel.queue_bind(
+            exchange=self.exchange,
+            queue=self.queue,
+            routing_key=self.routing_key
+        )
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(
+            queue=self.queue,
+            on_message_callback=self.process_message
+        )
+        channel.start_consuming()
+def my_callback(payload):
+    # process the payload here
+    return APIRoute.get_result(payload)
 
 
-        return response
-
-async def main():
-    print("we in hurr")
-    server = RabbitMQServer('APIServer')
-    await server.setup()
-    try:
-        await asyncio.Future()  # Run forever
-        print("async rabbitmq")
-    except asyncio.CancelledError:
-        pass
-    finally:
-        await server.shutdown()
-
-if __name__ == '__main__':
-    asyncio.run(main())
+server = rabbitMQServer("APIServer")
+server.process_requests(my_callback)

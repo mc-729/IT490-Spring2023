@@ -160,16 +160,19 @@ function requestEmail($userid){
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$email = $row['Email'];
 	echo $email . PHP_EOL;
+	mysqli_close($conn);
 	return $email;
 
 } // End requestEmail
 
-function requestEvents($userid, $timeleft){
+function requestEvents($timeleft){
 	$conn = dbConnection();
-    $query = "SELECT * FROM IT490.events WHERE UID = '$userid' AND timeleft <= '$timeleft'";
+    $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
 	$result = mysqli_query($conn, $query);
 	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-	echo $rows . PHP_EOL;
+	//mysqli_free_result($rows);
+	//echo $rows . PHP_EOL;
+	mysqli_close($conn);
 	return $rows;
 
 } // End requestEvents
@@ -194,7 +197,7 @@ function requestProcessor($request)
         case "Email":
             return requestEmail($request['userid']);
 		case "Events":
-			return requestEvents($request['userid'], $request['timeleft']);	
+			return requestEvents($request['timeleft']);	
 	}
 	//$callLogin = array($callLogin => doLogin($username,$password)
 	return array("returnCode" => '0', 'message' => "Server received the request and processed it.");

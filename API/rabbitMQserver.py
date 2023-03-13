@@ -4,7 +4,6 @@ import requests
 import json
 import os
 import api_keys
-import ast
 class SearchByName:
     @staticmethod
     def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
@@ -100,7 +99,9 @@ class APIRoute:
                 
                 case 'SearchByName':
                     response = json.dumps(SearchByName.get_result(dictionary))
+                    
                     return response
+                    
                 case 'SearchByIngredient':
                     response = json.dumps(SearchByIngredient.get_result(dictionary))
                     return response
@@ -126,13 +127,10 @@ class APIRoute:
             #print("we have an error")
             return msg
                 
-                
-
-
 
 
 headers = {
-	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
+	"X-RapidAPI-Key": "c2f31309cfmsh05d7d208327896dp169a84jsnd60460087bc4", # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
     "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
 	"Content-Type": "application/json"                                                                      
 }
@@ -145,7 +143,6 @@ headers = {
 
 
 
-print(" [x] Awaiting RPC requests")
 
 def getServer(servername:str):
     if servername == "testServer":
@@ -175,35 +172,95 @@ def getServer(servername:str):
     else:
         raise ValueError(f"Invalid server name: {servername}")
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('127.0.0.1', '5672', 'testHost', pika.PlainCredentials('test', 'test')))
 
-channel = connection.channel()
+class rabbitMQServer:
+  
+    def __init__(self, servername):
+        server = getServer(servername)
 
-channel.queue_declare(queue='API_QUEUE',auto_delete=True,exclusive=False)
-channel.queue_bind(exchange="testExchange",queue="API_QUEUE",routing_key='*.response')
+        self.broker_host = server['BROKER_HOST']
+        self.broker_port = server['BROKER_PORT']
+        self.user = server['USER']
+        self.password = server['PASSWORD']
+        self.vhost = server['VHOST']
+        self.exchange = server['EXCHANGE']
+        self.queue = server['QUEUE']
+        self.exchange_type = server['EXCHANGE_TYPE']
+        self.auto_delete = server['AUTO_DELETE']
+        self.routing_key = '*'+self.queue
+        self.response_queue = {}
+        self.callback_queue = None
 
-headers = {
-	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
-    "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
-	"Content-Type": "application/json"                                                                      
-}
+        self.credentials = pika.PlainCredentials(self.user, self.password)
+        self.parameters = pika.ConnectionParameters(
+            host=self.broker_host,
+            port=self.broker_port,
+            virtual_host=self.vhost,
+            credentials=self.credentials,
+        )
+        self.connection = pika.BlockingConnection(self.parameters)
+        self.channel = self.connection.channel()
+
+    def process_message(self, channel, method, properties, body):
+        # send the ack to clear the item from the queue
+        print(str(channel))
+       
+        channel.basic_ack(delivery_tag=method.delivery_tag)
+        try:
+            if properties.reply_to:
+                # message wants a response
+                # process request
+                payload = json.loads(body)
+                response = None
+                if self.callback is not None:
+                    response = self.callback(payload)
+                replykey = method.routing_key + ".response"
+                channel.basic_publish(
+                    exchange='testExchange',
+                    routing_key=replykey,
+                    properties=pika.BasicProperties(
+                        correlation_id=properties.correlation_id
+                    ),
+                    body=json.dumps(response)
+                )
+                return
+        except Exception as e:
+            # ampq throws exception if get fails...
+            print(f"error: rabbitMQServer: process_message: exception caught: {e}")
+        # message does not require a response, send ack immediately
+        payload = json.loads(body)
+        if self.callback is not None:
+            self.callback(payload)
+        print("processed one-way message")
+        
+    def process_requests(self, callback):
+        self.callback = callback
+        channel = self.connection.channel()
+        channel.exchange_declare(
+            exchange=self.exchange,
+            exchange_type=self.exchange_type,
+            durable=True
+        )
+        channel.queue_declare(
+            queue=self.queue,
+            durable=True,
+            auto_delete=self.auto_delete
+        )
+        channel.queue_bind(
+            exchange=self.exchange,
+            queue=self.queue,
+            routing_key=self.routing_key
+        )
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(
+            queue=self.queue,
+            on_message_callback=self.process_message
+        )
+        channel.start_consuming()
+def my_callback(payload):
+    # process the payload here
+    return APIRoute.get_result(payload)
 
 
-
-def on_request(ch, method, props, body):
-   
- 
-    n = json.loads(body)
-    response = json.dumps(APIRoute.get_result(n),indent=2)
-    ch.basic_publish(exchange='',
-                     routing_key='*',
-                     properties=pika.BasicProperties(correlation_id = \
-                                                         props.correlation_id),
-                     body=str(response))
-    ch.basic_ack(delivery_tag=method.delivery_tag)
-
-channel.basic_qos(prefetch_count=1)
-channel.basic_consume(queue='API_QUEUE', on_message_callback=on_request)
-
-print(" [x] Awaiting RPC requestsss")
-channel.start_consuming()
+server = rabbitMQServer("APIServer")
+server.process_requests(my_callback)

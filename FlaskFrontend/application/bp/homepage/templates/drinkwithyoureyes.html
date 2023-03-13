@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
+
+{% block content %}
+<h1>Drink with your eyes</h1>
+<p>10 Cocktails will be displayed and the options will be refreshed every 30 seconds</p>
+
+<html>
+  <head>
+    <title>Countdown Timer</title>
+    <script>
+      function countdown() {
+        var timer = 30;
+        var interval = setInterval(function() {
+          timer--;
+          document.getElementById("timer").innerHTML = timer;
+          if (timer === 0) {
+            clearInterval(interval);
+            location.reload();
+          }
+        }, 1000);
+      }
+      window.onload = countdown;
+    </script>
+  </head>
+  <body>
+    <h2>Time until new drinks: <span id="timer"></span></h2>
+  </body>
+</html>
+
+{% if data %}
+<div class="container">
+    <div class="row" id="card-container">
+        {% for d in data %}
+        <div class="col-sm-4">
+            <div class="card">
+                <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                <div class="card-body">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% for d in data %}
+<div class="modal fade" id="modal-{{ d.idDrink }}" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}-label"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-{{ d.idDrink }}-label">{{ d.strDrink }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img class="img-fluid rounded" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                        <h6>Instructions:</h6>
+                        <p>{{ d.strInstructions }}</p>
+                        <h6>Measurements:</h6>
+                        <ul>
+                            {% for i in range(1, 16) %}
+                            {% if d['strIngredient'+i|string] %}
+                            <li>{{ d['strIngredient'+i|string] }} - {{ d['strMeasure'+i|string] }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        <button type="button" class="btn btn-outline-secondary">
+                            <i class="bi bi-heart"></i> Like
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    </div>
+</div>
+{% endfor %}
+
+{% endif %}
+{{ bootstrap.load_js() }}
+
+{% endblock %}
+
+
+
+

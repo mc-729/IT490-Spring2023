@@ -32,16 +32,40 @@ function loginAuth($username, $password)
 
         if (password_verify($password, $hashedpass)) {
             echo 'Login Successful' . PHP_EOL;
-			$resp = array(true, SessionGen($row['User_ID']), $row['User_ID'],$row['F_Name'],$row['L_Name'],$row['Username'], $row['Email']);
+			$resp =array(
+                'login_status' => true,
+                'session_id' => SessionGen($row['User_ID']),
+                'user_id' => $row['User_ID'],
+                'first_name' => $row['F_Name'],
+                'last_name' => $row['L_Name'],
+                'username' => $row['Username'],
+                'email' => $row['Email']
+            );
             return $resp;
         } else {
             echo 'Login Failed' . PHP_EOL;
-            $resp = ['login_status' => 'false'];
+            $resp =array(
+                'login_status' => false,
+                'session_id' => null,
+                'user_id' => null,
+                'first_name' => null,
+                'last_name' => null,
+                'username' => null,
+                'email' => null
+            );
             return $resp;
         }
     } else {
         echo 'Login Failed' . PHP_EOL;
-        $resp = ['login_status' => 'false'];
+        $resp =array(
+            'login_status' => false,
+            'session_id' => null,
+            'user_id' => null,
+            'first_name' => null,
+            'last_name' => null,
+            'username' => null,
+            'email' => null
+        );
         return $resp;
     }
 } //End loginAuth
@@ -89,7 +113,8 @@ function registrationInsert($username, $password, $email, $firstName, $lastName)
         // ==1 means found an already existing Username/Email in IT490.Users
         echo 'Username/Email already exists, please use a different one.' .
             PHP_EOL;
-        return false;
+            $resp = ['login_status' => false];
+            return $resp;
     }
     //If Username/Email is not found in database/doesn't exist, do this
     else {
@@ -99,7 +124,8 @@ function registrationInsert($username, $password, $email, $firstName, $lastName)
         if (mysqli_query($conn, $sqlInsert)) {
             echo 'New user registered, welcome. ';
             echo $sqlInsert;
-            return true;
+            $resp = ['login_status' => true];
+            return $resp;
         } else {
            /* $msg = 'Error with query';
             $request = [];
@@ -140,10 +166,12 @@ function doValidate($sessionid)
     if ($count != 0) {
         echo 'Session is valid' . PHP_EOL;
 
-        return true;
+        $resp = ['session_status' => true];
+        return $resp;
     } else {
         echo 'Session is not valid' . PHP_EOL;
-        return false;
+        $resp = ['session_status' => false];
+        return $resp;
     }
 } // End doValidate
 
@@ -159,55 +187,9 @@ function logout($sessionid)
     }
 }
 
-function apiRoute($searchVal)
-{
-    /*
-	fetchresultscached -> fetchresultsfromcahed -> not found make apicall/ if found take from memcached
-	*/
-    $searchResults = fetchSearchResultsCached($searchVal);
-    return $searchResults;
-}
 
-function fetchSearchResults($query)
-{
-    $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
 
-    $request = $query;
 
-    $searchResults = $client->send_request($request);
-    return $searchResults;
-}
-function fetchSearchResultsFromCache($query)
-{
-    global $memcached;
-    $key = 'search_results_' . md5($query);
-    return $memcached->get($key);
-}
-
-function storeSearchResultsInCache($query, $searchResults)
-{
-    global $memcached;
-    $key = 'search_results_' . md5($query);
-    $memcached->set($key, $searchResults, 3600); // Cache for 1 hour
-}
-function fetchSearchResultsCached($query)
-{
-	global $channel;
-    $searchResults = fetchSearchResultsFromCache($query);
-    if (!$searchResults) {
-        // Send a message to the caching queue
-        $message = ['query' => $query];
-        $channel->basic_publish(
-            new AMQPMessage(json_encode($message)),
-            '',
-            'search_results_cache'
-        );
-
-        // Fetch search results from the API
-        $searchResults = fetchSearchResults($query);
-    }
-    return $searchResults;
-}
 
 
 function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
@@ -263,6 +245,89 @@ function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email,
 
 	else {logout($sessionid);}
 
+
+}
+
+function storeSearchResultsInCache($query,$searchResults)
+{	
+    $obj = json_decode($searchResults, true);
+    echo gettype($obj);
+    $count=0;
+  
+    
+	
+	// Convert results to JSON
+	$json = json_encode($searchResults);
+	$filtered_json = "[".filter_var($json)."]";
+    $query=implode(',',$query);
+	//print_r($json);
+
+	
+	// Insert JSON data into database using prepared statement
+
+	$conn = dbConnection();
+	$stmt = $conn->prepare('INSERT INTO IT490.Cache (SearchKey, Results) VALUES (?,?)');
+	$stmt->bind_param('ss', $query, $filtered_json);
+	$result = $stmt->execute();
+	echo $result;
+	$stmt->close();
+	$conn->close();
+
+	// Check for errors and return result
+	if ($result) {
+		echo "It has been added to the cache ". PHP_EOL;
+      
+		return true;
+	} else {
+		echo "Something went wrong in the cache". PHP_EOL;
+		return false;
+	}
+	
+	
+}
+function fetchSearchResultsCached($query)
+
+
+{  
+    try{
+     echo"did we make it here?". PHP_EOL;
+    
+     $strQuery=implode(',',$query);
+	$conn=dbConnection();
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+
+
+
+	if ($count == 0) {
+		echo "it was not in cache";
+        $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
+
+        $searchResults = $client->send_request($query);
+        if(isset($searchResults)){
+		storeSearchResultsInCache($query,$searchResults);
+        $strQuery=implode(',',$query);
+        $conn=dbConnection();
+        $sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+      	return $row['Results'];}
+		
+	} else if($count!=0) {
+		echo "it was in cache";
+		$searchResults = $row['Results'];
+        echo gettype($searchResults);
+        return $searchResults;
+		//print_r($searchResults);
+	}}
+    catch (Exception $e) {
+        echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
+        return  $resp = ['API_REQUEST_STATUS' => false];
+    }
+	
 }
 function requestProcessor($request)
 {
@@ -283,11 +348,16 @@ function requestProcessor($request)
                 $request['lastName']
             );
         case 'validate_session':
+		
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-            return apiRoute($request['key']);
+		return  fetchSearchResultsCached($request['key']);
+        case "Update":
+				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
+				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+     
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [
@@ -298,9 +368,9 @@ function requestProcessor($request)
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
 
-echo 'Authentication Server BEGIN' . PHP_EOL;
+echo 'Authentication Server BEGIN TRY' . PHP_EOL;
 $server->process_requests('requestProcessor');
 
-echo 'Authentication Server END' . PHP_EOL;
+echo 'Authentication Server try END' . PHP_EOL;
 exit();
 

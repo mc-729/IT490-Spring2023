@@ -12,7 +12,7 @@ class rabbitMQServer
 	private $VHOST;
 	private $exchange;
 	private $queue;
-	private $routing_key = '*';
+	private $routing_key;
 	private $exchange_type = "topic";
 	private $auto_delete = false;
 
@@ -24,6 +24,7 @@ class rabbitMQServer
 		$this->USER     = $this->machine[$server]["USER"];
 		$this->PASSWORD = $this->machine[$server]["PASSWORD"];
 		$this->VHOST = $this->machine[$server]["VHOST"];
+		$this->routing_key= $this->machine[$server]["routing_key"];
 		if (isset( $this->machine[$server]["EXCHANGE_TYPE"]))
 		{
 			$this->exchange_type = $this->machine[$server]["EXCHANGE_TYPE"];
@@ -39,9 +40,9 @@ class rabbitMQServer
 	function process_message($msg)
 	{
 		// send the ack to clear the item from the queue
-		if ($msg->getRoutingKey() !== "*")
+		if ($msg->getRoutingKey() !== "*".$this->queue)
 		{
-			return;
+			
 		}
 		$this->conn_queue->ack($msg->getDeliveryTag());
 		try
@@ -144,7 +145,7 @@ class rabbitMQClient
 	private $VHOST;
 	private $exchange;
 	private $queue;
-	private $routing_key = '*';
+	private $routing_key;
 	private $response_queue = array();
 	private $exchange_type = "topic";
 
@@ -156,6 +157,7 @@ class rabbitMQClient
 		$this->USER     = $this->machine[$server]["USER"];
 		$this->PASSWORD = $this->machine[$server]["PASSWORD"];
 		$this->VHOST = $this->machine[$server]["VHOST"];
+		$this->routing_key = $this->machine[$server]["routing_key"];
 		if (isset( $this->machine[$server]["EXCHANGE_TYPE"]))
 		{
 			$this->exchange_type = $this->machine[$server]["EXCHANGE_TYPE"];
@@ -167,6 +169,8 @@ class rabbitMQClient
 		$this->exchange = $this->machine[$server]["EXCHANGE"];
 		$this->queue = $this->machine[$server]["QUEUE"];
 	}
+
+	
 
 	function process_response($response)
 	{
@@ -211,7 +215,7 @@ class rabbitMQClient
 			$exchange->setType($this->exchange_type);
 
 			$callback_queue = new AMQPQueue($channel);
-			$callback_queue->setName($this->queue."_response");
+			$callback_queue->setName($this->queue.$uid);
 			$callback_queue->declare();
 			$callback_queue->bind($exchange->getName(),$this->routing_key.".response");
 
@@ -225,6 +229,7 @@ class rabbitMQClient
 
 			$response = $this->response_queue[$uid];
 			unset($this->response_queue[$uid]);
+			$channel->close();
 			return $response;
 		}
 		catch(Exception $e)

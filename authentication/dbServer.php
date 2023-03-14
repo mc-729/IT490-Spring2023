@@ -6,6 +6,9 @@ require_once 'rabbitMQLib.inc';
 require_once '../Logging/send_log.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
 
+
+
+
 function loginAuth($username, $password)
 {
     $conn = dbConnection();
@@ -174,14 +177,22 @@ function doValidate($sessionid)
     }
 } // End doValidate
 
-function logout($sessionid){
+function logout($sessionid)
+{
+    $conn = dbConnection();
+    $query = "DELETE FROM IT490.sessions WHERE SessionID = '$sessionid'";
 
-	$conn = dbConnection();
-	$query = "DELETE FROM IT490.sessions WHERE SessionID = '$sessionid'";
+    if (mysqli_query($conn, $query)) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
-	if(mysqli_query($conn, $query)){return true;}
-	else return false;
-} // End logout
+
+
+
+
 
 function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
     // Connect to the database
@@ -276,25 +287,6 @@ function storeSearchResultsInCache($query,$searchResults)
 	
 	
 }
-function fetchSearchResultsCached($query)
-
-
-{  
-    try{
-     echo"did we make it here?". PHP_EOL;
-    
-     $strQuery=implode(',',$query);
-	$conn=dbConnection();
-	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
-	$result = mysqli_query($conn, $sql);
-	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-	
-
-
-	if(mysqli_query($conn, $query)){return true;}
-	else return false;
-} // End logout
 
 function requestEmail($userid){
 	$conn = dbConnection();
@@ -319,6 +311,23 @@ function requestEvents($timeleft){
 	return $rows;
 
 } // End requestEvents
+
+function fetchSearchResultsCached($query)
+
+
+{  
+    try{
+     echo"did we make it here?". PHP_EOL;
+    
+     $strQuery=implode(',',$query);
+	$conn=dbConnection();
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+
+
 
 	if ($count == 0) {
 		echo "it was not in cache";
@@ -355,8 +364,8 @@ function requestProcessor($request)
     if (!isset($request['type'])) {
         return 'ERROR: unsupported message type';
     }
-    switch ($request['type']) {
-        case 'Login':
+    switch ($request['type']) 
+       { case 'Login':
             return loginAuth($request['username'], $request['password']);
         case 'Register':
             return registrationInsert(
@@ -367,20 +376,27 @@ function requestProcessor($request)
                 $request['lastName']
             );
         case 'validate_session':
+		
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-			return  fetchSearchResultsCached($request['key']);
+		return  fetchSearchResultsCached($request['key']);
         case "Update":
-			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
-		case "Email":
-			return requestEmail($request['userid']);
+				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
+				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+           case "Email":
+            return requestEmail($request['userid']);
 		case "Events":
-			return requestEvents($request['timeleft']);	
+			return requestEvents($request['timeleft']);
+     
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
-    return array(['returnCode' => '0', 'message' => 'Server received the request and processed it.',]);
+    return [
+        'returnCode' => '0',
+        'message' => 'Server received the request and processed it.',
+    ];
+
 } // End requestProcessor
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
@@ -393,5 +409,3 @@ exit();
 
 
 ?>
-
-

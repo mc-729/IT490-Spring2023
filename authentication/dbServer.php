@@ -261,15 +261,16 @@ function storeSearchResultsInCache($query,$searchResults)
 	// Convert results to JSON
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
-    $query=implode(',',$query);
+    //$query=implode(',',$query);
 	//print_r($json);
 
-	
+    
+
 	// Insert JSON data into database using prepared statement
 
 	$conn = dbConnection();
 	$stmt = $conn->prepare('INSERT INTO IT490.Cache (SearchKey, Results) VALUES (?,?)');
-	$stmt->bind_param('ss', $query, $filtered_json);
+	$stmt->bind_param('ss', $query, $searchResults);
 	$result = $stmt->execute();
 	echo $result;
 	$stmt->close();
@@ -389,6 +390,8 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
 		case "Events":
 			return requestEvents($request['timeleft']);
+        case "like":
+                return storeSearchResultsInCache($request['drinkName'],$request['drink']);
      
     }
     //$callLogin = array($callLogin => doLogin($username,$password)

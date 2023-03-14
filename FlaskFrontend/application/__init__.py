@@ -4,18 +4,18 @@ from flask_wtf import CSRFProtect
 from requests import Session
 from flask import Flask
 from flask_session import Session
-
-from config import Config
 import config
 from application.bp.authentication import authentication
 from application.bp.homepage import bp_homepage
+from application.bp.apiSearch import  bp_apiSearch
+from application.bp.DrinkWithYourEyes import bp_drinkwithyoureyes
 from flask import Flask, render_template, redirect, request, session
 
 
 csrf = CSRFProtect()
-csrf.exempt('application.bp.homepage.data')
-csrf.exempt('application.bp.homepage.drinkwithyoureyes')
-csrf.exempt('application.bp.homepage.apiSearch')
+csrf.exempt('application.bp.DrinkWithYourEyes.data')
+csrf.exempt('application.bp.DrinkWithYourEyes.drinkwithyoureyes')
+csrf.exempt('application.bp.apiSearch.apiSearch')
 
 def init_app():
     """Initialize the core application."""
@@ -30,7 +30,7 @@ def init_app():
     # Initialize Plugins
 
     with app.app_context():
-        blueprints = [bp_homepage, authentication]
+        blueprints = [bp_homepage, authentication, bp_apiSearch,bp_drinkwithyoureyes]
        
         # Register Blueprints
         for blueprint in blueprints:

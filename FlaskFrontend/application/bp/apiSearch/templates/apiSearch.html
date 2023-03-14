@@ -55,10 +55,14 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline-secondary like-button" id="like-button-{{ d.idDrink }}"
-                    data-id="{{d}}" data-index="{{ loop.index }}">
-                    <i class="bi bi-heart"></i> Like
-                </button>
+              
+                <form method="post">
+                    <div style="display:none">
+                        {{ render_field(like.drinks, value=data, hidden=True) }}
+                        {{ render_field(like.like, value=d, hidden=True) }}
+                    </div>
+                    {{ render_field(like.submit,class="btn btn-outline-secondary like-button") }}
+                </form>
             </div>
         </div>
     </div>

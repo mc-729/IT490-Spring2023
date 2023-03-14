@@ -4,7 +4,7 @@ from wtforms import validators
 from wtforms.fields import *
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 class LoginForm(FlaskForm):
@@ -19,7 +19,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField()
 
 class LikeButton(FlaskForm):
-    like = SubmitField('Like')
+    class Meta:
+        csrf = False
+    like=StringField("")
+    drinks=StringField("")
+    submit= SubmitField('Like')
 
     
 class RegisterForm(FlaskForm):
@@ -70,8 +74,8 @@ class SearchForm(FlaskForm):
         ('FilterByCategory', 'Filter by Category'),
         ('ListIngredients', 'List Ingredients'),
         ('SearchIngredientInfo', 'Search Ingredients Info')
-    ], validators=[DataRequired()])
-    searchValue = StringField('Search Value', validators=[DataRequired()])
+    ])
+    searchValue = StringField('Search Value')
     submit = SubmitField("search for drinks")
 
 

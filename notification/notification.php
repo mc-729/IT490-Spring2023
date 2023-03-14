@@ -31,10 +31,10 @@ function sendEmail($email){
 
     // send the message
     if(!$mail->send()){
-        echo 'Message could not be sent.';
-        echo 'Mailer Error: ' . $mail->ErrorInfo;
+        echo 'Message could not be sent.'.PHP_EOL;
+        echo 'Mailer Error: ' . $mail->ErrorInfo.PHP_EOL;
     } else {
-        echo 'Message has been sent';
+        echo 'Message has been sent'.PHP_EOL;
     }
 }
 

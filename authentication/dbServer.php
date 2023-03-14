@@ -6,9 +6,6 @@ require_once 'rabbitMQLib.inc';
 require_once '../Logging/send_log.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
 
-
-
-
 function loginAuth($username, $password)
 {
     $conn = dbConnection();
@@ -188,12 +185,6 @@ function logout($sessionid)
         return false;
     }
 }
-
-
-
-
-
-
 function updateProfile($sessionid, $username,$newpassword, $oldpassword, $email, $firstName, $lastName) {
     // Connect to the database
     $conn = dbConnection();
@@ -358,7 +349,6 @@ function fetchSearchResultsCached($query)
 }
 function requestProcessor($request)
 {
-
     echo 'received request' . PHP_EOL;
     var_dump($request);
     if (!isset($request['type'])) {
@@ -376,26 +366,22 @@ function requestProcessor($request)
                 $request['lastName']
             );
         case 'validate_session':
-		
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-		return  fetchSearchResultsCached($request['key']);
+		    return  fetchSearchResultsCached($request['key']);
         case "Update":
-				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
-				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
-           case "Email":
+			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+        case "Email":
             return requestEmail($request['userid']);
 		case "Events":
 			return requestEvents($request['timeleft']);
      
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
-    return [
-        'returnCode' => '0',
-        'message' => 'Server received the request and processed it.',
-    ];
+    return array([
+        'returnCode' => '0', 'message' => 'Server received the request and processed it.']);
 
 } // End requestProcessor
 

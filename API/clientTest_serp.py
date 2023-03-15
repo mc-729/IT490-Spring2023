@@ -40,7 +40,6 @@ class FibonacciRpcClient(object):
             body= json.dumps(n))
         self.connection.process_data_events(time_limit=None)
         return str(self.response)
-# newDict = {"type":"SearchByIngredient","operation":"s","searchTerm":"vodka"}
 newDict = {"type":"GoogleEventSearch","operation":"s","searchTerm":"whiskey tasting events","location":"Austin,Texas"}
 fibonacci_rpc = FibonacciRpcClient()
 print(" [x] Requesting fib(30)")

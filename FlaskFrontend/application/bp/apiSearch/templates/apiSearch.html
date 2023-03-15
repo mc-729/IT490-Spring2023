@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
+{% from 'pagination.html' import render_pagination %}
 
 {% block content %}
 <h1>Cocktail Search</h1>
@@ -26,12 +27,18 @@
         {% endfor %}
     </div>
 </div>
-
+<div class="d-flex justify-content-center">
+    {{ render_pagination(pagination, 'apiSearch.apiSearch', pagination.page) }}
+</div>
 
 {% else %}
 <div class="col-sm-12">
     <p>No results</p>
 </div>
+<div class="row">
+  
+</div>
+
 {% endif %}
 
 {% if data %}

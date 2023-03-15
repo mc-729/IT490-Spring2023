@@ -1,0 +1,12 @@
+[Unit]
+Description=Log server for RabbitMQ Logs
+
+[Service]
+User=root
+ExecStart =/usr/bin/php /home/justin/git/IT490-Spring2023/Logging/receive_logs.php
+;Restart =always
+StandardOutput=append:/var/log/rabbitMQLogs.log
+StandardError=append:/var/log/rabbitMQErrorLogs.log
+
+[Install]
+WantedBy=multi-user.target

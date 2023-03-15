@@ -27,6 +27,3 @@ def create_cocktail():
 
 
 
-@bp_homepage. route('/myliquorcabinet')
-def myliquorcabinet():
-    return render_template('myliquorcabinet.html')

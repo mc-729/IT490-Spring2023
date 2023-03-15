@@ -33,7 +33,7 @@ class GetCocktailDetailsByID:
     # example query string querystring = {"i":"11007"}
 
         url = "https://the-cocktail-db.p.rapidapi.com/lookup.php"
-        querystring = {}
+        querystring = {"i":dictionary['searchTerm']}
         response = requests.request("GET", url, headers=headers, params=querystring)
         response = response.json()
         return response

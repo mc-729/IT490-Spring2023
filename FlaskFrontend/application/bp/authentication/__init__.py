@@ -163,3 +163,7 @@ def registration():
             return redirect(url_for('authentication.registration'))
     return render_template('registration.html',form=form)
 
+@authentication.route('/myliquorcabinet')
+def myliquorcabinet():
+
+    return render_template('myliquorcabinet.html')

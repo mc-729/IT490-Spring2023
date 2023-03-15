@@ -261,7 +261,7 @@ function storeSearchResultsInCache($query,$searchResults)
 	// Convert results to JSON
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
-   // $query=implode(',',$query);
+    $query=implode(',',$query);
 	print_r($json);
 
     

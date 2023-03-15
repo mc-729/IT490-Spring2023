@@ -1,7 +1,7 @@
 
 import ast
 import json
-from flask import Blueprint, flash, jsonify, render_template, request, session, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
@@ -46,6 +46,7 @@ def sendDrinkData():
     
 
 
+
 @bp_apiSearch.route('/apiSearch', methods=['GET', 'POST'])
 def apiSearch():
     form = SearchForm()
@@ -58,6 +59,7 @@ def apiSearch():
     if form.validate_on_submit() and form.ans.data and form.searchValue.data:
         session['searchtype'] = request.form['ans']
         session['searchTerm'] = request.form['searchValue']
+        return redirect(url_for('apiSearch.apiSearch', ans=session['searchtype'], searchValue=session['searchTerm'], page=1))
 
     if 'searchtype' in session and 'searchTerm' in session:
         searchtype = session['searchtype']
@@ -84,7 +86,7 @@ def apiSearch():
                 response = json.loads(response)["drinks"]
 
                 page = request.args.get('page', 1, type=int)
-                per_page = 5  # Change this to the desired number of items per page
+                per_page = 10  # Change this to the desired number of items per page
                 pagination = JSONPagination(response, page, per_page)
                 paginated_response = pagination.get_page_items()
 
@@ -94,41 +96,6 @@ def apiSearch():
     return render_template('apiSearch.html', form=form, data=paginated_response, like=like, pagination=pagination)
 
 
-
-
-def render_pagination(pagination, endpoint, page):
-    num_pages = pagination.get('total_pages')
-    current_page = pagination.get('current_page')
-    prev_page = pagination.get('prev_page')
-    next_page = pagination.get('next_page')
-    has_prev = pagination.get('has_prev')
-    has_next = pagination.get('has_next')
-
-    url_for_kwargs = request.view_args.copy()
-    url_for_kwargs.update(request.args)
-
-    pagination_links = []
-
-    if has_prev:
-        url_for_kwargs['page'] = prev_page
-        prev_link = url_for(endpoint, **url_for_kwargs)
-        pagination_links.append({'text': 'Previous', 'url': prev_link, 'is_active': False})
-    else:
-        pagination_links.append({'text': 'Previous', 'url': '#', 'is_active': False, 'is_disabled': True})
-
-    for i in range(1, num_pages + 1):
-        url_for_kwargs['page'] = i
-        page_link = url_for(endpoint, **url_for_kwargs)
-        pagination_links.append({'text': str(i), 'url': page_link, 'is_active': i == current_page})
-
-    if has_next:
-        url_for_kwargs['page'] = next_page
-        next_link = url_for(endpoint, **url_for_kwargs)
-        pagination_links.append({'text': 'Next', 'url': next_link, 'is_active': False})
-    else:
-        pagination_links.append({'text': 'Next', 'url': '#', 'is_active': False, 'is_disabled': True})
-
-    return render_template('pagination.html', pagination_links=pagination_links)
 
 
 

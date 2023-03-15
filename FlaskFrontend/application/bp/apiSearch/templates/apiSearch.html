@@ -1,33 +1,44 @@
 {% extends "base.html" %}
 {% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
+{% from 'pagination.html' import render_pagination %}
 
 {% block content %}
 <h1>Cocktail Search</h1>
 {{ render_form(form) }}
 {% if data %}
 <div class="container">
+
+
     <div class="row" id="card-container">
         {% for d in data %}
         <div class="col-sm-4">
-            <div class="card">
+            <div class="card" data-drink-id="{{ d.idDrink }}">
                 <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ d.strDrink }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                    <button type="button" class="btn btn-secondary like-button"
+                        onclick="likeDrink('{{ d.idDrink }}', this)">Like</button>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-
+<div class="d-flex justify-content-center">
+    {{ render_pagination(pagination, 'apiSearch.apiSearch', pagination.page) }}
+</div>
 
 {% else %}
 <div class="col-sm-12">
     <p>No results</p>
 </div>
+<div class="row">
+  
+</div>
+
 {% endif %}
 
 {% if data %}
@@ -37,6 +48,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
+                <div id="success-message" style="display: none;"></div>
                 <h5 class="modal-title" id="modal-{{ d.idDrink }}-label">{{ d.strDrink }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -55,10 +67,16 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline-secondary like-button" id="like-button-{{ d.idDrink }}"
-                    data-id="{{d}}" data-index="{{ loop.index }}">
-                    <i class="bi bi-heart"></i> Like
-                </button>
+
+
+                <div style="display:none">
+                    {{ render_field(like.drinks, value=data, hidden=True) }}
+
+                </div>
+                {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
+
+                <button type="button" class="btn btn-secondary like-button"
+                    onclick="likeDrink('{{ d.idDrink }}', this)">Like</button>
             </div>
         </div>
     </div>

@@ -110,6 +110,7 @@ def create_cocktail():
 
 @bp_homepage.route('/events', methods=['GET', 'POST'])
 def events():
+    data = {}
     form = EventsForm()
     if form.validate_on_submit():
         search = request.form['search']
@@ -130,12 +131,15 @@ def events():
                     }
                 }
                 response = client.send_request(request_dict)
-                return jsonify(response)    
+                response = json.loads(json.loads(response))[0]
+                response= json.loads(response)
+                #return jsonify(response)
+                data = response
             except Exception as e:
                 print(str(e))
     else:
         response = []
     if form.validate_on_submit():
         pass
-    return render_template('events.html', form=form)
+    return render_template('events.html', form=form, data=data)
 

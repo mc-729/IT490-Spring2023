@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
+{% from 'pagination.html' import render_pagination %}
 
 {% block content %}
 <h1>Drink with your eyes</h1>
@@ -15,13 +16,25 @@
           timer--;
           document.getElementById("timer").innerHTML = timer;
           if (timer === 0) {
-            clearInterval(interval);
-            location.reload();
+
+            var current_page = ('${page}');
+            var totalPages = {{pagination.total_pages}};
+            var searchType="{{session['searchtype']}}";
+
+            function redirectToNextPage(){
+              var nextPage = current_page + 1;
+              if(next_page > totalPages){
+                nextPage = 1;
+              }
+              window.location.href = {{"http://localhost:5000/drinkwithyoureyes?page=${nextPage}"}}; 
+            }
+            
           }
         }, 1000);
       }
       window.onload = countdown;
     </script>
+    
   </head>
   <body>
     <h2>Time until new drinks: <span id="timer"></span></h2>
@@ -29,12 +42,11 @@
 </html>
 
 {% if data %}
-<div class="container">
     <div class="row" id="card-container">
         {% for d in data %}
         <div class="col-sm-4">
             <div class="card">
-                <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                <img class="card-img-top" id="{{ d.strDrinkThumb }}"src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                 <div class="card-body">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#modal-{{ d.idDrink }}">Details</button>
@@ -44,6 +56,12 @@
         {% endfor %}
     </div>
 </div>
+<div id="wrapper" style="display: none;">
+  <div id="paginationbar" class="d-flex justify-content-center">
+    {{ render_pagination(pagination, 'drinkwithyoureyes.drinkwithyoureyes', pagination.page) }}
+  </div>
+</div>
+
 {% for d in data %}
 <div class="modal fade" id="modal-{{ d.idDrink }}" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}-label"
             aria-hidden="true">

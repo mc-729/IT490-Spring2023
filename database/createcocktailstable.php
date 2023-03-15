@@ -17,13 +17,11 @@ if ($conn->connect_error) {
 
 // sql to create table Cocktails
 $sql = "CREATE TABLE IT490.Cocktails(
-    Cocktail_ID INT NOT NULL AUTO_INCREMENT,
-    Name VARCHAR(255) NOT NULL,
-    Glass VARCHAR(255) NOT NULL,
-    Instruction TEXT,
-    Picture VARCHAR(255),
+    User_ID INT NOT NULL,
+    Recipe JSON,
     Ingredients JSON,
-    PRIMARY KEY (Cocktail_ID)
+    PRIMARY KEY (User_ID),
+    FOREIGN KEY (User_ID) REFERENCES IT490.Users(User_ID)
     )";
 
 if ($conn->query($sql) === TRUE) {

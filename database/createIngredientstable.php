@@ -15,16 +15,18 @@ if ($conn->connect_error) {
 	echo "Successfully Connected!".PHP_EOL;
 }
 
-// sql to alter table Cocktails
-
-$sql = "ALTER TABLE IT490.Cocktails
-ADD Cocktail_Details JSON NOT NULL;";
+// sql to create table Ingredients
+$sql = "CREATE TABLE IT490.Ingredients(
+    User_ID INT NOT NULL,
+    PRIMARY KEY (User_ID),
+    FOREIGN KEY (User_ID) REFERENCES IT490.Users(User_ID)
+    )";
 
 if ($conn->query($sql) === TRUE) {
-    echo "Table Cocktails altered successfully".PHP_EOL;
-  } else {
-    echo "Error altering table Cocktails: " . $conn->error;
-  }
-  
-  $conn->close();
-  ?>
+  echo "Table Ingredients created successfully".PHP_EOL;
+} else {
+  echo "Error creating table Ingredients: " . $conn->error;
+}
+
+$conn->close();
+?>

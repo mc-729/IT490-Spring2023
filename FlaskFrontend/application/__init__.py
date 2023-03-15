@@ -7,19 +7,25 @@ from flask_session import Session
 import config
 from application.bp.authentication import authentication
 from application.bp.homepage import bp_homepage
+from application.bp.events import bp_events
 from application.bp.apiSearch import  bp_apiSearch
 from application.bp.DrinkWithYourEyes import bp_drinkwithyoureyes
 from application.bp.jqueryexperiment import bp_jqueryExample
 from application.bp.pagination import bp_pagination
+
 from flask import Flask, render_template, redirect, request, session
 
 
 csrf = CSRFProtect()
+
+csrf.exempt('application.bp.events.events')
+
 csrf.exempt('application.bp.DrinkWithYourEyes.data')
 csrf.exempt('application.bp.DrinkWithYourEyes.drinkwithyoureyes')
 csrf.exempt('application.bp.apiSearch.apiSearch')
 csrf.exempt('application.bp.apiSearch.sendDrinkData')
 csrf.exempt('application.bp.apiSearch.apiSearchSubmit')
+
 
 
 def init_app():
@@ -35,7 +41,9 @@ def init_app():
     # Initialize Plugins
 
     with app.app_context():
-        blueprints = [bp_homepage, authentication, bp_apiSearch,bp_drinkwithyoureyes,bp_jqueryExample,bp_pagination]
+
+        blueprints = [bp_homepage, authentication, bp_apiSearch,bp_drinkwithyoureyes,bp_jqueryExample,bp_pagination,bp_events]
+
        
         # Register Blueprints
         for blueprint in blueprints:

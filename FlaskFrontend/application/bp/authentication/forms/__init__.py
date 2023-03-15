@@ -62,6 +62,7 @@ class IngredientForm(FlaskForm):
 class RecipeForm(FlaskForm):
     name = StringField('Name')
     ingredients = FieldList(FormField(IngredientForm), min_entries=1)
+
 class SearchForm(FlaskForm):
     class Meta:
         csrf = False
@@ -78,6 +79,14 @@ class SearchForm(FlaskForm):
     searchValue = StringField('Search Value')
     submit = SubmitField("search for drinks")
 
+class EventsForm(FlaskForm):
+    class Meta:
+        csrf = False
+    
+    search = StringField('Search', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
+    submit = SubmitField("search for events")
 
 class IngredientsForm(FlaskForm):
     class SpiritCategory(FlaskForm):

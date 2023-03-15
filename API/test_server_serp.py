@@ -3,7 +3,7 @@ import pika
 import requests
 import json
 import os
-import api_keys
+#import api_keys
 import ast
 from serpapi import GoogleSearch
 
@@ -142,11 +142,11 @@ channel = connection.channel()
 
 channel.queue_declare(queue='API_QUEUE')
 
-headers = {
-	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
-    "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
-	"Content-Type": "application/json"                                                                      
-}
+#headers = {
+#	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
+#    "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
+#	"Content-Type": "application/json"                                                                      
+#}
 
 
 

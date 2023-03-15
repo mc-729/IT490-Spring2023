@@ -189,7 +189,33 @@ function logout($sessionid)
 }
 
 
+function eventInsert($name, $UID, $description, $date, $url, $image)
+{
+    $conn = dbConnection();
 
+    $date_str = date_create_from_format('M d', $date);
+    $date_str->setDate(date('Y'), $date_str->format('m'), $date_str->format('d'));
+    $formatted_date = date_format($date_str, 'Y-m-d');
+
+    $sqlInsert = "INSERT into IT490.events (UID, name, description, image, link, startdate)
+        VALUES ('$UID','$name','$description','$image','$url', '$formatted_date')";
+
+    if (mysqli_query($conn, $sqlInsert)) {
+        echo 'New user registered, welcome. ';
+        echo $sqlInsert;
+        $resp = ['login_status' => true];
+        return $resp;
+    } else {
+        $msg = 'Error with query';
+        $request = [];
+        $request['type'] = 'error';
+        $request['service'] = 'database';
+        $request['message'] = $msg;
+        sendLog($request); 
+        echo "we failed to insert bbby";
+    }
+    
+} // End eventInsert
 
 
 
@@ -435,17 +461,20 @@ function requestProcessor($request)
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-		return  fetchSearchResultsCached($request['key']);
+		    return  fetchSearchResultsCached($request['key']);
         case "Update":
-				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
-				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
-           case "Email":
+			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+        case 'Insertevent':
+            return  eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['url'], $request['image']);
+			
+      case "Email":
             return requestEmail($request['userid']);
 		case "Events":
 			return requestEvents($request['timeleft']);
         case "like":
                 return storeSearchResultsInCache($request['drinkName'],$request['drink']);
      
+
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [

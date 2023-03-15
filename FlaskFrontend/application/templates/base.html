@@ -31,10 +31,10 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <div class="navbar-nav mr-auto">
                     {{ render_nav_item('homepage.about','About' ) }}
+                    {{ render_nav_item('events.events','Search for Events' ) }}
                     {{ render_nav_item('drinkwithyoureyes.drinkwithyoureyes','Drink with your eyes' ) }}
                     {{ render_nav_item('apiSearch.apiSearch','cocktail search' ) }}
                     {{ render_nav_item('jqueryExample.jquerytestFunct','dynamic update test' ) }}
-                   
                     {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
                     {{ render_nav_item('authentication.registration','Register' ) }}

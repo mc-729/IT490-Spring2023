@@ -261,10 +261,11 @@ function storeSearchResultsInCache($query,$searchResults)
 	// Convert results to JSON
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
-    $query=implode(',',$query);
-	//print_r($json);
+   // $query=implode(',',$query);
+	print_r($json);
 
-	
+    
+
 	// Insert JSON data into database using prepared statement
 
 	$conn = dbConnection();
@@ -389,6 +390,8 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
 		case "Events":
 			return requestEvents($request['timeleft']);
+        case "like":
+                return storeSearchResultsInCache($request['drinkName'],$request['drink']);
      
     }
     //$callLogin = array($callLogin => doLogin($username,$password)

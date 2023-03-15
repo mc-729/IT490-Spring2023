@@ -6,16 +6,20 @@
 {{ render_form(form) }}
 {% if data %}
 <div class="container">
+
+
     <div class="row" id="card-container">
         {% for d in data %}
         <div class="col-sm-4">
-            <div class="card">
+            <div class="card" data-drink-id="{{ d.idDrink }}">
                 <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ d.strDrink }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                    <button type="button" class="btn btn-secondary like-button"
+                        onclick="likeDrink('{{ d.idDrink }}', this)">Like</button>
                 </div>
             </div>
         </div>
@@ -37,6 +41,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
+                <div id="success-message" style="display: none;"></div>
                 <h5 class="modal-title" id="modal-{{ d.idDrink }}-label">{{ d.strDrink }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -55,14 +60,16 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              
-                <form method="post">
-                    <div style="display:none">
-                        {{ render_field(like.drinks, value=data, hidden=True) }}
-                        {{ render_field(like.like, value=d, hidden=True) }}
-                    </div>
-                    {{ render_field(like.submit,class="btn btn-outline-secondary like-button") }}
-                </form>
+
+
+                <div style="display:none">
+                    {{ render_field(like.drinks, value=data, hidden=True) }}
+
+                </div>
+                {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
+
+                <button type="button" class="btn btn-secondary like-button"
+                    onclick="likeDrink('{{ d.idDrink }}', this)">Like</button>
             </div>
         </div>
     </div>

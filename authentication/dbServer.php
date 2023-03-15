@@ -384,7 +384,7 @@ function fetchSearchResultsCached($query)
 }
 
 
-function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $recipeName, $ingredients){
+function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $ingredients){
     // Connect to the database
     $conn = dbConnection();
    
@@ -406,10 +406,7 @@ function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $recipeName, $in
    foreach ($ingredients as $ingredientName => $updatedIngredients){
        if ($updatedIngredients > 0){//Change the current Ingredient quantity to its updated one
            $currentIngredients[$ingredientName] = $updatedIngredients;
-       } else {
-           unset($currentIngredients[$ingredientName]);//if 0 then unset to remove
-       }
-   }
+   
    
    //Update cocktails table with updated Ingredeints
    $updatedIngredients = json_encode($currentIngredients);
@@ -431,10 +428,22 @@ function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $recipeName, $in
    
    file_put_contents('ingredients.json', json_encode($info));
    */
-   
+    }
    }
+}
 
-
+function mlcUpdateRecipes($sessionid, $user_ID, $recipes){
+    // Connect to the database
+    $conn = dbConnection();
+   
+    //from function UpdateProfile
+    if(doValidate($sessionid)) {
+       $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+       $result = mysqli_query($conn, $sql);
+       $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+       $userid = $row['UID'];
+    }
+}
 
 function requestProcessor($request)
 {

@@ -1,7 +1,7 @@
 
 import ast
 import json
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, flash, jsonify, render_template, request
 from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
@@ -32,8 +32,13 @@ def sendDrinkData():
             }
 
      print(drink_data)
-     response1 = client.send_request(request_dict)
-     response = {"status": "success", "message": "Data received successfully."}
+     response = client.send_request(request_dict)
+     if(response):
+        response = {"status": "success", "message": "Data received successfully."}
+        flash("you have liked the recipe for %s"%drinkName, "success")
+     else:
+         response = {"status": "error", "message": "something went wrong"}
+    
      return jsonify(response)
 
     # Return a response indicating the request was successful

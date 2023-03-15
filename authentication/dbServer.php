@@ -261,8 +261,8 @@ function storeSearchResultsInCache($query,$searchResults)
 	// Convert results to JSON
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
-    //$query=implode(',',$query);
-	//print_r($json);
+   // $query=implode(',',$query);
+	print_r($json);
 
     
 
@@ -270,7 +270,7 @@ function storeSearchResultsInCache($query,$searchResults)
 
 	$conn = dbConnection();
 	$stmt = $conn->prepare('INSERT INTO IT490.Cache (SearchKey, Results) VALUES (?,?)');
-	$stmt->bind_param('ss', $query, $searchResults);
+	$stmt->bind_param('ss', $query, $filtered_json);
 	$result = $stmt->execute();
 	echo $result;
 	$stmt->close();

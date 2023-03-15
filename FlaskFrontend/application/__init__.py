@@ -16,6 +16,7 @@ csrf = CSRFProtect()
 csrf.exempt('application.bp.homepage.data')
 csrf.exempt('application.bp.homepage.drinkwithyoureyes')
 csrf.exempt('application.bp.homepage.apiSearch')
+csrf.exempt('application.bp.homepage.events')
 
 def init_app():
     """Initialize the core application."""

@@ -1,8 +1,8 @@
 
 import json
 from flask import Blueprint, jsonify, render_template, request
-from flask_modals import render_template_modal
-from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
+#from flask_modals import render_template_modal
+from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton, EventsForm
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 bp_homepage = Blueprint('homepage', __name__, template_folder='templates')
 
@@ -107,4 +107,35 @@ def create_cocktail():
     if form.validate_on_submit():
         pass
     return render_template('create_cocktail.html', form=form)
+
+@bp_homepage.route('/events', methods=['GET', 'POST'])
+def events():
+    form = EventsForm()
+    if form.validate_on_submit():
+        search = request.form['search']
+        city = str(request.form['city'])
+        state = str(request.form['state'])
+        location = city +', '+ state
+
+        if search and location:
+            client = RabbitMQClient('testServer')
+            try:
+                request_dict = {
+                    'type': 'API_CALL',
+                    'key': {
+                        'type': 'GoogleEventSearch',
+                        'operation': 's',
+                        'searchTerm': search,
+                        'location' : location
+                    }
+                }
+                response = client.send_request(request_dict)
+                return jsonify(response)    
+            except Exception as e:
+                print(str(e))
+    else:
+        response = []
+    if form.validate_on_submit():
+        pass
+    return render_template('events.html', form=form)
 

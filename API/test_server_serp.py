@@ -6,6 +6,7 @@ import os
 #import api_keys
 import ast
 from serpapi import GoogleSearch
+
 class SearchByName:
     @staticmethod
     def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
@@ -105,103 +106,48 @@ class ToJsonFile:
 class APIRoute:
     @staticmethod
     def get_result(dictionary):
-     
-        try:
-           
-            match dictionary['type']:
-                
-                case 'SearchByName':
-                    response = json.dumps(SearchByName.get_result(dictionary))
-                    return response
-                case 'SearchByIngredient':
-                    response = json.dumps(SearchByIngredient.get_result(dictionary))
-                    return response
-                case 'GetCocktailDetailsByID':
-                    response = json.dumps(GetCocktailDetailsByID.get_result(dictionary))
-                    return response
-                case 'Random10Cocktails':
-                    response = json.dumps(Random10Cocktails.get_result(dictionary))
-                    return response
-                case 'FilterByCategory':
-                    response = json.dumps(FilterByCategory.get_result(dictionary))
-                    return response
-                case 'ListIngredients':
-                    response = json.dumps(ListIngredients.get_result(dictionary))
-                    return response
-                case 'SearchIngredientInfo':
-                    response = json.dumps(SearchIngredientInfo.get_result(dictionary))
-                    return response
-                case 'GoogleEventSearch':
-                    response = json.dumps(GoogleEventSearch.get_result(dictionary))
-                    return response
-            return dictionary
-        except Exception as err:
-            msg = 'No API route found'
-            print(f"Unexpected {err=}, {type(err)=}")
-            #print("we have an error")
-            return msg
-                
+        dictionary=ast.literal_eval(dictionary)
+        match dictionary['type']:
+            case 'SearchByName':
+               response = json.dumps(SearchByName.get_result(dictionary))
+               return response
+            case 'SearchByIngredient':
+               response = json.dumps(SearchByIngredient.get_result(dictionary))
+               return response
+            case 'GetCocktailDetailsByID':
+               response = json.dumps(GetCocktailDetailsByID.get_result(dictionary))
+               return response
+            case 'Random10Cocktails':
+               response = json.dumps(Random10Cocktails.get_result(dictionary))
+               return response
+            case 'FilterByCategory':
+               response = json.dumps(FilterByCategory.get_result(dictionary))
+               return response
+            case 'ListIngredients':
+               response = json.dumps(ListIngredients.get_result(dictionary))
+               return response
+            case 'SearchIngredientInfo':
+               response = json.dumps(SearchIngredientInfo.get_result(dictionary))
+               return response
+            case 'GoogleEventSearch':
+               response = json.dumps(GoogleEventSearch.get_result(dictionary))
+               return response
+        return dictionary
                 
 
-
-
-
-headers = {
-	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
-    "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
-	"Content-Type": "application/json"                                                                      
-}
-
-
-
-
-
-    
-
-
-
-print(" [x] Awaiting RPC requests")
-
-def getServer(servername:str):
-    if servername == "testServer":
-        return {
-            'BROKER_HOST': '127.0.0.1',
-            'BROKER_PORT': '5672',
-            'USER': 'test',
-            'PASSWORD': 'test',
-            'VHOST': 'testHost',
-            'EXCHANGE': 'testExchange',
-            'QUEUE': 'testQueue',
-            'EXCHANGE_TYPE': 'topic',
-            'AUTO_DELETE': True
-        }
-    elif servername == 'APIServer':
-        return {
-            'BROKER_HOST': '127.0.0.1',
-            'BROKER_PORT': '5672',
-            'USER': 'test',
-            'PASSWORD': 'test',
-            'VHOST': 'testHost',
-            'EXCHANGE': 'testExchange',
-            'QUEUE': 'API_QUEUE',
-            'EXCHANGE_TYPE': 'topic',
-            'AUTO_DELETE': True
-        }
-    else:
-        raise ValueError(f"Invalid server name: {servername}")
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('127.0.0.1', '5672', 'testHost', pika.PlainCredentials('test', 'test')))
 
 channel = connection.channel()
 
-channel.queue_declare(queue='API_QUEUE',auto_delete=True,exclusive=False)
-channel.queue_bind(exchange="testExchange",queue="API_QUEUE",routing_key='*.response')
+channel.queue_declare(queue='API_QUEUE')
 
-headers = {
-	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
-    "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
-	"Content-Type": "application/json"                                                                      
-}
+#headers = {
+#	"X-RapidAPI-Key": api_keys.api_key, # please keep the 100/day limit in mind for the Cocktail DB, if you are working on it 
+#    "X-RapidAPI-Host": "the-cocktail-db.p.rapidapi.com",                    # just input your api key so you can keep track of calls
+#	"Content-Type": "application/json"                                                                      
+#}
+
 
 
 
@@ -211,7 +157,7 @@ def on_request(ch, method, props, body):
     n = json.loads(body)
     response = json.dumps(APIRoute.get_result(n),indent=2)
     ch.basic_publish(exchange='',
-                     routing_key='*',
+                     routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
                                                          props.correlation_id),
                      body=str(response))
@@ -220,5 +166,5 @@ def on_request(ch, method, props, body):
 channel.basic_qos(prefetch_count=1)
 channel.basic_consume(queue='API_QUEUE', on_message_callback=on_request)
 
-print(" [x] Awaiting RPC requestsss")
+print(" [x] Awaiting RPC requests")
 channel.start_consuming()

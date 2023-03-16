@@ -8,6 +8,7 @@ require_once '../Logging/send_log.inc';
 
 
 
+
 function loginAuth($username, $password)
 {
     $conn = dbConnection();
@@ -68,6 +69,7 @@ function loginAuth($username, $password)
         );
         return $resp;
     }
+
 } //End loginAuth
 
 function dbConnection()
@@ -286,9 +288,10 @@ function storeSearchResultsInCache($query,$searchResults)
 	$json = json_encode($searchResults);
 	$filtered_json = "[".filter_var($json)."]";
     $query=implode(',',$query);
-	//print_r($json);
+	print_r($json);
 
-	
+    
+
 	// Insert JSON data into database using prepared statement
 
 	$conn = dbConnection();
@@ -311,6 +314,31 @@ function storeSearchResultsInCache($query,$searchResults)
 	
 	
 }
+
+function requestEmail($userid){
+	$conn = dbConnection();
+    $query = "SELECT Email FROM IT490.Users WHERE User_Id = '$userid'";
+	$result = mysqli_query($conn, $query);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$email = $row['Email'];
+	echo $email . PHP_EOL;
+	mysqli_close($conn);
+	return $email;
+
+} // End requestEmail
+
+function requestEvents($timeleft){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
+	$result = mysqli_query($conn, $query);
+	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+	//mysqli_free_result($rows);
+	//echo $rows . PHP_EOL;
+	mysqli_close($conn);
+	return $rows;
+
+} // End requestEvents
+
 function fetchSearchResultsCached($query)
 
 
@@ -357,13 +385,14 @@ function fetchSearchResultsCached($query)
 }
 function requestProcessor($request)
 {
+
     echo 'received request' . PHP_EOL;
     var_dump($request);
     if (!isset($request['type'])) {
         return 'ERROR: unsupported message type';
     }
-    switch ($request['type']) {
-        case 'Login':
+    switch ($request['type']) 
+       { case 'Login':
             return loginAuth($request['username'], $request['password']);
         case 'Register':
             return registrationInsert(
@@ -384,12 +413,22 @@ function requestProcessor($request)
 			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
         case 'Insertevent':
             return  eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['url'], $request['image']);
+			
+      case "Email":
+            return requestEmail($request['userid']);
+		case "Events":
+			return requestEvents($request['timeleft']);
+        case "like":
+                return storeSearchResultsInCache($request['drinkName'],$request['drink']);
+     
+
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [
         'returnCode' => '0',
         'message' => 'Server received the request and processed it.',
     ];
+
 } // End requestProcessor
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
@@ -400,3 +439,5 @@ $server->process_requests('requestProcessor');
 echo 'Authentication Server try END' . PHP_EOL;
 exit();
 
+
+?>

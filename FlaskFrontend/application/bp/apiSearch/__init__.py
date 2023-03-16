@@ -1,7 +1,6 @@
 
 import json
 from flask import Blueprint, jsonify, render_template, request
-from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 bp_apiSearch = Blueprint('apiSearch', __name__, template_folder='templates')

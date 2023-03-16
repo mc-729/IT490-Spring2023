@@ -77,20 +77,35 @@ def get_data():
     
     return paginated_data,pagination
 
-@bp_drinkwithyoureyes.route('/refreshOptions', methods=['GET', 'POST'])   
-def get_paginated_cocktails_data(page=0, items_per_page=10):
-    all_data = get_data()  # Implement your own function to get all cocktails data
-    start_index = page * items_per_page
-    end_index = start_index + items_per_page
-    paginated_data = all_data[start_index:end_index]
-    return paginated_data
- 
+@bp_drinkwithyoureyes.route('/refreshOptions', methods=['GET', 'POST'])
+def your_view_function():
+    searchtype = 'SearchByName'
+    searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
+    session['searchtype'] = searchtype
+    session['searchterm'] = searchTerm
+    page = request.args.get('page', 1, type=int)
 
-@bp_drinkwithyoureyes.route("/getCards")
-def get_cards():
+    pagination = None
 
-    page = int(request.args.get("page", 0))
-    data = get_data(page)  # Implement your own function to get cocktails data
-    return render_template("drinkwithyoureyes.html ", data=data)
+    if('searchtype' in session and 'searchterm' in session):
+        client = RabbitMQClient('testServer')
+        request_dict = {
+                'type': 'API_CALL',
+                'key': {
+                    'type': searchtype,
+                    'operation': 's',
+                    'searchTerm': searchTerm
+                }
+            }
+        response = client.send_request(request_dict)
+        response = json.loads(json.loads(response))[0]
+        response = json.loads(response)["drinks"]
+        pagination = JSONPagination(response, page=page, per_page=10)
+        paginated_response = pagination.get_page_items()
+        
+
+    return render_template('drinkwithyoureyes.html',data = paginated_response ,pagination=pagination, page=page)
+
+
  
 

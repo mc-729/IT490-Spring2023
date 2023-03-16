@@ -10,36 +10,27 @@
   <head>
     <title>Countdown Timer</title>
     <script>
-      function countdown() {
-        var timer = 30;
-        var interval = setInterval(function() {
-          timer--;
-          document.getElementById("timer").innerHTML = timer;
-          if (timer === 0) {
-
-            var current_page = ('${page}');
-            var totalPages = {{pagination.total_pages}};
-            var searchType="{{session['searchtype']}}";
-
-            function redirectToNextPage(){
-              var nextPage = current_page + 1;
-              if(next_page > totalPages){
-                nextPage = 1;
-              }
-              window.location.href = {{"http://localhost:5000/drinkwithyoureyes?page=${nextPage}"}}; 
-            }
-            
-          }
-        }, 1000);
-      }
-      window.onload = countdown;
+      var count = 30;
+      var countdown = setInterval(function() {
+        count--;
+        document.getElementById("countdown").innerHTML = count;
+        if (count == 0) {
+          clearInterval(countdown);
+          var currentPage = {{ pagination.page }};
+          console.log(currentPage);
+          var nextPage = currentPage + 1;
+          window.location.href = "{{ url_for('drinkwithyoureyes.your_view_function', page=nextPage) }}";
+        }
+      }, 1000);
     </script>
     
-  </head>
-  <body>
-    <h2>Time until new drinks: <span id="timer"></span></h2>
-  </body>
+    <p>You will be redirected to the next page in <span id="countdown">30</span> seconds.</p>
+    
+    {{ pagination.links }}
+    
 </html>
+
+
 
 {% if data %}
     <div class="row" id="card-container">
@@ -57,8 +48,8 @@
     </div>
 </div>
 <div id="wrapper" style="display: none;">
-  <div id="paginationbar" class="d-flex justify-content-center">
-    {{ render_pagination(pagination, 'drinkwithyoureyes.drinkwithyoureyes', pagination.page) }}
+  <div id="pagination" class="d-flex justify-content-center">
+    {{ render_pagination(pagination, 'drinkwithyoureyes.your_view_function', pagination.page) }}
   </div>
 </div>
 

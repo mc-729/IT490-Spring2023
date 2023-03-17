@@ -397,14 +397,7 @@ function retrieveRecipes($sessionid)
 
         $rows = mysqli_fetch_all($result2, MYSQLI_ASSOC);
         print_r($rows);
-        foreach($rows as $val){
-
-            $arr=mysqli_fetch_array($result2, MYSQLI_ASSOC);
-            $jsonDecode=json_decode(($arr));
-            array_push($returnArray,$jsonDecode);
-              
-            print_r($jsonDecode);
-        }
+      
     
 
       return $rows;

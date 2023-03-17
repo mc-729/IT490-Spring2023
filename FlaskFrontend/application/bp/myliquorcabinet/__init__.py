@@ -1,3 +1,4 @@
+import ast
 import json
 from flask import Blueprint, jsonify, render_template, request, session
 #from flask_modals import render_template_modal
@@ -7,20 +8,30 @@ bp_liquorcabinet = Blueprint('myliquorcabinet', __name__, template_folder='templ
 
 @bp_liquorcabinet.route('/liquorcabinet', methods=['GET', 'POST'])
 def liquorcabinet():
-   
+    data = {}
+
     client = RabbitMQClient('testServer')
     request_dict = {
-                'type': 'retrieveRecipes',
+                'type': 'retrieveRecipe',
                 
                     'sessionID': session['sessionID'],
+                    
                     
                 
             }
 
- 
+    i=0
     response = client.send_request(request_dict)
-    response = json.loads(json.loads(response))[0]
-    response = json.loads(response)
-
-    form=LikeButton
-    return render_template('myliquorcabinet.html', form=form)
+    response=json.loads(response)
+    RecipeList=list()
+   
+    for val in response:
+         val2=val["Recipe"]
+         val3=json.loads(val2)
+         new_word=ast.literal_eval(val3)
+         RecipeList.append(new_word)
+    
+    
+   
+    
+    return render_template('myliquorcabinet.html',data=RecipeList)

@@ -26,7 +26,7 @@ $(document).ready(function() {
     const hiddenInputId = 'hidden-input-' + idDrink;
     const hiddenInput = document.getElementById(hiddenInputId);
     const drinkData = hiddenInput.value;  // Assuming the value is a JSON string
-
+if(isLiked){
     $.ajax({
       url: targetUrl,
       type: 'POST',
@@ -43,7 +43,7 @@ $(document).ready(function() {
         // Handle failed POST request (e.g., show an error message)
         console.error('Error sending data:', xhr.statusText);
       }
-    });
+    });}
   };
 });
 

@@ -154,3 +154,6 @@ class IngredientsForm(FlaskForm):
     mixers = FieldList(FormField(MixerCategory), label='Mixers')
     submit = SubmitField('Submit')
 
+class submitBtn(FlaskForm):
+     submit = SubmitField('Submit')
+

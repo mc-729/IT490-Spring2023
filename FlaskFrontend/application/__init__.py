@@ -12,7 +12,7 @@ from application.bp.apiSearch import  bp_apiSearch
 from application.bp.DrinkWithYourEyes import bp_drinkwithyoureyes
 from application.bp.jqueryexperiment import bp_jqueryExample
 from application.bp.pagination import bp_pagination
-from application.bp.MyliquorCabinet import bp_myliquorcabinet
+from application.bp.myliquorcabinet import bp_liquorcabinet
 from flask import Flask, render_template, redirect, request, session
 
 
@@ -25,7 +25,7 @@ csrf.exempt('application.bp.DrinkWithYourEyes.drinkwithyoureyes')
 csrf.exempt('application.bp.apiSearch.apiSearch')
 csrf.exempt('application.bp.apiSearch.sendDrinkData')
 csrf.exempt('application.bp.apiSearch.apiSearchSubmit')
-csrf.exempt('application.bp.myliquorcabinet.myliquorcabinet')
+csrf.exempt('application.bp.myliquorcabinet.liquorcabinet')
 
 
 
@@ -43,7 +43,7 @@ def init_app():
 
     with app.app_context():
 
-        blueprints = [bp_homepage, authentication, bp_myliquorcabinet,bp_apiSearch,bp_drinkwithyoureyes,bp_jqueryExample,bp_pagination,bp_events]
+        blueprints = [bp_homepage, authentication, bp_liquorcabinet,bp_apiSearch,bp_drinkwithyoureyes,bp_jqueryExample,bp_pagination,bp_events]
 
        
         # Register Blueprints

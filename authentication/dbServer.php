@@ -383,58 +383,58 @@ function fetchSearchResultsCached($query)
 
 function retrieveRecipes($sessionid)
 
-{   $conn=dbconnection();
-     if (doValidate($sessionid)) {
+{
+    $conn = dbconnection();
+    if (doValidate($sessionid)) {
+
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
+        $result2 = $conn->query($sql2);
+        $returnArray=array();
+
+        $rows = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        print_r($rows);
+        foreach($rows as $val){
+
+            $arr=mysqli_fetch_array($result2, MYSQLI_ASSOC);
+            $jsonDecode=json_decode(($arr));
+            array_push($returnArray,$jsonDecode);
+              
+            print_r($jsonDecode);
+        }
     
-    $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
-    $result = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    $userid = $row['UID'];
-    $sql2 = "SELECT Recipe FROM IT490.Cocktails WHERE User_ID = $userid";
-    $result2 = $conn->query($sql2);
-    $recipelist = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-    $recipeData = json_decode($recipelist['Recipe'], true);
 
-    return $recipeData;
-}
+      return $rows;
+    }
 }
 
-function updateRecipeList($sessionid, $recipedata) {
+
+function updateRecipeList($sessionid, $recipedata, $drinkname)
+{
     $conn = dbConnection();
     if (doValidate($sessionid)) {
         $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
-        $sql2 = "SELECT Recipe FROM IT490.Cocktails WHERE User_ID = $userid";
-        $result2 = $conn->query($sql2);
-        $count = mysqli_num_rows($result2);
-        $recipedata = str_replace("'", '"', $recipedata);
-        echo "Recipe after taking out double qoutes" .$recipedata. PHP_EOL;
-        $recipedata = str_replace("None", "null", $recipedata);
-        echo "Recipe after replacing none" .$recipedata. PHP_EOL;
-     
-        
-        if ($count != 0) {
-            $recipelist = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-            $recipeData = json_decode($recipelist['Recipe'], true);
-            array_push($recipeData, $recipedata);
-            $recipeData=json_encode($recipeData, JSON_HEX_QUOT);
-            $sql3 = "UPDATE IT490.Cocktails SET Recipe = '$recipeData' WHERE User_ID = $userid";
-            $result = mysqli_query($conn, $sql3);
-        } else {
-            $recipelist = array($recipedata);
+        //$recipedata = str_replace("'", '"', $recipedata);
+       // $recipedata = str_replace("None", "null", $recipedata);
+        // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
       
-           // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
-           $recipelist=json_encode($recipelist, JSON_HEX_QUOT);
-
-          
-            $recipelistJson = json_encode($recipelist);
-            echo "Recipe after second encoding" .$recipelistJson. PHP_EOL;
-            $sql3 = "INSERT INTO IT490.Cocktails (User_ID, Recipe) VALUES ($userid, '$recipelist')";
-            $result = mysqli_query($conn, $sql3);
-        }
-        
+      
+        echo $recipedata .PHP_EOL;
+        $recipedata=json_encode($recipedata);
+        $conn = dbConnection();
+        $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
+        $stmt->bind_param('sss', $userid, $recipedata,$drinkname);
+        $result = $stmt->execute();
+        echo $result;
+        $stmt->close();
+        $conn->close();
+       
         if ($result) {
             echo "Recipe updated successfully" . PHP_EOL;
         } else {
@@ -534,9 +534,9 @@ function requestProcessor($request)
         case "Events":
             return requestEvents($request['timeleft']);
         case "like":
-            return updateRecipeList($request['sessionID'], $request['drink'] );
-            case "retrieveRecipe":
-                return retrieveRecipes($request['sessionID']);
+            return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
+        case "retrieveRecipe":
+            return retrieveRecipes($request['sessionID']);
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [

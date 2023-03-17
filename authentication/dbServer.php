@@ -426,7 +426,7 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
       
       
         echo $recipedata .PHP_EOL;
-        $recipedata=json_encode($recipedata);
+        $recipedata=json_encode($recipedata,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
         $conn = dbConnection();
         $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
         $stmt->bind_param('sss', $userid, $recipedata,$drinkname);

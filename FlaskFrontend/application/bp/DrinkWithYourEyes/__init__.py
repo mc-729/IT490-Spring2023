@@ -35,6 +35,9 @@ def drinkwithyoureyes():
          RecipeList.append(strVal)
     for val in RecipeList:
             print(type(val))
+    test=ast.literal_eval(RecipeList[0])
+    print(test["strDrink"])
+            
             
 
          

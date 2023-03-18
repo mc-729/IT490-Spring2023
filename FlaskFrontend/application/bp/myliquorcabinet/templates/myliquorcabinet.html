@@ -7,17 +7,20 @@
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingDrinks">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDrinks" aria-expanded="true" aria-controls="collapseDrinks">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseDrinks" aria-expanded="true" aria-controls="collapseDrinks">
                     Drinks List
                 </button>
             </h2>
-            <div id="collapseDrinks" class="accordion-collapse collapse show" aria-labelledby="headingDrinks" data-bs-parent="#accordionExample">
+            <div id="collapseDrinks" class="accordion-collapse collapse show" aria-labelledby="headingDrinks"
+                data-bs-parent="#accordionExample">
                 <div class="accordion-body custom-scroll">
                     <ul class="list-group list-group-flush">
                         {% for d in data %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             {{ d.strDrink }}
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-{{ d.idDrink }}">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#modal-{{ d.idDrink }}">
                                 Details
                             </button>
                         </li>
@@ -25,8 +28,48 @@
                     </ul>
                 </div>
             </div>
+
         </div>
     </div>
+</div>
+
+<div class="accordion" id="accordionIngredient">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingDrinks">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIngredient"
+                aria-expanded="true" aria-controls="collapseIngredient">
+              Ingredient List
+            </button>
+        </h2>
+        <div id="collapseIngredient" class="accordion-collapse collapse show" aria-labelledby="headingDrinks"
+            data-bs-parent="#accordionIngrediente">
+            <div class="accordion-body custom-scroll">
+                <ul class="list-group list-group-flush">
+                    {% for Ingredients in MasterIngredients %}
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ Ingredients }}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control amount-input" placeholder="Amount" aria-label="Amount">
+                                    <input type="text" class="form-control measurement-input" placeholder="Measurement" aria-label="Measurement">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary submit-ingredient" onclick="submitIngredient(this)">Submit</button>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 </div>
 {% if data %}
 {% for d in data %}
@@ -56,7 +99,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
 
-                
+
             </div>
         </div>
     </div>

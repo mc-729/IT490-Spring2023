@@ -26,7 +26,7 @@ csrf.exempt('application.bp.apiSearch.apiSearch')
 csrf.exempt('application.bp.apiSearch.sendDrinkData')
 csrf.exempt('application.bp.apiSearch.apiSearchSubmit')
 csrf.exempt('application.bp.myliquorcabinet.liquorcabinet')
-
+csrf.exempt('application.bp.myliquorcabinet.submit_ingredient')
 
 
 def init_app():

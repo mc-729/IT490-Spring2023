@@ -275,11 +275,7 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
 
 function storeSearchResultsInCache($query, $searchResults)
 {
-    $obj = json_decode($searchResults, true);
-    echo gettype($obj);
-    $count = 0;
-
-
+ 
 
     // Convert results to JSON
     $json = json_encode($searchResults);
@@ -391,16 +387,19 @@ function retrieveRecipes($sessionid)
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
+        $sql="SELECT name FROM IT490.ingredients";
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
-        $returnArray=array();
-
-        $rows = mysqli_fetch_all($result2, MYSQLI_ASSOC);
-        print_r($rows);
-      
-    
-
-      return $rows;
+        $result3=$conn->query($sql);
+        $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
+        $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        print_r($ingredients);
+        $resp = array(
+            'ingredients' => $ingredients,
+            'drinkList' => $drinkList
+            
+        );
+      return $resp;
     }
 }
 

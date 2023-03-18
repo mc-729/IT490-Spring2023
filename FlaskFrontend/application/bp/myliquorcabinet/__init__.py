@@ -22,10 +22,18 @@ def liquorcabinet():
 
     i=0
     response = client.send_request(request_dict)
-    response=json.loads(response)
+
+    RecipeResponseList=json.loads(response)["drinkList"]
+    IngredientList= json.loads(response)["ingredients"]
+    MasterIngredients=[]
+    for ingredient in IngredientList:
+        print(ingredient["name"])
+        MasterIngredients.append(ingredient["name"])
+    
+   
     RecipeList=list()
    
-    for val in response:
+    for val in RecipeResponseList:
          val2=val["Recipe"]
          val3=json.loads(val2)
          new_word=ast.literal_eval(val3)
@@ -34,4 +42,18 @@ def liquorcabinet():
     
    
     
-    return render_template('myliquorcabinet.html',data=RecipeList)
+    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients)
+
+@bp_liquorcabinet.route('/submit_ingredient', methods=['GET', 'POST'])
+def submit_ingredient():
+     ingredient_data = request.get_json()
+     print(ingredient_data)
+    
+     
+   
+     response = {"status": "success", "message": "Data received successfully."}
+      
+   
+    
+     return jsonify(response)
+

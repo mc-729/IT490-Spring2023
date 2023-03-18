@@ -17,18 +17,22 @@ def sendDrinkData():
     
      print(type(drink_data))
      
-
-     drink_data = json.dumps(drink_data)
-     drink_data=json.loads(drink_data)
-     drinkName=ast.literal_eval(drink_data)["strDrink"]
+     drink= json.dumps(drink_data)
+     drink=json.loads(drink)
+     drinkName=ast.literal_eval(drink)["strDrink"]
      
-     drink_data = json.dumps(drink_data)
+     
+   
      client = RabbitMQClient('testServer')
      request_dict = {
                 'type': 'like',
                 
-                    'drinkName': drinkName,
-                    'drink': drink_data
+                    'sessionID': session['sessionID'],
+                    'drink': drink_data,
+                    'drinkName':drinkName
+                   
+
+
                 
             }
 
@@ -36,7 +40,7 @@ def sendDrinkData():
      response = client.send_request(request_dict)
      if(response):
         response = {"status": "success", "message": "Data received successfully."}
-        flash("you have liked the recipe for %s"%drinkName, "success")
+      
      else:
          response = {"status": "error", "message": "something went wrong"}
     

@@ -4,6 +4,7 @@
 <div class="container">
     <h1>My Liqour Cabinet</h1>
 
+
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingDrinks">
@@ -15,20 +16,37 @@
             <div id="collapseDrinks" class="accordion-collapse collapse show" aria-labelledby="headingDrinks"
                 data-bs-parent="#accordionExample">
                 <div class="accordion-body custom-scroll">
-                    <ul class="list-group list-group-flush">
+
+                    <div class="row" id="card-container">
                         {% for d in data %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ d.strDrink }}
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#modal-{{ d.idDrink }}">
-                                Details
-                            </button>
-                        </li>
+                        <div class="col-sm-4">
+                            <div class="card" data-drink-id="{{ d.idDrink }}">
+                        
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ d.strDrink }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                                    <button type="button" class="btn btn-secondary like-button"
+                                        onclick="likeDrink('{{ d.idDrink }}', this,false)">unlike</button>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+</div>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    <div id="toast-message" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <!-- The message will be inserted here -->
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 </div>
@@ -36,9 +54,9 @@
 <div class="accordion" id="accordionIngredient">
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingDrinks">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIngredient"
-                aria-expanded="true" aria-controls="collapseIngredient">
-              Ingredient List
+            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseIngredient" aria-expanded="true" aria-controls="collapseIngredient">
+                Ingredient List
             </button>
         </h2>
         <div id="collapseIngredient" class="accordion-collapse collapse show" aria-labelledby="headingDrinks"
@@ -48,17 +66,22 @@
                     {% for Ingredients in MasterIngredients %}
                     <li class="list-group-item">
                         <div class="row">
+
                             <div class="col-md-4">
-                                {{ Ingredients }}
+
+                                <span class="ingredient-name">{{ Ingredients }}</span>
                             </div>
                             <div class="col-md-4">
                                 <div class="input-group">
-                                    <input type="text" class="form-control amount-input" placeholder="Amount" aria-label="Amount">
-                                    <input type="text" class="form-control measurement-input" placeholder="Measurement" aria-label="Measurement">
+                                    <input type="text" class="form-control amount-input" placeholder="Amount"
+                                        aria-label="Amount">
+                                    <input type="text" class="form-control measurement-input" placeholder="Measurement"
+                                        aria-label="Measurement">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <button type="button" class="btn btn-primary submit-ingredient" onclick="submitIngredient(this)">Submit</button>
+                                <button type="button" class="btn btn-primary submit-ingredient"
+                                    onclick="submitIngredient(this)">Submit</button>
                             </div>
                         </div>
                     </li>
@@ -70,7 +93,7 @@
 </div>
 
 
-</div>
+
 {% if data %}
 {% for d in data %}
 <div class="modal fade" id="modal-{{ d.idDrink }}" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}-label"
@@ -96,6 +119,8 @@
                 </ul>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary like-button"
+                    onclick="likeDrink('{{ d.idDrink }}', this,false)">unlike</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
 

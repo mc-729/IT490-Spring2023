@@ -19,8 +19,9 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
-                    <button type="button" class="btn btn-secondary like-button"
-                        onclick="likeDrink('{{ d.idDrink }}', this)">Like</button>
+                        <button type="button" class="btn btn-secondary like-button"
+                        onclick="likeDrink('{{ d.idDrink }}', this)" data-is-liked="false">Like</button>
+                
                 </div>
             </div>
         </div>
@@ -76,7 +77,8 @@
                 {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
 
                 <button type="button" class="btn btn-secondary like-button"
-                    onclick="likeDrink('{{ d.idDrink }}', this)">Like</button>
+                onclick="likeDrink('{{ d.idDrink }}', this)" data-is-liked="false">Like</button>
+        
             </div>
         </div>
     </div>

@@ -13,40 +13,39 @@ bp_apiSearch = Blueprint('apiSearch', __name__, template_folder='templates')
     # Process the data and return a response    
 @bp_apiSearch.route('/sendDrinkData', methods=['GET','POST'])
 def sendDrinkData():
-     drink_data = request.get_json()
-    
-     print(type(drink_data))
-     
-     drink= json.dumps(drink_data)
-     drink=json.loads(drink)
-     drinkName=ast.literal_eval(drink)["strDrink"]
-     
-     
-   
-     client = RabbitMQClient('testServer')
-     request_dict = {
-                'type': 'like',
-                
-                    'sessionID': session['sessionID'],
-                    'drink': drink_data,
-                    'drinkName':drinkName
-                   
+      action = request.args.get('action')
+      drink_data = request.get_json()
 
+      drink = json.dumps(drink_data)
+      drink = json.loads(drink)
+      drinkName = ast.literal_eval(drink)["strDrink"]
 
-                
-            }
+      client = RabbitMQClient('testServer')
 
-     print(drink_data)
-     response = client.send_request(request_dict)
-     if(response):
-        response = {"status": "success", "message": "Data received successfully."}
+      if action == 'like':
+        request_dict = {
+            'type': 'like',
+            'sessionID': session['sessionID'],
+            'drink': drink_data,
+            'drinkName': drinkName
+        }
+      elif action == 'unlike':
+        request_dict = {
+            'type': 'deleteRecipe',
+            'sessionID': session['sessionID'],
+            'drinkName': drinkName
+        }
+      else:
+        return jsonify({"status": "error", "message": "Invalid action"})
+
+      response = client.send_request(request_dict)
+  
+      response = {"status": "success", "message": "Data processed successfully."}
       
-     else:
-         response = {"status": "error", "message": "something went wrong"}
-    
-     return jsonify(response)
 
-    # Return a response indicating the request was successful
+      return jsonify(response)
+
+        # Return a response indicating the request was successful
     
 
 

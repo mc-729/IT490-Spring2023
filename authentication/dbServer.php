@@ -275,7 +275,7 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
 
 function storeSearchResultsInCache($query, $searchResults)
 {
- 
+
 
     // Convert results to JSON
     $json = json_encode($searchResults);
@@ -387,22 +387,36 @@ function retrieveRecipes($sessionid)
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
-        $sql="SELECT name FROM IT490.ingredients";
+        $sql = "SELECT name FROM IT490.ingredients";
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
-        $result3=$conn->query($sql);
+        $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
         print_r($ingredients);
         $resp = array(
             'ingredients' => $ingredients,
             'drinkList' => $drinkList
-            
+
         );
-      return $resp;
+        return $resp;
     }
 }
+function DeleteRecipe($sessionID, $drinkName)
+{
+    $conn = dbconnection();
+    if (doValidate($sessionID)) {
 
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionID'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        $sql = "DELETE FROM IT490.UserCocktails where User_ID=$userid and DrinkName=$drinkName";
+
+        if ($conn->query($sql))  return  ['Status' => true];
+        else  return  ['Status' => false];
+    }
+}
 
 function updateRecipeList($sessionid, $recipedata, $drinkname)
 {
@@ -413,20 +427,20 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
         //$recipedata = str_replace("'", '"', $recipedata);
-       // $recipedata = str_replace("None", "null", $recipedata);
+        // $recipedata = str_replace("None", "null", $recipedata);
         // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
-      
-      
-        echo $recipedata .PHP_EOL;
-        $recipedata=json_encode($recipedata,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+
+
+        echo $recipedata . PHP_EOL;
+        $recipedata = json_encode($recipedata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $conn = dbConnection();
         $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
-        $stmt->bind_param('sss', $userid, $recipedata,$drinkname);
+        $stmt->bind_param('sss', $userid, $recipedata, $drinkname);
         $result = $stmt->execute();
         echo $result;
         $stmt->close();
         $conn->close();
-       
+
         if ($result) {
             echo "Recipe updated successfully" . PHP_EOL;
         } else {
@@ -520,7 +534,6 @@ function requestProcessor($request)
             return updateProfile($request['sessionID'], $request['username'], $request['newPW'], $request['oldPW'], $request['email'], $request['firstName'], $request['lastName']);
         case 'Insertevent':
             return  eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['url'], $request['image']);
-
         case "Email":
             return requestEmail($request['userid']);
         case "Events":
@@ -529,6 +542,8 @@ function requestProcessor($request)
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":
             return retrieveRecipes($request['sessionID']);
+        case "deleteRecipe":
+            return DeleteRecipe($request['sessionID'], $request['drinkName']);
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [

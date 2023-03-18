@@ -27,7 +27,6 @@ def liquorcabinet():
     IngredientList= json.loads(response)["ingredients"]
     MasterIngredients=[]
     for ingredient in IngredientList:
-        print(ingredient["name"])
         MasterIngredients.append(ingredient["name"])
     
    
@@ -48,12 +47,48 @@ def liquorcabinet():
 def submit_ingredient():
      ingredient_data = request.get_json()
      print(ingredient_data)
-    
-     
-   
-     response = {"status": "success", "message": "Data received successfully."}
-      
-   
+     ingredient=ingredient_data["ingredient"]
+     amount=ingredient_data["amount"]
+     measurement=ingredient_data["measurement"]
+     if ingredient!="" and amount !="" and measurement !="":
+             response = {"status": "success", "message": "Data received successfully."}
+     else:
+            response = {"status": "failure", "message": "something went wrong."}
     
      return jsonify(response)
+
+
+@bp_liquorcabinet.route('/deleteRecipe', methods=['GET', 'POST'])
+def deleteRecipe():
+    drink_data = request.get_json()
+
+     
+    drink= json.dumps(drink_data)
+    drink=json.loads(drink)
+    drinkName=ast.literal_eval(drink)["strDrink"]
+     
+     
+   
+    client = RabbitMQClient('testServer')
+    request_dict = {
+                'type': 'deleteRecipe',
+                
+                    'sessionID': session['sessionID'],
+                    'drinkName':drinkName
+          
+            }
+
+   
+    response = client.send_request(request_dict)
+    resp=json.loads(response.decode("utf-8").replace("'",'"'))
+     
+        # Check if login was successful
+    if resp['status']==True:
+             response = {"status": "success", "message": "Data received successfully."}
+    else:
+            response = {"status": "failure", "message": "something went wrong."}
+    
+    return jsonify(response)
+
+
 

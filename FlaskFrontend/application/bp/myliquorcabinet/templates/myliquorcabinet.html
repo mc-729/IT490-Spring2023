@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
 {% block content %}
 <div class="container">
     <h1>My Liqour Cabinet</h1>
@@ -17,22 +17,26 @@
                 data-bs-parent="#accordionExample">
                 <div class="accordion-body custom-scroll">
 
-                    <div class="row" id="card-container">
+                    <div class="row g-3" id="card-container">
+
+                        {% if data %}
                         {% for d in data %}
                         <div class="col-sm-4">
                             <div class="card" data-drink-id="{{ d.idDrink }}">
-                        
                                 <div class="card-body">
                                     <h5 class="card-title">{{ d.strDrink }}</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
                                     <button type="button" class="btn btn-secondary like-button"
-                                        onclick="likeDrink('{{ d.idDrink }}', this,false)">unlike</button>
+                                        onclick="likeDrink('{{ d.idDrink }}', this,true)"
+                                        data-is-liked="true">unlike</button>
                                 </div>
                             </div>
                         </div>
+
                         {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -118,9 +122,10 @@
                     {% endfor %}
                 </ul>
             </div>
+            {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary like-button"
-                    onclick="likeDrink('{{ d.idDrink }}', this,false)">unlike</button>
+                    onclick="likeDrink('{{ d.idDrink }}', this,true)" data-is-liked="true">unlike</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
 
@@ -145,5 +150,6 @@
         max-height: 300px;
         overflow-y: scroll;
     }
+  
 </style>
 {% endblock %}

@@ -411,7 +411,8 @@ function DeleteRecipe($sessionID, $drinkName)
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
-        $sql = "DELETE FROM IT490.UserCocktails where User_ID=$userid and DrinkName=$drinkName";
+        $sql = "DELETE FROM IT490.UserCocktails where User_ID=$userid and DrinkName='$drinkName'";
+        
 
         if ($conn->query($sql))  return  ['Status' => true];
         else  return  ['Status' => false];

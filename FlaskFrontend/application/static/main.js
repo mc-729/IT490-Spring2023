@@ -8,8 +8,14 @@ $(document).ready(function() {
       $(buttonElement).text('Like');
     }
   }
-  window.likeDrink = function(idDrink, buttonElement) {
-    let isLiked = $(buttonElement).data('is-liked');
+ 
+  window.likeDrink = function(idDrink, buttonElement, isLiquorCabinetPage) {
+    let isLiked;
+    if (isLiquorCabinetPage) {
+      isLiked = true;
+    } else {
+      isLiked = $(buttonElement).data('is-liked');
+    }
     // Find the corresponding buttons in the card and the modal using the idDrink and the like-button class
     const cardButton = $(`.card[data-drink-id="${idDrink}"] .like-button`);
     const modalButton = $(`#modal-${idDrink} .like-button`);
@@ -28,8 +34,15 @@ $(document).ready(function() {
       contentType: 'application/json',
       success: function(response) {
         // Toggle the isLiked variable on success
+        if (isLiked && isLiquorCabinetPage) {
+          // Remove the card and the modal for the unliked drink
+          $(`.card[data-drink-id="${idDrink}"]`).remove();
+          $(`#modal-${idDrink}`).remove();
+        
+        }
         isLiked = !isLiked;
         $(buttonElement).data('is-liked', isLiked);
+        
         // Show the success message
         const successMessage = isLiked ? 'Data sent successfully!' : 'Data removed successfully!';
         $('#success-message').html(successMessage).fadeIn(500).delay(3000).fadeOut(500);

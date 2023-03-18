@@ -9,6 +9,8 @@ bp_liquorcabinet = Blueprint('myliquorcabinet', __name__, template_folder='templ
 @bp_liquorcabinet.route('/liquorcabinet', methods=['GET', 'POST'])
 def liquorcabinet():
     data = {}
+    like = LikeButton()
+
 
     client = RabbitMQClient('testServer')
     request_dict = {
@@ -41,7 +43,7 @@ def liquorcabinet():
     
    
     
-    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients)
+    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients,like=like)
 
 @bp_liquorcabinet.route('/submit_ingredient', methods=['GET', 'POST'])
 def submit_ingredient():
@@ -57,38 +59,6 @@ def submit_ingredient():
     
      return jsonify(response)
 
-
-@bp_liquorcabinet.route('/deleteRecipe', methods=['GET', 'POST'])
-def deleteRecipe():
-    drink_data = request.get_json()
-
-     
-    drink= json.dumps(drink_data)
-    drink=json.loads(drink)
-    drinkName=ast.literal_eval(drink)["strDrink"]
-     
-     
-   
-    client = RabbitMQClient('testServer')
-    request_dict = {
-                'type': 'deleteRecipe',
-                
-                    'sessionID': session['sessionID'],
-                    'drinkName':drinkName
-          
-            }
-
-   
-    response = client.send_request(request_dict)
-    resp=json.loads(response.decode("utf-8").replace("'",'"'))
-     
-        # Check if login was successful
-    if resp['status']==True:
-             response = {"status": "success", "message": "Data received successfully."}
-    else:
-            response = {"status": "failure", "message": "something went wrong."}
-    
-    return jsonify(response)
 
 
 

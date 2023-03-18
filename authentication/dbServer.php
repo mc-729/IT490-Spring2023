@@ -202,7 +202,7 @@ function eventInsert($name, $UID, $description, $date, $url, $image)
         VALUES ('$UID','$name','$description','$image','$url', '$formatted_date')";
 
     if (mysqli_query($conn, $sqlInsert)) {
-        echo 'New user registered, welcome. ';
+        echo 'Event Saved';
         echo $sqlInsert;
         $resp = ['login_status' => true];
         return $resp;
@@ -411,16 +411,14 @@ function requestProcessor($request)
 		    return  fetchSearchResultsCached($request['key']);
         case "Update":
 			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
-        case 'Insertevent':
-            return  eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['url'], $request['image']);
-			
-      case "Email":
+        case 'SaveEvent':
+            return eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['URL'], $request['image']);	
+        case "Email":
             return requestEmail($request['userid']);
 		case "Events":
 			return requestEvents($request['timeleft']);
         case "like":
-                return storeSearchResultsInCache($request['drinkName'],$request['drink']);
-     
+            return storeSearchResultsInCache($request['drinkName'],$request['drink']);
 
     }
     //$callLogin = array($callLogin => doLogin($username,$password)

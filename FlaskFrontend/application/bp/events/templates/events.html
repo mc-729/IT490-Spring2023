@@ -16,9 +16,15 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{ d.description }}</h6>
                     <h6 class="card-subtitle mb-2 text-muted">{{ start_dates[loop.index0] }}</h6>
                     <a href="{{d.link}}"class="card-link">Event Link</a>
-                    
+                    {% if session.sessionID %}
+                    <button type="button" class="btn btn-secondary like-button"
+                        onclick="saveEvent('{{ d.name }}', this)">Save</button>
+                    {% endif %}
                 </div>
             </div>
+        </div>
+        {{ render_field(like.like, id='hidden-event-' + d.name|string, value=d, hidden=True) }}
+        {{ render_field(like.like, id='hidden-date-' + d.name|string, value=start_dates[loop.index0], hidden=True) }}
         </div>
         {% endfor %}
     </div>

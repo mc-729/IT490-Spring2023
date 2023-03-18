@@ -19,13 +19,12 @@ from flask import Flask, render_template, redirect, request, session
 csrf = CSRFProtect()
 
 csrf.exempt('application.bp.events.events')
-
 csrf.exempt('application.bp.DrinkWithYourEyes.data')
 csrf.exempt('application.bp.DrinkWithYourEyes.drinkwithyoureyes')
 csrf.exempt('application.bp.apiSearch.apiSearch')
 csrf.exempt('application.bp.apiSearch.sendDrinkData')
 csrf.exempt('application.bp.apiSearch.apiSearchSubmit')
-
+csrf.exempt('application.bp.events.sendEventData')
 
 
 def init_app():

@@ -2,7 +2,6 @@
 import ast
 import json
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
-from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from application.jsonPgaination.JSONPagination import JSONPagination

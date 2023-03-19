@@ -67,6 +67,9 @@ def apiSearch():
     if 'searchtype' in session and 'searchTerm' in session:
         searchtype = session['searchtype']
         searchTerm = session['searchTerm']
+        sessionID=None
+        if 'sessionID' in session: sessionID=session['sessionID']
+        
 
         if searchtype and searchTerm:
             client = RabbitMQClient('testServer')
@@ -76,7 +79,8 @@ def apiSearch():
                     'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
-                }
+                },
+                'loginStatus':sessionID
             }
 
             try:
@@ -87,7 +91,7 @@ def apiSearch():
                 
                 #return response
                 response = json.loads(response)
-              
+                
             
                 
                 #print(json.dumps(pageDrinkList, indent=2))

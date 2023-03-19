@@ -67,6 +67,9 @@ def apiSearch():
     if 'searchtype' in session and 'searchTerm' in session:
         searchtype = session['searchtype']
         searchTerm = session['searchTerm']
+        sessionID=None
+        if 'sessionID' in session: sessionID=session['sessionID']
+        
 
         if searchtype and searchTerm:
             client = RabbitMQClient('testServer')
@@ -76,7 +79,8 @@ def apiSearch():
                     'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
-                }
+                },
+                'loginStatus':sessionID
             }
 
             try:
@@ -84,17 +88,20 @@ def apiSearch():
                             'operation': 's',
                             'searchTerm': searchTerm}
                 response = client.send_request(request_dict)
-
-                response = json.loads(json.loads(response))[0]
-                response = json.loads(response)["drinks"]
-
+                
+                #return response
+                response = json.loads(response)
+                
+            
+                
+                #print(json.dumps(pageDrinkList, indent=2))
                 page = request.args.get('page', 1, type=int)
                 per_page = 10  # Change this to the desired number of items per page
                 pagination = JSONPagination(response, page, per_page)
                 paginated_response = pagination.get_page_items()
 
             except Exception as e:
-                print(str(e))
+                print('Something went wrong in API search : '+ str(e))
 
     return render_template('apiSearch.html', form=form, data=paginated_response, like=like, pagination=pagination)
 

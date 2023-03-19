@@ -24,9 +24,15 @@
                     {% endif %}
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                        {% if session.sessionID %}
+                        {% if d.userLikes%}
                         <button type="button" class="btn btn-secondary like-button"
-                        onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">Like</button>
-                
+                        onclick="likeDrink('{{ d.idDrink }}', this,true)" data-is-liked="false">Unlike</button>
+                        {% else %}
+                        <button type="button" class="btn btn-secondary like-button"
+                        onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">like</button>
+                        {% endif %}
+                        {% endif %}
                 </div>
             </div>
         </div>
@@ -76,9 +82,15 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 
                 {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
-
+                {% if session.sessionID %}
+                {% if d.userLikes%}
                 <button type="button" class="btn btn-secondary like-button"
-                onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">Like</button>
+                onclick="likeDrink('{{ d.idDrink }}', this,true)" data-is-liked="false">Unlike</button>
+                {% else %}
+                <button type="button" class="btn btn-secondary like-button"
+                onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">like</button>
+                {% endif %}
+                {% endif %}
         
             </div>
         </div>

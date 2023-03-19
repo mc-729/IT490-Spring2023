@@ -425,7 +425,24 @@ function getDrinkTotalRating($drinks,$loginStatus)
     print_r($totalLikes) . PHP_EOL;
     return $drinks;
 }
+function GetMyIngredients($userid){
+    $conn = dbConnection();
 
+ 
+
+    // Build the SQL statement
+    $sql = "SELECT Ing_Name , Amount , Measurement_Type from UserMLC WHERE User_ID = $userid ";
+    
+    $result = mysqli_query($conn,$sql);
+    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    if($row >0){
+
+        $ReturnArray=mysqli_fetch_all($result, MYSQLI_ASSOC);
+        return $ReturnArray;
+  
+}
+
+}
 function retrieveRecipes($sessionid)
 
 {
@@ -443,10 +460,12 @@ function retrieveRecipes($sessionid)
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        $userIngredientList=GetMyIngredients($userid);
         print_r($ingredients);
         $resp = array(
             'ingredients' => $ingredients,
-            'drinkList' => $drinkList
+            'drinkList' => $drinkList,
+            'userIngredientList'=> $userIngredientList
 
         );
         return $resp;
@@ -629,8 +648,7 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
         case "Events":
             return requestEvents($request['timeleft']);
-        case "totallikes":
-            return getDrinkTotalRating($request['drinks']);
+       
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":

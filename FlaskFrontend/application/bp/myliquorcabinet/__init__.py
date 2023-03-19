@@ -25,6 +25,7 @@ def liquorcabinet():
     i=0
     response = client.send_request(request_dict)
 
+
     RecipeResponseList=json.loads(response)["drinkList"]
     IngredientList= json.loads(response)["ingredients"]
     MasterIngredients=[]
@@ -58,6 +59,7 @@ def submit_ingredient():
             response = {"status": "failure", "message": "something went wrong."}
     
      return jsonify(response)
+
 
 
 

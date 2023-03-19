@@ -276,12 +276,16 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
 function storeSearchResultsInCache($query, $searchResults)
 {
 
+    $searchResults = json_decode($searchResults, true);
+    $count = 0;
+
+
 
     // Convert results to JSON
     $json = json_encode($searchResults);
     $filtered_json = "[" . filter_var($json) . "]";
     $query = implode(',', $query);
-    print_r($json);
+    //print_r($json);
 
 
 
@@ -359,14 +363,17 @@ function fetchSearchResultsCached($query)
                 $sql = "SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
                 $result = mysqli_query($conn, $sql);
                 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-                return $row['Results'];
+                $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
+                echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
+                $drinksList = getDrinkTotalRating($row['Results']);
+              
+               
+                return $drinksList;
             }
         } else if ($count != 0) {
             echo "it was in cache";
-            $searchResults = $row['Results'];
-            echo gettype($searchResults);
-            return $searchResults;
-            //print_r($searchResults);
+            $drinksList = getDrinkTotalRating($row['Results']);
+            return $drinksList;
         }
     } catch (Exception $e) {
         echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
@@ -375,7 +382,30 @@ function fetchSearchResultsCached($query)
 }
 
 
+function getDrinkTotalRating($drinks)
 
+{
+    $conn = dbconnection();
+    $totalLikes = array();
+    $drinks = json_decode($drinks, true);
+    $drinks = $drinks[0];
+    $drinks = json_decode($drinks, true);
+    $drinks = $drinks['drinks'];
+
+    $length = count($drinks);
+
+    for ($i = 0; $i < $length; $i++) {
+        $drinkName = $drinks[$i]["strDrink"];
+        $drinkName = mysqli_real_escape_string($conn, $drinkName);
+        $sql = "SELECT DrinkName FROM IT490.UserCocktails WHERE DrinkName = '$drinkName'";
+        $result = $conn->query($sql);
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $num_likes = count($rows);
+        $drinks[$i]['likes'] = $num_likes;
+    }
+    print_r($totalLikes) . PHP_EOL;
+    return $drinks;
+}
 
 function retrieveRecipes($sessionid)
 
@@ -390,6 +420,7 @@ function retrieveRecipes($sessionid)
         $sql = "SELECT name FROM IT490.ingredients";
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
+
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
@@ -416,6 +447,16 @@ function DeleteRecipe($sessionID, $drinkName)
 
         if ($conn->query($sql))  return  ['Status' => true];
         else  return  ['Status' => false];
+
+        $returnArray = array();
+
+        $rows = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        print_r($rows);
+
+
+
+        return $rows;
+
     }
 }
 
@@ -568,17 +609,19 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
         case "Events":
             return requestEvents($request['timeleft']);
+        case "totallikes":
+            return getDrinkTotalRating($request['drinks']);
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":
             return retrieveRecipes($request['sessionID']);
-<<<<<<< HEAD
+
         case "updateMLC":
             return updateUserMLC($request['sessionID'], $request['ingName'], $request['amount'], $request['measurementType']);
-=======
+
         case "deleteRecipe":
             return DeleteRecipe($request['sessionID'], $request['drinkName']);
->>>>>>> 216cef94fa8ad76f0c8c347f0b94c76cf3a1de00
+
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [

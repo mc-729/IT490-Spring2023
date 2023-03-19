@@ -17,6 +17,11 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ d.strDrink }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                    {% if d.likes%}
+                    <h6 class="card-subtitle mb-2 text-muted">Total Likes: {{ d.likes }}</h6>
+                    {% else %}
+                    <h6 class="card-subtitle mb-2 text-muted">Total Likes: 0</h6>
+                    {% endif %}
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
                         <button type="button" class="btn btn-secondary like-button"
@@ -59,6 +64,7 @@
                 <p>{{ d.strInstructions }}</p>
                 <h6>Ingredients:</h6>
                 <ul>
+                    <li>{{ d.num_likes }}</li>
                     {% for i in range(1, 16) %}
                     {% if d['strIngredient'+i|string] %}
                     <li>{{ d['strIngredient'+i|string] }} - {{ d['strMeasure'+i|string] }}</li>
@@ -68,12 +74,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-
-                <div style="display:none">
-                    {{ render_field(like.drinks, value=data, hidden=True) }}
-
-                </div>
+                
                 {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
 
                 <button type="button" class="btn btn-secondary like-button"

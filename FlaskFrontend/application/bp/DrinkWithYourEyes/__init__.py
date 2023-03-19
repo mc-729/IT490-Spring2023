@@ -1,6 +1,8 @@
 
+import ast
 import json
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, session
+#from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder='templates')
@@ -11,7 +13,42 @@ bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder=
 def drinkwithyoureyes():
     data = {}
     searchtype = 'Random10Cocktails'
+    client = RabbitMQClient('testServer')
+    request_dict = {
+                'type': 'retrieveRecipe',
+                
+                    'sessionID': session['sessionID'],
+                    
+                    
+                
+            }
 
+    i=0
+    response = client.send_request(request_dict)
+    response=json.loads(response)
+    RecipeList=list()
+    for val in response:
+         strVal=str(val["Recipe"]).replace("'",'"')
+         strVal=strVal[1:-1]
+       
+         
+         RecipeList.append(strVal)
+    for val in RecipeList:
+            print(type(val))
+    test=ast.literal_eval(RecipeList[0])
+    print(test["strDrink"])
+            
+            
+
+         
+        
+       
+           
+
+
+    
+   
+    return jsonify(RecipeList)
     if searchtype:
         
         data=get_data(searchtype)

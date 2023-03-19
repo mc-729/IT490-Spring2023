@@ -24,3 +24,5 @@ def create_cocktail():
         pass
     return render_template('create_cocktail.html', form=form)
 
+
+

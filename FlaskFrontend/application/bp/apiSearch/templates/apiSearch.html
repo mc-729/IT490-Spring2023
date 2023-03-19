@@ -17,6 +17,11 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ d.strDrink }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                    {% if d.likes%}
+                    <h6 class="card-subtitle mb-2 text-muted">Total Likes: {{ d.likes }}</h6>
+                    {% else %}
+                    <h6 class="card-subtitle mb-2 text-muted">Total Likes: 0</h6>
+                    {% endif %}
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-{{ d.idDrink }}">Details</button>
                     <button type="button" class="btn btn-secondary like-button"

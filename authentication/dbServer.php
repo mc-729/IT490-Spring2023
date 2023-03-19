@@ -278,7 +278,7 @@ function storeSearchResultsInCache($query, $searchResults)
     $searchResults = json_decode($searchResults, true);
     $count = 0;
 
-    
+
     // Convert results to JSON
     $json = json_encode($searchResults);
     $filtered_json = "[" . filter_var($json) . "]";
@@ -363,22 +363,15 @@ function fetchSearchResultsCached($query)
                 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
                 $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
                 echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
-                $drinkRating = getDrinkTotalRating($row['Results']);
-                print_r($drinkRating);
-                $results = array('drinks'=>$row['Results'], "Likes"=> getDrinkTotalRating($row['Results']));
-                //print_r($results);
-                return $results;
+                $drinksList = getDrinkTotalRating($row['Results']);
+              
+               
+                return $drinksList;
             }
         } else if ($count != 0) {
             echo "it was in cache";
-            $searchResults = $row['Results'];
-            $drinkRating = getDrinkTotalRating($searchResults);
-            print_r($drinkRating);
-            $results = array('drinks'=>$searchResults, "Likes"=> getDrinkTotalRating($searchResults));
-            echo gettype($searchResults);
-            //print_r($searchResults);
-            return $results;
-            
+            $drinksList = getDrinkTotalRating($row['Results']);
+            return $drinksList;
         }
     } catch (Exception $e) {
         echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
@@ -393,25 +386,23 @@ function getDrinkTotalRating($drinks)
     $conn = dbconnection();
     $totalLikes = array();
     $drinks = json_decode($drinks, true);
-    $count = 0;
+    $drinks = $drinks[0];
+    $drinks = json_decode($drinks, true);
+    $drinks = $drinks['drinks'];
+
     $length = count($drinks);
-    //print_r($drinks);
-    //foreach($drinks[0] as $value)
-    for($i = 0; $i <= $length; $i++){
-       // $drinkName = $drinks[0]['drinks'][$count]['strDrink'];
-        $drinkName = $drinks[0]['drinks'][$i]['strDrink'];
+
+    for ($i = 0; $i < $length; $i++) {
+        $drinkName = $drinks[$i]["strDrink"];
+        $drinkName = mysqli_real_escape_string($conn, $drinkName);
         $sql = "SELECT DrinkName FROM IT490.UserCocktails WHERE DrinkName = '$drinkName'";
         $result = $conn->query($sql);
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         $num_likes = count($rows);
-        $num_like_array = array($drinkName => $num_likes);
-        array_push($totalLikes, $num_like_array );
-
-
-        $count += 1;
+        $drinks[$i]['likes'] = $num_likes;
     }
-return $totalLikes;
-    
+    print_r($totalLikes) . PHP_EOL;
+    return $drinks;
 }
 
 function retrieveRecipes($sessionid)
@@ -426,14 +417,14 @@ function retrieveRecipes($sessionid)
         $userid = $row['UID'];
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
-        $returnArray=array();
+        $returnArray = array();
 
         $rows = mysqli_fetch_all($result2, MYSQLI_ASSOC);
         print_r($rows);
-      
-    
 
-      return $rows;
+
+
+        return $rows;
     }
 }
 
@@ -447,20 +438,20 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
         //$recipedata = str_replace("'", '"', $recipedata);
-       // $recipedata = str_replace("None", "null", $recipedata);
+        // $recipedata = str_replace("None", "null", $recipedata);
         // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
-      
-      
-        echo $recipedata .PHP_EOL;
-        $recipedata=json_encode($recipedata,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+
+
+        echo $recipedata . PHP_EOL;
+        $recipedata = json_encode($recipedata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $conn = dbConnection();
         $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
-        $stmt->bind_param('sss', $userid, $recipedata,$drinkname);
+        $stmt->bind_param('sss', $userid, $recipedata, $drinkname);
         $result = $stmt->execute();
         echo $result;
         $stmt->close();
         $conn->close();
-       
+
         if ($result) {
             echo "Recipe updated successfully" . PHP_EOL;
         } else {

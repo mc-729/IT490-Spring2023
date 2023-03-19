@@ -24,3 +24,22 @@ def liquorcabinet():
 
     form=LikeButton
     return render_template('myliquorcabinet.html', form=form)
+
+
+@bp_liquorcabinet.route('/drinkrating', methods=['GET', 'POST'])
+def getDrinkRatings(drink):
+   
+    client = RabbitMQClient('testServer')
+    request_dict = {
+                'type': 'totaldrinkrating',
+                
+                    'sessionID': session['sessionID'],
+                    'drink': drink
+            }
+
+ 
+    response = client.send_request(request_dict)
+    response = json.loads(json.loads(response))[0]
+    response = json.loads(response)
+
+    return jsonify(response)

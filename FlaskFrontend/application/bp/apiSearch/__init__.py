@@ -85,17 +85,44 @@ def apiSearch():
                             'operation': 's',
                             'searchTerm': searchTerm}
                 response = client.send_request(request_dict)
+                
+                #return response
+                response = json.loads(response)
+                print(response.keys())
+                #response = response["drinks"]
 
-                response = json.loads(json.loads(response))[0]
-                response = json.loads(response)["drinks"]
 
+                likes_list = response["Likes"]
+                print(likes_list)
+                drinkList = response["drinks"]
+                drinkList = json.loads(drinkList)[0]
+                drinkList = drinkList['drinks']
+                #return drinkList
+                #grabbing ratings
+
+                for drink in drinkList:
+                    for like in likes_list:
+                        for key, value in like.items():
+                            if  key == drink["strDrink"]:
+                                drinkName=drink["strDrink"]
+                                
+                                #drink.update(likeDict)
+                                #drink['likes'] = like[drinkName]
+                                print(value)
+                                drink.update({"likes":value})
+                                #if drink['strDrink'] in likes_list[0][drink]:
+                                #drink.update(likes_list[drink])
+                print("we made it to pagination \n")
+                #print(json.dumps(drinkList, indent=2)
+                
+                #print(json.dumps(pageDrinkList, indent=2))
                 page = request.args.get('page', 1, type=int)
                 per_page = 10  # Change this to the desired number of items per page
-                pagination = JSONPagination(response, page, per_page)
+                pagination = JSONPagination(drinkList, page, per_page)
                 paginated_response = pagination.get_page_items()
 
             except Exception as e:
-                print(str(e))
+                print('Something went wrong in API search : '+ str(e))
 
     return render_template('apiSearch.html', form=form, data=paginated_response, like=like, pagination=pagination)
 

@@ -296,10 +296,32 @@ function requestEvents($timeleft){
     $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
 	$result = mysqli_query($conn, $query);
 	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-	//mysqli_free_result($rows);
-	//echo $rows . PHP_EOL;
 	mysqli_close($conn);
 	return $rows;
+
+} // End requestEvents
+
+function updateDates(){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events";
+	$result = mysqli_query($conn, $query);
+    $today = date("Y-m-d");
+    while ($rows = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+        $eventId = $rows['id'];
+        $eventDate = $rows['startdate'];
+        $timeleft = (strtotime($eventDate) - strtotime($today));
+        $days = floor($timeleft / (60 * 60 *24));
+        $query = "UPDATE IT490.events SET timeleft = $days WHERE id = $eventId";
+
+        if (mysqli_query($conn, $query)) {
+            echo 'Timeleft updated' . PHP_EOL;
+        } else {
+            echo "we failed to update bbby" . PHP_EOL;
+            return false;
+        }
+    }
+	mysqli_close($conn);
+	return true;
 
 } // End requestEvents
 
@@ -377,6 +399,8 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
 		case "Events":
 			return requestEvents($request['timeleft']);
+        case "UpdateStartDates":
+            return updateDates();    
      
     }
     //$callLogin = array($callLogin => doLogin($username,$password)

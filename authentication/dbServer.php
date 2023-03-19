@@ -426,6 +426,40 @@ function getDrinkTotalRating($drinks,$loginStatus)
     return $drinks;
 }
 
+function getLikeList($loginStatus){
+    $conn = dbconnection();
+
+    if(isset($loginStatus)){
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$loginStatus'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        
+        $sql = "SELECT DrinkName, Recipe FROM IT490.UserCocktails WHERE User_ID !='$userid'" ;
+        //$sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
+        $result = $conn->query($sql);
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $resp = array(
+            'drinkList' => $rows
+
+        );
+
+        return $resp;
+        // 
+}
+else{
+        $sql = "SELECT DrinkName, Recipe FROM IT490.UserCocktails" ;
+        $result = $conn->query($sql);
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $resp = array(
+            'drinkList' => $rows
+
+        );
+
+        return $resp;
+}
+}
+
 function retrieveRecipes($sessionid)
 
 {

@@ -509,28 +509,37 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
     $conn = dbConnection();
 
     if (doValidate($sessionid)) {
-        $sql2 = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
-        $result = mysqli_query($conn, $sql2);
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+        $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
-
-    // Build the SQL statement
-    $sql = "UPDATE UserMLC SET Amount = $amount, Measurement_Type = $measurementType
-    WHERE User_ID = $userid AND Ing_Name = $ingName";
     
+    //Check
+    $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
+    $result = mysqli_query($conn, $sqlCheck);
+    $count = mysqli_num_rows($result);
+    if ($count == 0 ) {
+
+        $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
+        VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
+        } else {
+    $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
+    WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        }
     $result = mysqli_query($conn,$sql);
     
     if ($result) {
         echo "UserMLC table updated successfully" . PHP_EOL;
+        
+        $sql = "SELECT * FROM UserMLC WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        $result = mysqli_query($conn,$sql);
+        $return = mysqli_fetch_array($result);
+        return $return;
     } else {
         echo "An error occurred while updating the table" . PHP_EOL;
     }
-    
 }
 }
-
-
-
 
 
 
@@ -572,13 +581,10 @@ function requestProcessor($request)
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":
             return retrieveRecipes($request['sessionID']);
-<<<<<<< HEAD
         case "updateMLC":
             return updateUserMLC($request['sessionID'], $request['ingName'], $request['amount'], $request['measurementType']);
-=======
         case "deleteRecipe":
             return DeleteRecipe($request['sessionID'], $request['drinkName']);
->>>>>>> 216cef94fa8ad76f0c8c347f0b94c76cf3a1de00
     }
     //$callLogin = array($callLogin => doLogin($username,$password)
     return [

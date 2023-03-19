@@ -21,7 +21,7 @@ $sql = "CREATE TABLE IT490.UserMLC(
     Ing_Name VARCHAR(60),
     Amount FLOAT(5,2),
     Measurement_Type VARCHAR(60),
-    PRIMARY KEY (User_ID),
+    PRIMARY KEY (User_ID, Ing_Name),
     FOREIGN KEY (User_ID) REFERENCES IT490.Users(User_ID)
     )";
 

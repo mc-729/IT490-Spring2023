@@ -52,8 +52,20 @@ def submit_ingredient():
      ingredient=ingredient_data["ingredient"]
      amount=ingredient_data["amount"]
      measurement=ingredient_data["measurement"]
+     client = RabbitMQClient('testServer')
+
+
+     request_dict = {
+           'type' : 'updateMLC',
+           'sessionID': session['sessionID'],
+           'ingName' : ingredient,
+           'amount' : amount,
+           'measurementType' : measurement
+     }
+
      if ingredient!="" and amount !="" and measurement !="":
-             response = {"status": "success", "message": "Data received successfully."}
+            response = {"status": "success", "message": "Data received successfully."}
+            response = client.send_request(request_dict)
      else:
             response = {"status": "failure", "message": "something went wrong."}
     

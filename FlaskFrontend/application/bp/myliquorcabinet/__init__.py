@@ -1,3 +1,4 @@
+import ast
 import json
 from flask import Blueprint, jsonify, render_template, request, session
 #from flask_modals import render_template_modal
@@ -7,39 +8,59 @@ bp_liquorcabinet = Blueprint('myliquorcabinet', __name__, template_folder='templ
 
 @bp_liquorcabinet.route('/liquorcabinet', methods=['GET', 'POST'])
 def liquorcabinet():
-   
+    data = {}
+    like = LikeButton()
+
+
     client = RabbitMQClient('testServer')
     request_dict = {
-                'type': 'retrieveRecipes',
+                'type': 'retrieveRecipe',
                 
                     'sessionID': session['sessionID'],
+                    
                     
                 
             }
 
- 
+    i=0
     response = client.send_request(request_dict)
-    response = json.loads(json.loads(response))[0]
-    response = json.loads(response)
-
-    form=LikeButton
-    return render_template('myliquorcabinet.html', form=form)
 
 
-@bp_liquorcabinet.route('/drinkrating', methods=['GET', 'POST'])
-def getDrinkRatings(drink):
+    RecipeResponseList=json.loads(response)["drinkList"]
+    IngredientList= json.loads(response)["ingredients"]
+    MasterIngredients=[]
+    for ingredient in IngredientList:
+        MasterIngredients.append(ingredient["name"])
+    
    
-    client = RabbitMQClient('testServer')
-    request_dict = {
-                'type': 'totaldrinkrating',
-                
-                    'sessionID': session['sessionID'],
-                    'drink': drink
-            }
+    RecipeList=list()
+   
+    for val in RecipeResponseList:
+         val2=val["Recipe"]
+         val3=json.loads(val2)
+         new_word=ast.literal_eval(val3)
+         RecipeList.append(new_word)
+    
+    
+   
+    
+    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients,like=like)
 
- 
-    response = client.send_request(request_dict)
-    response = json.loads(json.loads(response))[0]
-    response = json.loads(response)
+@bp_liquorcabinet.route('/submit_ingredient', methods=['GET', 'POST'])
+def submit_ingredient():
+     ingredient_data = request.get_json()
+     print(ingredient_data)
+     ingredient=ingredient_data["ingredient"]
+     amount=ingredient_data["amount"]
+     measurement=ingredient_data["measurement"]
+     if ingredient!="" and amount !="" and measurement !="":
+             response = {"status": "success", "message": "Data received successfully."}
+     else:
+            response = {"status": "failure", "message": "something went wrong."}
+    
+     return jsonify(response)
 
-    return jsonify(response)
+
+
+
+

@@ -79,7 +79,6 @@ $(document).ready(function() {
       data: JSON.stringify(eventData),
       contentType: 'application/json',
       success: function(response) {
-        // Show the success message
         const successMessage = 'Data sent successfully!';
         $('#success-message').html(successMessage).fadeIn(500).delay(3000).fadeOut(500);
         toggleLikeStatus(cardButton, isLiked);

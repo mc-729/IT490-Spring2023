@@ -443,14 +443,25 @@ function retrieveRecipes($sessionid)
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        $userIngredients=GetUsieringredients($userid);
         print_r($ingredients);
         $resp = array(
             'ingredients' => $ingredients,
-            'drinkList' => $drinkList
+            'drinkList' => $drinkList,
+            'userIngredients'=> $userIngredients
 
         );
         return $resp;
     }
+}
+function GetUsieringredients($userID){
+
+ $conn=dbConnection();
+ $sql="SELECT ING_Name, Amount,Measurement_Type from UserMLC where User_ID ='$userID'";
+ $result = $conn->query($sql);
+ $response=mysqli_fetch_all($result, MYSQLI_ASSOC);
+ return $response;
+
 }
 function DeleteRecipe($sessionID, $drinkName)
 {
@@ -556,6 +567,7 @@ function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $recipeName, $in
 }
 
 
+
 function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
     // Connect to the database
     $conn = dbConnection();
@@ -595,6 +607,9 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
 
 
 
+
+
+
 function requestProcessor($request)
 {
 
@@ -629,8 +644,7 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
         case "Events":
             return requestEvents($request['timeleft']);
-        case "totallikes":
-            return getDrinkTotalRating($request['drinks']);
+       
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":

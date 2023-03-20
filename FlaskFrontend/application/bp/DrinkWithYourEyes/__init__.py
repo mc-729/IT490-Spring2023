@@ -29,11 +29,12 @@ def drinkwithyoureyes():
             }           
         paginated_data , pagination = get_data()
         objLen = len(data)
+       
         response = client.send_request(request_dict)
              
       
         response= json.loads(response)
-
+        print(str(len(response))+"main funct")
    # if searchtype:
         
    #     data=get_data(searchtype)
@@ -76,10 +77,12 @@ def get_data():
             }   
     response = client.send_request(request_dict)
     response= json.loads(response)
+    print(str(len(response))+"get data")
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Change this to the desired number of items per page
     pagination = JSONPagination(response, page, per_page)
     paginated_data = pagination.get_page_items()
+    print(len(response))
 
     
     return paginated_data,pagination
@@ -113,11 +116,14 @@ def your_view_function():
         response = client.send_request(request_dict)
    
         response = json.loads(response)
+        total=int(len(response)/10)
+        print(str(total)+"refresh and total is: "+str(len(response)) )
+        randomNum=str(random.randrange(total))
         pagination = JSONPagination(response, page=page, per_page=10)
         paginated_response = pagination.get_page_items()
         
 
-    return render_template('drinkwithyoureyes.html',data = paginated_response ,pagination=pagination,like=like, page=page)
+    return render_template('drinkwithyoureyes.html',data = paginated_response ,pagination=pagination,like=like, page=page,randNum=randomNum)
 
 
  

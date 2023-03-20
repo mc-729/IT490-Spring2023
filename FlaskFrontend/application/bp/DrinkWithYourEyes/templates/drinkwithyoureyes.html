@@ -17,9 +17,10 @@
         if (count == 0) {
           clearInterval(countdown);
           var currentPage = {{ pagination.page }};
+          var randNum =  Math.floor(Math.random() * 10) + 1;
           console.log(currentPage);
           var nextPage = currentPage + 1;
-          window.location.href = "{{ url_for('drinkwithyoureyes.your_view_function', page=nextPage) }}";
+          window.location.href = "{{ url_for('drinkwithyoureyes.your_view_function', page=randNum) }}";
         }
       }, 1000);
     </script>

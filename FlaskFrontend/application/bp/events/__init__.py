@@ -57,6 +57,8 @@ def events():
         city = str(request.form['city'])
         state = str(request.form['state'])
         location = city + ', ' + state
+        sessionID = None
+        if 'sessionID' in session: sessionID = session['sessionID']
 
         if search and location:
             client = RabbitMQClient('testServer')
@@ -68,17 +70,22 @@ def events():
                         'operation': 's',
                         'searchTerm': search,
                         'location': location
-                    }
+                    },
+                    'loginStatus':sessionID
                 }
+                
                 response = client.send_request(request_dict)
                 response = json.loads(json.loads(response))[0]
-                response = json.loads(response)
+                
+                
+                
 
                 for event in response:
                     start_dates.append(event['date']['start_date'])
-                    print(start_dates)
-
-                # return jsonify(response)
+                
+                print("We are about to print response")
+                print(json.dumps(response,indent=2))
+                #return jsonify(response)
                 data = response
 
             except Exception as e:

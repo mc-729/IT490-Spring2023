@@ -196,6 +196,9 @@ function eventInsert($name, $UID, $description, $date, $url, $image)
     $date_str->setDate(date('Y'), $date_str->format('m'), $date_str->format('d'));
     $formatted_date = date_format($date_str, 'Y-m-d');
 
+    $name = mysqli_real_escape_string($conn, $name);
+    $description = mysqli_real_escape_string($conn, $description);
+
     $sqlInsert = "INSERT into IT490.events (UID, name, description, image, link, startdate)
         VALUES ('$UID','$name','$description','$image','$url', '$formatted_date')";
 
@@ -352,7 +355,7 @@ function fetchSearchResultsCached($query,$loginStatus)
 
 
         if ($count == 0) {
-            echo "it was not in cache";
+            echo "it was not in cache" . PHP_EOL;
             $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
 
             $searchResults = $client->send_request($query);
@@ -363,17 +366,27 @@ function fetchSearchResultsCached($query,$loginStatus)
                 $sql = "SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
                 $result = mysqli_query($conn, $sql);
                 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+ 
+                if ($query['type'] == 'GoogleEventSearch'){
+                    return $row['Results'];
+                } else {
                 $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
                 echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
                 $drinksList = getDrinkTotalRating($row['Results'],$loginStatus);
               
                
                 return $drinksList;
+                }
             }
         } else if ($count != 0) {
-            echo "it was in cache";
+            echo "it was in cache" . PHP_EOL;
+
+            if ($query['type'] == 'GoogleEventSearch'){
+                return $row['Results'];
+            } else {
             $drinksList = getDrinkTotalRating($row['Results'],$loginStatus);
             return $drinksList;
+            }
         }
     } catch (Exception $e) {
         echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
@@ -611,7 +624,7 @@ function requestProcessor($request)
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-            return  fetchSearchResultsCached($request['key'],$request['loginStatus']);
+            return fetchSearchResultsCached($request['key'],$request['loginStatus']);
         case "Update":
 			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
         case 'SaveEvent':

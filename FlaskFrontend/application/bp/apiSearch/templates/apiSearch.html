@@ -11,12 +11,13 @@
 
     <div class="row" id="card-container">
         {% for d in data %}
+        {%if d.show%}
         <div class="col-sm-4">
             <div class="card" data-drink-id="{{ d.idDrink }}">
                 <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ d.strDrink }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{  d.show }}</h6>
                     {% if d.likes%}
                     <h6 class="card-subtitle mb-2 text-muted">Total Likes: {{ d.likes }}</h6>
                     {% else %}
@@ -36,6 +37,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 </div>

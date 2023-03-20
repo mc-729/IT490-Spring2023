@@ -104,3 +104,7 @@ def your_view_function():
         
 
     return render_template('drinkwithyoureyes.html',data = paginated_response ,pagination=pagination, page=page)
+
+
+ 
+

@@ -34,5 +34,5 @@ def render_pagination(pagination, endpoint, page):
     else:
         pagination_links.append({'text': 'Next', 'url': '#', 'is_active': False, 'is_disabled': True})
 
-    return render_template('pagination.html', pagination_links=pagination_links)
+    return render_template('pagination.html', pagination_links=pagination_links, num_pages=num_pages, next_page=next_page)
 

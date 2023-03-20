@@ -1,5 +1,3 @@
-
-import ast
 import json
 import random
 from flask import Blueprint, jsonify, render_template, request, session
@@ -12,6 +10,9 @@ bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder=
 @bp_drinkwithyoureyes.route('/drinkwithyoureyes', methods=['GET','POST'])
 def drinkwithyoureyes():
     data = {}
+
+    searchtype = 'SearchByName'
+    searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
     if searchtype:
         client = RabbitMQClient('testServer')
         request_dict = {
@@ -37,6 +38,10 @@ def drinkwithyoureyes():
     if(paginated_data):   
         return render_template('drinkwithyoureyes.html', data=paginated_data, pagination=pagination )
     else:
+
+        client = RabbitMQClient('logServer')
+        client.publish("Front end: DrinkWithYourEyes could not render template" )
+
         return "something broke" 
 
 

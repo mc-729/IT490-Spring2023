@@ -59,6 +59,8 @@ def login():
             session['user_id']=resp['user_id']
             return redirect('/dashboard')
         else:
+            client = RabbitMQClient('logServer')
+            client.publish("Front end: Login unsuccessful. Please check your username and password.")
             flash('Login unsuccessful. Please check your username and password.', 'danger')
 
     return render_template('login.html', form=form)
@@ -87,7 +89,9 @@ def logout():
         session.clear() 
        
         return redirect(url_for('authentication.login'))
-
+    
+    client = RabbitMQClient('logServer')
+    client.publish("Front end: Logout was unsuccessful" )
     return 'Something went wrong.'
 
         
@@ -137,6 +141,8 @@ def edit_profile():
            flash("Profile information updated successfully", "success")
            return redirect(url_for("authentication.edit_profile"))
         else:
+            client = RabbitMQClient('logServer')
+            client.publish("Front end: Failed to update profile information" )
             flash("Failed to update profile information", "error")
 
     return render_template("edit_profile.html", form=form)

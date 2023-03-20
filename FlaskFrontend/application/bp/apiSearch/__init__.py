@@ -45,6 +45,15 @@ def sendDrinkData():
       response = {"status": "success", "message": "Data processed successfully."}
       
 
+     else:
+         client = RabbitMQClient('logServer')
+         client.publish("Front end did not Receive drink data")
+
+         response = {"status": "error", "message": "something went wrong"}
+    
+     return jsonify(response)
+
+
       return jsonify(response)
 
         # Return a response indicating the request was successful
@@ -103,7 +112,13 @@ def apiSearch():
                 paginated_response = pagination.get_page_items()
 
             except Exception as e:
+
+                client = RabbitMQClient('logServer')
+                client.publish("Front end: " + str(e))
+                print(str(e))
+
                 print('Something went wrong in API search : '+ str(e))
+
 
     return render_template('apiSearch.html', form=form, data=paginated_response, like=like, pagination=pagination)
 

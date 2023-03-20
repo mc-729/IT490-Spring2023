@@ -7,7 +7,6 @@ require_once 'rabbitMQLib.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
 
 
-
 function loginAuth($username, $password)
 {
     $conn = dbConnection();
@@ -39,7 +38,9 @@ function loginAuth($username, $password)
                 'first_name' => $row['F_Name'],
                 'last_name' => $row['L_Name'],
                 'username' => $row['Username'],
-                'email' => $row['Email']
+                'email' => $row['Email'],
+                'city' => $row['City'],
+                'state' => $row['State']
             );
             return $resp;
         } else {
@@ -51,7 +52,9 @@ function loginAuth($username, $password)
                 'first_name' => null,
                 'last_name' => null,
                 'username' => null,
-                'email' => null
+                'email' => null,
+                'city' => null,
+                'state' => null
             );
             return $resp;
         }
@@ -64,7 +67,9 @@ function loginAuth($username, $password)
             'first_name' => null,
             'last_name' => null,
             'username' => null,
-            'email' => null
+            'email' => null,
+            'city' => null,
+            'state' => null
         );
         return $resp;
     }
@@ -99,7 +104,7 @@ function dbConnection()
     }
     return $conn;
 } // End dbConnection
-function registrationInsert($username, $password, $email, $firstName, $lastName)
+function registrationInsert($username, $password, $email, $firstName, $lastName, $city, $state)
 {
     $conn = dbConnection();
 
@@ -118,8 +123,8 @@ function registrationInsert($username, $password, $email, $firstName, $lastName)
     }
     //If Username/Email is not found in database/doesn't exist, do this
     else {
-        $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, Email, Password)
-                        VALUES ('$username','$firstName','$lastName','$email','$hashPassword')";
+        $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, City, State, Email, Password)
+                        VALUES ('$username','$firstName','$lastName','$city', '$state', '$email','$hashPassword')";
 
         if (mysqli_query($conn, $sqlInsert)) {
             echo 'New user registered, welcome. ';
@@ -188,22 +193,26 @@ function logout($sessionid)
 }
 
 
+
 function eventInsert($name, $UID, $description, $date, $url, $image)
 {
     $conn = dbConnection();
-
+    echo "DB connected";
     $date_str = date_create_from_format('M d', $date);
     $date_str->setDate(date('Y'), $date_str->format('m'), $date_str->format('d'));
     $formatted_date = date_format($date_str, 'Y-m-d');
+
+    $name = mysqli_real_escape_string($conn, $name);
+    $description = mysqli_real_escape_string($conn, $description);
 
     $sqlInsert = "INSERT into IT490.events (UID, name, description, image, link, startdate)
         VALUES ('$UID','$name','$description','$image','$url', '$formatted_date')";
 
     if (mysqli_query($conn, $sqlInsert)) {
-        echo 'New user registered, welcome. ';
+        echo 'Event Saved';
         echo $sqlInsert;
-        $resp = ['login_status' => true];
-        return $resp;
+        
+        return true;
     } else {
         $msg = 'Error with query';
         $request = [];
@@ -212,13 +221,37 @@ function eventInsert($name, $UID, $description, $date, $url, $image)
         $request['message'] = $msg;
         sendLog($request);
         echo "we failed to insert bbby";
+        return false;
     }
 } // End eventInsert
 
-
-
-function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName)
+function eventDelete($name, $UID)
 {
+    $conn = dbConnection();
+    echo "DB connected";
+
+    $sql = "DELETE FROM IT490.events WHERE name = '$name' AND UID = '$UID'";
+
+    if (mysqli_query($conn, $sql)) {
+        echo 'Event Deleted' . PHP_EOL;
+        echo $sql;
+        
+        return true;
+    } else {
+        $msg = 'Error with query' . PHP_EOL;
+        $request = [];
+        $request['type'] = 'error';
+        $request['service'] = 'database';
+        $request['message'] = $msg;
+        sendLog($request);
+        echo "we failed to delete bbby" . PHP_EOL;
+        return false;
+    }
+} // End eventDelete
+
+
+function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName, $city, $state) {
+
     // Connect to the database
     $conn = dbConnection();
 
@@ -256,7 +289,22 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
         if (!empty($lastName)) {
             $sql .= " l_name='" . mysqli_real_escape_string($conn, $lastName) . "',";
         }
-
+          if (!empty($city)) {
+        $sql .= " city='".mysqli_real_escape_string($conn, $city)."',";
+    }
+    if (!empty($state)) {
+        $sql .= " state='".mysqli_real_escape_string($conn, $state)."',";
+    }
+    
+    // Remove the trailing comma from the SQL statement
+    $sql = rtrim($sql, ",");
+    
+    // Add the WHERE clause to the SQL statement
+    $sql .= " WHERE User_ID=".$userid;
+    
+    // Execute the SQL statement
+    $result = mysqli_query($conn, $sql);
+	if($result){return true;}
         // Remove the trailing comma from the SQL statement
         $sql = rtrim($sql, ",");
 
@@ -275,8 +323,8 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
 
 function storeSearchResultsInCache($query, $searchResults)
 {
-    $obj = json_decode($searchResults, true);
-    echo gettype($obj);
+
+    $searchResults = json_decode($searchResults, true);
     $count = 0;
 
 
@@ -285,7 +333,7 @@ function storeSearchResultsInCache($query, $searchResults)
     $json = json_encode($searchResults);
     $filtered_json = "[" . filter_var($json) . "]";
     $query = implode(',', $query);
-    print_r($json);
+    //print_r($json);
 
 
 
@@ -334,7 +382,7 @@ function requestEvents($timeleft)
     return $rows;
 } // End requestEvents
 
-function fetchSearchResultsCached($query)
+function fetchSearchResultsCached($query,$loginStatus)
 
 
 {
@@ -352,7 +400,7 @@ function fetchSearchResultsCached($query)
 
 
         if ($count == 0) {
-            echo "it was not in cache";
+            echo "it was not in cache" . PHP_EOL;
             $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
 
             $searchResults = $client->send_request($query);
@@ -363,14 +411,27 @@ function fetchSearchResultsCached($query)
                 $sql = "SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
                 $result = mysqli_query($conn, $sql);
                 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-                return $row['Results'];
+ 
+                if ($query['type'] == 'GoogleEventSearch'){
+                    return $row['Results'];
+                } else {
+                $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
+                echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
+                $drinksList = getDrinkTotalRating($row['Results'],$loginStatus);
+              
+               
+                return $drinksList;
+                }
             }
         } else if ($count != 0) {
-            echo "it was in cache";
-            $searchResults = $row['Results'];
-            echo gettype($searchResults);
-            return $searchResults;
-            //print_r($searchResults);
+            echo "it was in cache" . PHP_EOL;
+
+            if ($query['type'] == 'GoogleEventSearch'){
+                return $row['Results'];
+            } else {
+            $drinksList = getDrinkTotalRating($row['Results'],$loginStatus);
+            return $drinksList;
+            }
         }
     } catch (Exception $e) {
         echo 'Caught exception my dude: ',  $e->getMessage(), "\n";
@@ -379,7 +440,50 @@ function fetchSearchResultsCached($query)
 }
 
 
+function getDrinkTotalRating($drinks,$loginStatus)
 
+{
+    $conn = dbconnection();
+    $totalLikes = array();
+    $drinks = json_decode($drinks, true);
+    $drinks = $drinks[0];
+    $drinks = json_decode($drinks, true);
+    $drinks = $drinks['drinks'];
+
+    $length = count($drinks);
+
+    for ($i = 0; $i < $length; $i++) {
+        $drinkName = $drinks[$i]["strDrink"];
+        $drinkName = mysqli_real_escape_string($conn, $drinkName);
+        $sql = "SELECT DrinkName FROM IT490.UserCocktails WHERE DrinkName = '$drinkName'";
+        $result = $conn->query($sql);
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $num_likes = count($rows);
+        $drinks[$i]['likes'] = $num_likes;
+    }
+    if(isset($loginStatus)){
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$loginStatus'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        for ($i = 0; $i < $length; $i++) {
+            $drinkName = $drinks[$i]["strDrink"];
+            $drinkName = mysqli_real_escape_string($conn, $drinkName);
+            $sql = "SELECT DrinkName FROM IT490.UserCocktails WHERE DrinkName = '$drinkName' and User_ID='$userid'" ;
+            $result = $conn->query($sql);
+            $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            $num_likes = count($rows);
+            if($num_likes>0){
+            $drinks[$i]['userLikes'] = true;}
+            else $drinks[$i]['userLikes'] = false;
+        }
+
+
+    }
+
+    print_r($totalLikes) . PHP_EOL;
+    return $drinks;
+}
 
 function retrieveRecipes($sessionid)
 
@@ -391,26 +495,53 @@ function retrieveRecipes($sessionid)
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
+        $sql = "SELECT name FROM IT490.ingredients";
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
-        $returnArray=array();
 
-        $rows = mysqli_fetch_all($result2, MYSQLI_ASSOC);
-        print_r($rows);
-        foreach($rows as $val){
+        $result3 = $conn->query($sql);
+        $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
+        $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        $userIngredients=GetUsieringredients($userid);
+        print_r($ingredients);
+        $resp = array(
+            'ingredients' => $ingredients,
+            'drinkList' => $drinkList,
+            'userIngredients'=> $userIngredients
 
-            $arr=mysqli_fetch_array($result2, MYSQLI_ASSOC);
-            $jsonDecode=json_decode(($arr));
-            array_push($returnArray,$jsonDecode);
-              
-            print_r($jsonDecode);
-        }
-    
-
-      return $rows;
+        );
+        return $resp;
     }
 }
 
+function GetUsieringredients($userID){
+
+ $conn=dbConnection();
+ $sql="SELECT ING_Name, Amount,Measurement_Type from UserMLC where User_ID ='$userID'";
+ $result = $conn->query($sql);
+ $response=mysqli_fetch_all($result, MYSQLI_ASSOC);
+ return $response;
+
+}
+
+function DeleteRecipe($sessionID, $drinkName)
+{
+    $conn = dbconnection();
+    if (doValidate($sessionID)) {
+
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionID'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        $sql = "DELETE FROM IT490.UserCocktails where User_ID=$userid and DrinkName='$drinkName'";
+        
+
+        if ($conn->query($sql))  return  ['Status' => true];
+        else  return  ['Status' => false];
+
+
+    }
+}
 
 function updateRecipeList($sessionid, $recipedata, $drinkname)
 {
@@ -421,20 +552,18 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
         //$recipedata = str_replace("'", '"', $recipedata);
-       // $recipedata = str_replace("None", "null", $recipedata);
+        // $recipedata = str_replace("None", "null", $recipedata);
         // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
-      
-      
-        echo $recipedata .PHP_EOL;
-        $recipedata=json_encode($recipedata,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+            echo $recipedata . PHP_EOL;
+        $recipedata = json_encode($recipedata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $conn = dbConnection();
         $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
-        $stmt->bind_param('sss', $userid, $recipedata,$drinkname);
+        $stmt->bind_param('sss', $userid, $recipedata, $drinkname);
         $result = $stmt->execute();
         echo $result;
         $stmt->close();
         $conn->close();
-       
+
         if ($result) {
             echo "Recipe updated successfully" . PHP_EOL;
         } else {
@@ -444,70 +573,89 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
 }
 
 
-function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $recipeName, $ingredients)
-{
+
+
+
+
+function updateDates(){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events";
+	$result = mysqli_query($conn, $query);
+    $today = date("Y-m-d");
+    while ($rows = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+        $eventId = $rows['id'];
+        $eventDate = $rows['startdate'];
+        $timeleft = (strtotime($eventDate) - strtotime($today));
+        $days = floor($timeleft / (60 * 60 *24));
+        $query = "UPDATE IT490.events SET timeleft = $days WHERE id = $eventId";
+
+        if (mysqli_query($conn, $query)) {
+            echo 'Timeleft updated' . PHP_EOL;
+        } else {
+            echo "we failed to update bbby" . PHP_EOL;
+            return false;
+        }
+    }
+	mysqli_close($conn);
+	return true;
+
+} // End requestEvents
+
+
+
+
+
+function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
     // Connect to the database
     $conn = dbConnection();
 
-    //from function UpdateProfile
     if (doValidate($sessionid)) {
         $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
+    
+    //Check
+    $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
+    $result = mysqli_query($conn, $sqlCheck);
+    $count = mysqli_num_rows($result);
+    if ($count == 0 ) {
 
-
-        //SQL select statement to then update said ingredients
-        $sql2 = "SELECT Ingredients FROM IT490.Cocktails WHERE User_ID = $user_ID";
-        $result2 = $conn->query($sql2);
-        $row2 = $result2->fetch_assoc();
-        $currentIngredients = json_decode($row2['Ingredients'], true);
-
-        //Update Ingredients
-        foreach ($ingredients as $ingredientName => $updatedIngredients) {
-            if ($updatedIngredients > 0) { //Change the current Ingredient quantity to its updated one
-                $currentIngredients[$ingredientName] = $updatedIngredients;
-            } else {
-                unset($currentIngredients[$ingredientName]); //if 0 then unset to remove
-            }
+        $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
+        VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
+        } else {
+    $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
+    WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
         }
-
-        //Update cocktails table with updated Ingredeints
-        $updatedIngredients = json_encode($currentIngredients);
-        $sql3 = "UPDATE IT490.Cocktails SET Ingredients = '$updatedIngredients' WHERE User_ID = $user_ID";
-        if ($conn->query($sql3) === FALSE) {
-            echo "Error, could not update ingredients: " . $conn->error . PHP_EOL;
-        }
+    $result = mysqli_query($conn,$sql);
+    
+    if ($result) {
+        echo "UserMLC table updated successfully" . PHP_EOL;
+        
+        $sql = "SELECT * FROM UserMLC WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        $result = mysqli_query($conn,$sql);
+        $return = mysqli_fetch_array($result);
+        return $return;
+    } else {
+        echo "An error occurred while updating the table" . PHP_EOL;
     }
-
-
-    /*
-   //Get information/data from the JSON file
-   $info = json_decode(file_get_contents('ingredients.json'), true);
-   
-   //Update and or remove Ingredient(s)
-   if ($ingredientQuantity > 0) { //if ingredient quantity exists, then update the quantity by adding or removing
-       $info[$ingredientName] = $ingredientQuantity;
-   } else {
-       unset($info[$ingredientName]); //completely remove ingredient if it becomes 0
-   }
-   
-   file_put_contents('ingredients.json', json_encode($info));
-   */
 }
+}
+
+
+
 
 
 
 function requestProcessor($request)
 {
-
     echo 'received request' . PHP_EOL;
     var_dump($request);
     if (!isset($request['type'])) {
         return 'ERROR: unsupported message type';
     }
-    switch ($request['type']) {
-        case 'Login':
+    switch ($request['type']) 
+       { case 'Login':
             return loginAuth($request['username'], $request['password']);
         case 'Register':
             return registrationInsert(
@@ -515,34 +663,57 @@ function requestProcessor($request)
                 $request['password'],
                 $request['email'],
                 $request['firstName'],
-                $request['lastName']
+                $request['lastName'],
+                $request['city'],
+                $request['state']
             );
         case 'validate_session':
-
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
-            return  fetchSearchResultsCached($request['key']);
-        case "Update":
-            return updateProfile($request['sessionID'], $request['username'], $request['newPW'], $request['oldPW'], $request['email'], $request['firstName'], $request['lastName']);
-        case 'Insertevent':
-            return  eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['url'], $request['image']);
 
+            return fetchSearchResultsCached($request['key'],$request['loginStatus']);
+        case "Update":
+
+				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
+				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName'],$request['city'],$request['state']);
+
+		
+        case 'SaveEvent':
+            return eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['URL'], $request['image']);	
         case "Email":
+
             return requestEmail($request['userid']);
         case "Events":
             return requestEvents($request['timeleft']);
+
+        case "totallikes":
+            return getDrinkTotalRating($request['drinks'],$request['sessionID']);
+
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":
             return retrieveRecipes($request['sessionID']);
+
+        case "updateMLC":
+            return updateUserMLC($request['sessionID'], $request['ingName'], $request['amount'], $request['measurementType']);
+             case "UpdateStartDates":
+            return updateDates();
+        case "deleteRecipe":
+            return DeleteRecipe($request['sessionID'], $request['drinkName']);
+        
+        case "DeleteEvent":
+            return eventDelete($request['name'], $request['UID']);
+    
+
     }
-    //$callLogin = array($callLogin => doLogin($username,$password)
+   
     return [
         'returnCode' => '0',
         'message' => 'Server received the request and processed it.',
     ];
+
 } // End requestProcessor
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');

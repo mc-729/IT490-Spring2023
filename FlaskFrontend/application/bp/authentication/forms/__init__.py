@@ -34,13 +34,17 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
     submit = SubmitField('Register')
 
 class EditProfileForm(FlaskForm):
-    def __init__(self, first_name_placeholder=None, last_name_placeholder=None, username_placeholder=None, email_placeholder=None):
+    def __init__(self, first_name_placeholder=None, last_name_placeholder=None, city_placeholder=None, state_placeholder=None, username_placeholder=None, email_placeholder=None):
         super(EditProfileForm, self).__init__()
         self.first_name.render_kw = {"placeholder": first_name_placeholder} if first_name_placeholder else {}
         self.last_name.render_kw = {"placeholder": last_name_placeholder} if last_name_placeholder else {}
+        self.city.render_kw = {"placeholder": city_placeholder} if city_placeholder else {}
+        self.state.render_kw = {"placeholder": state_placeholder} if state_placeholder else {}
         self.username.render_kw = {"placeholder": username_placeholder} if username_placeholder else {}
         self.email.render_kw = {"placeholder": email_placeholder} if email_placeholder else {}
 
@@ -48,6 +52,8 @@ class EditProfileForm(FlaskForm):
     
     first_name = StringField("First Name")
     last_name = StringField("Last Name")
+    city = StringField("City")
+    state = StringField("State")
     email = StringField("Email")
     username = StringField("Username")
     old_password = PasswordField("Old Password")
@@ -87,6 +93,7 @@ class EventsForm(FlaskForm):
     city = StringField('City', validators=[DataRequired()])
     state = StringField('State', validators=[DataRequired()])
     submit = SubmitField("search for events")
+    submit2 = SubmitField("recommend events")
 
 class IngredientsForm(FlaskForm):
     class SpiritCategory(FlaskForm):

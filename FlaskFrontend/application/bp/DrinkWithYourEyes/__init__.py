@@ -2,16 +2,15 @@ import json
 import random
 from flask import Blueprint, jsonify, render_template, request, session
 from flask_modals import render_template_modal
+
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from application.jsonPgaination.JSONPagination import JSONPagination
 bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder='templates')
-
-
-
 @bp_drinkwithyoureyes.route('/drinkwithyoureyes', methods=['GET','POST'])
 def drinkwithyoureyes():
     data = {}
+
     searchtype = 'SearchByName'
     searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
     if searchtype:
@@ -39,8 +38,10 @@ def drinkwithyoureyes():
     if(paginated_data):   
         return render_template('drinkwithyoureyes.html', data=paginated_data, pagination=pagination )
     else:
+
         client = RabbitMQClient('logServer')
         client.publish("Front end: DrinkWithYourEyes could not render template" )
+
         return "something broke" 
 
 

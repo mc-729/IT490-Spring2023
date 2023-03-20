@@ -1,8 +1,10 @@
 
 import ast
 import json
+
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
-#from flask_modals import render_template_modal
+l
+
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from application.jsonPgaination.JSONPagination import JSONPagination
@@ -13,34 +15,36 @@ bp_apiSearch = Blueprint('apiSearch', __name__, template_folder='templates')
     # Process the data and return a response    
 @bp_apiSearch.route('/sendDrinkData', methods=['GET','POST'])
 def sendDrinkData():
-     drink_data = request.get_json()
-    
-     print(type(drink_data))
-     
-     drink= json.dumps(drink_data)
-     drink=json.loads(drink)
-     drinkName=ast.literal_eval(drink)["strDrink"]
-     
-     
-   
-     client = RabbitMQClient('testServer')
-     request_dict = {
-                'type': 'like',
-                
-                    'sessionID': session['sessionID'],
-                    'drink': drink_data,
-                    'drinkName':drinkName
-                   
+      action = request.args.get('action')
+      drink_data = request.get_json()
 
+      drink = json.dumps(drink_data)
+      drink = json.loads(drink)
+      drinkName = ast.literal_eval(drink)["strDrink"]
 
-                
-            }
+      client = RabbitMQClient('testServer')
 
-     print(drink_data)
-     response = client.send_request(request_dict)
-     if(response):
-        response = {"status": "success", "message": "Data received successfully."}
+      if action == 'like':
+        request_dict = {
+            'type': 'like',
+            'sessionID': session['sessionID'],
+            'drink': drink_data,
+            'drinkName': drinkName
+        }
+      elif action == 'unlike':
+        request_dict = {
+            'type': 'deleteRecipe',
+            'sessionID': session['sessionID'],
+            'drinkName': drinkName
+        }
+      else:
+        return jsonify({"status": "error", "message": "Invalid action"})
+
+      response = client.send_request(request_dict)
+  
+      response = {"status": "success", "message": "Data processed successfully."}
       
+
      else:
          client = RabbitMQClient('logServer')
          client.publish("Front end did not Receive drink data")
@@ -49,7 +53,10 @@ def sendDrinkData():
     
      return jsonify(response)
 
-    # Return a response indicating the request was successful
+
+      return jsonify(response)
+
+        # Return a response indicating the request was successful
     
 
 
@@ -71,6 +78,9 @@ def apiSearch():
     if 'searchtype' in session and 'searchTerm' in session:
         searchtype = session['searchtype']
         searchTerm = session['searchTerm']
+        sessionID=None
+        if 'sessionID' in session: sessionID=session['sessionID']
+        
 
         if searchtype and searchTerm:
             client = RabbitMQClient('testServer')
@@ -80,7 +90,8 @@ def apiSearch():
                     'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
-                }
+                },
+                'loginStatus':sessionID
             }
 
             try:
@@ -88,19 +99,26 @@ def apiSearch():
                             'operation': 's',
                             'searchTerm': searchTerm}
                 response = client.send_request(request_dict)
-
-                response = json.loads(json.loads(response))[0]
-                response = json.loads(response)["drinks"]
-
+                
+                #return response
+                response = json.loads(response)
+                
+            
+                
+                #print(json.dumps(pageDrinkList, indent=2))
                 page = request.args.get('page', 1, type=int)
                 per_page = 10  # Change this to the desired number of items per page
                 pagination = JSONPagination(response, page, per_page)
                 paginated_response = pagination.get_page_items()
 
             except Exception as e:
+
                 client = RabbitMQClient('logServer')
                 client.publish("Front end: " + str(e))
                 print(str(e))
+
+                print('Something went wrong in API search : '+ str(e))
+
 
     return render_template('apiSearch.html', form=form, data=paginated_response, like=like, pagination=pagination)
 

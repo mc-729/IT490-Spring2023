@@ -7,6 +7,7 @@ $dbname = "IT490";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 } else 
@@ -15,12 +16,11 @@ if ($conn->connect_error) {
 }
 
 // sql to create table Cocktails
-$sql = "CREATE TABLE IT490.UserCocktails(
+$sql = "CREATE TABLE IT490.Cocktails(
     User_ID INT NOT NULL,
-    DrinkName VARCHAR(255) NOT NULL,
-    Recipe JSON DEFAULT NULL,
-	  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	  PRIMARY KEY (DrinkName),
+    Recipe JSON,
+    Ingredients JSON,
+    PRIMARY KEY (User_ID),
     FOREIGN KEY (User_ID) REFERENCES IT490.Users(User_ID)
     )";
 

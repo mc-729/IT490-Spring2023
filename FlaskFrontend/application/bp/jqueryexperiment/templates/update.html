@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Flask Dynamic Data Update Example{% endblock %}
+
+{% block content %}
+  <h1>Updating Random Number...</h1>
+  <p>Click <a href="{{ url_for('jqueryExample.jquerytestFunct') }}">here</a> to go back.</p>
+  <h2>Random Number: <span id="random"></span></h2>
+  {% endblock %}
+  {% block JavaScript %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script>
+    function updateRandom() {
+      fetch("/data")
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("random").innerText = data.random;
+        });
+    }
+    updateRandom();
+
+  </script>
+
+    <!-- Optional JavaScript -->
+    {{ bootstrap.load_js() }}
+{% endblock %}

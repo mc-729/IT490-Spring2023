@@ -4,7 +4,7 @@ from wtforms import validators
 from wtforms.fields import *
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 class LoginForm(FlaskForm):
@@ -19,7 +19,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField()
 
 class LikeButton(FlaskForm):
-    like = SubmitField('Like')
+    class Meta:
+        csrf = False
+    like=StringField("")
+    drinks=StringField("")
+    submit= SubmitField('Like')
 
     
 class RegisterForm(FlaskForm):
@@ -58,6 +62,7 @@ class IngredientForm(FlaskForm):
 class RecipeForm(FlaskForm):
     name = StringField('Name')
     ingredients = FieldList(FormField(IngredientForm), min_entries=1)
+
 class SearchForm(FlaskForm):
     class Meta:
         csrf = False
@@ -70,10 +75,19 @@ class SearchForm(FlaskForm):
         ('FilterByCategory', 'Filter by Category'),
         ('ListIngredients', 'List Ingredients'),
         ('SearchIngredientInfo', 'Search Ingredients Info')
-    ], validators=[DataRequired()])
-    searchValue = StringField('Search Value', validators=[DataRequired()])
+    ])
+    searchValue = StringField('Search Value')
     submit = SubmitField("search for drinks")
 
+class EventsForm(FlaskForm):
+    class Meta:
+        csrf = False
+    
+    search = StringField('Search', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
+    submit = SubmitField("search for events")
+    submit2 = SubmitField("recommend events")
 
 class IngredientsForm(FlaskForm):
     class SpiritCategory(FlaskForm):
@@ -140,4 +154,7 @@ class IngredientsForm(FlaskForm):
     liqueurs = FieldList(FormField(LiqueurCategory), label='Liqueurs')
     mixers = FieldList(FormField(MixerCategory), label='Mixers')
     submit = SubmitField('Submit')
+
+class submitBtn(FlaskForm):
+     submit = SubmitField('Submit')
 

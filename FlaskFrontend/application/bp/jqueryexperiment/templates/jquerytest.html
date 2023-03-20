@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Flask Dynamic Data Update Example{% endblock %}
+{% block Script %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+{{ bootstrap.load_js() }}
+{% endblock %}
+{% block content %}
+<h1>Generate Random Number</h1>
+<button id="generate">Generate</button>
+<br><br>
+<h2>Random Number: <span id="random"></span></h2>
+  {% endblock %}
+  {% block JavaScript %}
+
+  <script>
+    const generateButton = document.getElementById("generate");
+    const randomSpan = document.getElementById("random");
+
+    generateButton.addEventListener("click", () => {
+      fetch("/data")
+        .then(response => response.json())
+        .then(data => {
+          randomSpan.innerText = data.random;
+        });
+    });
+  </script>
+  {{ bootstrap.load_js() }}
+{% endblock %}
+
+<script>
+    $("#generate").keyup(function(){
+        var text = $(this).val();
+    
+        $.ajax({
+          url: "/data",
+          type: "get",
+          data: {jsdata: text},
+          success: function(response) {
+            $("#random").html(response);
+          },
+          error: function(xhr) {
+            //Do Something to handle error
+          }
+        });
+    });
+    </script>

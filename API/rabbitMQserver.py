@@ -3,7 +3,9 @@ import pika
 import requests
 import json
 import os
-import api_keys
+from serpapi import GoogleSearch
+
+#import api_keys
 class SearchByName:
     @staticmethod
     def get_result(dictionary:{"type":"","operation":"","searchTerm":""}):
@@ -76,6 +78,17 @@ class SearchIngredientInfo:
         response = response.json()
         return response
 
+class GoogleEventSearch:
+    @staticmethod
+    def get_result(dictionary:{"type":"","operation":"","searchTerm":"","location":""}):
+        parameter = {"engine":"google_events","q":dictionary['searchTerm'],"location":dictionary['location'],"hl":"en","gl":"us","api_key":"70f09adf5a0cf704be3787eb3243842f1abe44ad14f109e92d18ad82eb9392f2"}
+        search = GoogleSearch(parameter)
+        response = search.get_dict()
+        events_results = response["events_results"]
+        response = json.dumps(events_results)
+        print(events_results)
+        return events_results
+
 class ToJsonFile:
     @staticmethod
     def to_json_file(response,fileName):
@@ -119,6 +132,9 @@ class APIRoute:
                     return response
                 case 'SearchIngredientInfo':
                     response = json.dumps(SearchIngredientInfo.get_result(dictionary))
+                    return response
+                case 'GoogleEventSearch':
+                    response = json.dumps(GoogleEventSearch.get_result(dictionary))
                     return response
             return dictionary
         except Exception as err:

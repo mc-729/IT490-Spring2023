@@ -69,7 +69,6 @@ def submit_ingredient():
             response = client.send_request(request_dict)
      else:
             response = {"status": "failure", "message": "something went wrong."}
-    
      return jsonify(response)
 
 

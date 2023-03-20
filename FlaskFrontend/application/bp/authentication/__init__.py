@@ -55,7 +55,7 @@ def login():
             session['sessionID']=resp['session_id']
             session['username']=resp['username']
             session['email']=resp['email']
-        
+            session['user_id']=resp['user_id']
          
             return redirect('/dashboard')
         else:
@@ -163,3 +163,7 @@ def registration():
             return redirect(url_for('authentication.registration'))
     return render_template('registration.html',form=form)
 
+@authentication.route('/myliquorcabinet')
+def myliquorcabinet():
+
+    return render_template('myliquorcabinet.html')

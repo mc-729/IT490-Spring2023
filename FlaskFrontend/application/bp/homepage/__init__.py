@@ -1,7 +1,6 @@
 
 import json
 from flask import Blueprint, jsonify, render_template, request
-#from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton, EventsForm
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 bp_homepage = Blueprint('homepage', __name__, template_folder='templates')
@@ -24,4 +23,6 @@ def create_cocktail():
     if form.validate_on_submit():
         pass
     return render_template('create_cocktail.html', form=form)
+
+
 

@@ -1,4 +1,5 @@
 
+import ast
 import json
 import random
 from flask import Blueprint, jsonify, render_template, request, session
@@ -7,14 +8,9 @@ from application.bp.authentication.forms import SearchForm , IngredientsForm, Li
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from application.jsonPgaination.JSONPagination import JSONPagination
 bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder='templates')
-
-
-
 @bp_drinkwithyoureyes.route('/drinkwithyoureyes', methods=['GET','POST'])
 def drinkwithyoureyes():
     data = {}
-    searchtype = 'SearchByName'
-    searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
     if searchtype:
         client = RabbitMQClient('testServer')
         request_dict = {

@@ -11,7 +11,7 @@
             {{ bootstrap.load_css() }}
         {% endblock %}
 
-        <title>Your page title</title>
+        <title>My Liquor Cabinet</title>
     {% endblock %}
 </head>
 
@@ -40,6 +40,7 @@
                     {{ render_nav_item('authentication.registration','Register' ) }}
                     {% endif %}
                     {% if session.sessionID %}
+                    {{ render_nav_item('myliquorcabinet.liquorcabinet','My Liquor Cabinet' ) }}
                     {{ render_nav_item('authentication.edit_profile','Edit Profile' ) }}
                     {{ render_nav_item('authentication.logout', 'Logout', button=True) }}
                     {% endif %}

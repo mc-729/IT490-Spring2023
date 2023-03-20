@@ -87,6 +87,7 @@ class EventsForm(FlaskForm):
     city = StringField('City', validators=[DataRequired()])
     state = StringField('State', validators=[DataRequired()])
     submit = SubmitField("search for events")
+    submit2 = SubmitField("recommend events")
 
 class IngredientsForm(FlaskForm):
     class SpiritCategory(FlaskForm):
@@ -153,4 +154,7 @@ class IngredientsForm(FlaskForm):
     liqueurs = FieldList(FormField(LiqueurCategory), label='Liqueurs')
     mixers = FieldList(FormField(MixerCategory), label='Mixers')
     submit = SubmitField('Submit')
+
+class submitBtn(FlaskForm):
+     submit = SubmitField('Submit')
 

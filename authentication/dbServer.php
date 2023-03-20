@@ -480,14 +480,26 @@ function retrieveRecipes($sessionid)
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+        $userIngredients=GetUsieringredients($userid);
         print_r($ingredients);
         $resp = array(
             'ingredients' => $ingredients,
-            'drinkList' => $drinkList
+            'drinkList' => $drinkList,
+            'userIngredients'=> $userIngredients
 
         );
         return $resp;
     }
+}
+
+function GetUsieringredients($userID){
+
+ $conn=dbConnection();
+ $sql="SELECT ING_Name, Amount,Measurement_Type from UserMLC where User_ID ='$userID'";
+ $result = $conn->query($sql);
+ $response=mysqli_fetch_all($result, MYSQLI_ASSOC);
+ return $response;
+
 }
 
 function DeleteRecipe($sessionID, $drinkName)
@@ -570,28 +582,41 @@ function updateDates(){
 
 
 
+
 function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
     // Connect to the database
     $conn = dbConnection();
 
     if (doValidate($sessionid)) {
-        $sql2 = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
-        $result = mysqli_query($conn, $sql2);
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+        $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
-
-    // Build the SQL statement
-    $sql = "UPDATE UserMLC SET Amount = $amount, Measurement_Type = $measurementType
-    WHERE User_ID = $userid AND Ing_Name = $ingName";
     
+    //Check
+    $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
+    $result = mysqli_query($conn, $sqlCheck);
+    $count = mysqli_num_rows($result);
+    if ($count == 0 ) {
+
+        $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
+        VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
+        } else {
+    $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
+    WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        }
     $result = mysqli_query($conn,$sql);
     
     if ($result) {
         echo "UserMLC table updated successfully" . PHP_EOL;
+        
+        $sql = "SELECT * FROM UserMLC WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        $result = mysqli_query($conn,$sql);
+        $return = mysqli_fetch_array($result);
+        return $return;
     } else {
         echo "An error occurred while updating the table" . PHP_EOL;
     }
-    
 }
 }
 
@@ -633,8 +658,10 @@ function requestProcessor($request)
             return requestEmail($request['userid']);
         case "Events":
             return requestEvents($request['timeleft']);
+
         case "totallikes":
             return getDrinkTotalRating($request['drinks'],$request['sessionID']);
+
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
         case "retrieveRecipe":

@@ -2,6 +2,7 @@
 import ast
 import json
 from flask import Blueprint, jsonify, render_template, request, session
+from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton, EventsForm
 from application.bp.authentication.forms import SearchForm, IngredientsForm, LikeButton, EventsForm
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 bp_events = Blueprint('events', __name__, template_folder='templates')
@@ -72,6 +73,8 @@ def events():
         if 'sessionID' in session: sessionID = session['sessionID']
 
         if search and location:
+            sessionID=None
+            if 'sessionID' in session: sessionID=session['sessionID']
             client = RabbitMQClient('testServer')
             try:
                 request_dict = {
@@ -80,9 +83,11 @@ def events():
                         'type': 'GoogleEventSearch',
                         'operation': 's',
                         'searchTerm': search,
+
                         'location': location
                     },
                     'loginStatus':sessionID
+
                 }
                 
                 response = client.send_request(request_dict)

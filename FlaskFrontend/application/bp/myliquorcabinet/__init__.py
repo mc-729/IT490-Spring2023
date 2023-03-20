@@ -24,10 +24,13 @@ def liquorcabinet():
 
     i=0
     response = client.send_request(request_dict)
-
+    #response=json.loads(response)
+    #return jsonify(response)
 
     RecipeResponseList=json.loads(response)["drinkList"]
     IngredientList= json.loads(response)["ingredients"]
+    UserIng=json.loads(response)["userIngredients"]
+
     MasterIngredients=[]
     for ingredient in IngredientList:
         MasterIngredients.append(ingredient["name"])
@@ -44,7 +47,7 @@ def liquorcabinet():
     
    
     
-    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients,like=like)
+    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients,like=like,UserIng=UserIng)
 
 @bp_liquorcabinet.route('/submit_ingredient', methods=['GET', 'POST'])
 def submit_ingredient():
@@ -53,11 +56,22 @@ def submit_ingredient():
      ingredient=ingredient_data["ingredient"]
      amount=ingredient_data["amount"]
      measurement=ingredient_data["measurement"]
+     client = RabbitMQClient('testServer')
+
+
+     request_dict = {
+           'type' : 'updateMLC',
+           'sessionID': session['sessionID'],
+           'ingName' : ingredient,
+           'amount' : amount,
+           'measurementType' : measurement
+     }
+
      if ingredient!="" and amount !="" and measurement !="":
-             response = {"status": "success", "message": "Data received successfully."}
+            response = {"status": "success", "message": "Data received successfully."}
+            data = client.send_request(request_dict)
      else:
             response = {"status": "failure", "message": "something went wrong."}
-    
      return jsonify(response)
 
 

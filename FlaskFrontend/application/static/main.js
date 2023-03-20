@@ -119,6 +119,24 @@ $(document).ready(function() {
       contentType: 'application/json',
       success: function(response) {
         if (response.status === 'success') {
+          const existingRow = $(`#UserING tbody tr[data-ingredient="${ingredient}"]`);
+
+          // Update the existing row or create a new one
+          if (existingRow.length) {
+            existingRow.find('td:nth-child(3)').text(amount);
+            existingRow.find('td:nth-child(4)').text(measurement);
+          } else {
+            const newRow = `
+              <tr data-ingredient="${ingredient}">
+                <th scope="row">${$('#UserING tbody tr').length + 1}</th>
+                <td>${ingredient}</td>
+                <td>${amount}</td>
+                <td>${measurement}</td>
+              </tr>
+            `;
+            $('#UserING tbody').append(newRow);
+          }
+        
          
           toastMessage.addClass('bg-success text-white');
           toastMessage.removeClass('bg-danger');

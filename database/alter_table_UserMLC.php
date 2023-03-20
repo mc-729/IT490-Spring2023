@@ -15,20 +15,14 @@ if ($conn->connect_error) {
 	echo "Successfully Connected!".PHP_EOL;
 }
 
-// sql to create table UserMLC
-$sql = "CREATE TABLE IT490.UserMLC(
-    User_ID INT NOT NULL,
-    Ing_Name VARCHAR(60),
-    Amount FLOAT(5,2),
-    Measurement_Type VARCHAR(60),
-    PRIMARY KEY (User_ID, Ing_Name),
-    FOREIGN KEY (User_ID) REFERENCES IT490.Users(User_ID)
-    )";
-
+// sql to alter table UserMLC
+$sql = "ALTER TABLE IT490.UserMLC
+MODIFY COLUMN Amount INT";
+// or try Amount BIGINT just replace the datatype
 if ($conn->query($sql) === TRUE) {
-  echo "Table UserMLC created successfully".PHP_EOL;
+  echo "Table UserMLC altered successfully".PHP_EOL;
 } else {
-  echo "Error creating table UserMLC : " . $conn->error;
+  echo "Error altering table UserMLC : " . $conn->error;
 }
 
 $conn->close();

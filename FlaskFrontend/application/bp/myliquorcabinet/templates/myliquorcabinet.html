@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
+{% from 'bootstrap4/table.html' import render_table %}
+{% block content %}
+<div class="container-lg">
+    <h1>My Liqour Cabinet</h1>
+
+    <div class="accordion" id="accordionUserIng">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingING">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseUserIng" aria-expanded="true" aria-controls="collapseUserIng">
+                    My Ingredient List
+                </button>
+            </h2>
+            <div id="collapseUserIng" class="accordion-collapse collapse show" aria-labelledby="headingING"
+                data-bs-parent="#accordionUserIng">
+                <div class="accordion-body custom-scroll">
+                    <div class="table-responsive">
+                        <table class="table" id="UserING">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Measurement Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ingredient in UserIng %}
+                                <tr data-ingredient="{{ ingredient.ING_Name }}">
+                                    <th scope="row">{{ loop.index }}</th>
+                                    <td>{{ ingredient.ING_Name }}</td>
+                                    <td>{{ ingredient.Amount }}</td>
+                                    <td>{{ ingredient.Measurement_Type }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDrinks">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseDrinks" aria-expanded="true" aria-controls="collapseDrinks">
+                    Drinks List
+                </button>
+            </h2>
+            <div id="collapseDrinks" class="accordion-collapse collapse show" aria-labelledby="headingDrinks"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body custom-scroll">
+                    <div class="row g-3" id="card-container">
+                        {% if data %}
+                        {% for d in data %}
+                        <div class="col-sm-4">
+                            <div class="card" data-drink-id="{{ d.idDrink }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ d.strDrink }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                                    <button type="button" class="btn btn-secondary like-button"
+                                        onclick="likeDrink('{{ d.idDrink }}', this,true)"
+                                        data-is-liked="true">unlike</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+        <div id="toast-message" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <!-- The message will be inserted here -->
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion" id="accordionIngredient">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDrinks">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseIngredient" aria-expanded="true" aria-controls="collapseIngredient">
+                    Update Ingredients
+                </button>
+            </h2>
+            <div id="collapseIngredient" class="accordion-collapse collapse show" aria-labelledby="headingDrinks"
+                data-bs-parent="#accordionIngrediente">
+                <div class="accordion-body custom-scroll">
+                    <ul class="list-group list-group-flush">
+                        {% for Ingredients in MasterIngredients %}
+                        <li class="list-group-item">
+                            <div class="row">
+
+                                <div class="col-md-4">
+
+                                    <span class="ingredient-name">{{ Ingredients }}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control amount-input" placeholder="Amount"
+                                            aria-label="Amount">
+                                        <input type="text" class="form-control measurement-input"
+                                            placeholder="Measurement" aria-label="Measurement">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary submit-ingredient"
+                                        onclick="submitIngredient(this)">Submit</button>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    {% if data %}
+    {% for d in data %}
+    <div class="modal fade" id="modal-{{ d.idDrink }}" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}-label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div id="success-message" style="display: none;"></div>
+                    <h5 class="modal-title" id="modal-{{ d.idDrink }}-label">{{ d.strDrink }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img class="img-fluid rounded" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                    <h6>Instructions:</h6>
+                    <p>{{ d.strInstructions }}</p>
+                    <h6>Ingredients:</h6>
+                    <ul>
+                        {% for i in range(1, 16) %}
+                        {% if d['strIngredient'+i|string] %}
+                        <li>{{ d['strIngredient'+i|string] }} - {{ d['strMeasure'+i|string] }}</li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary like-button"
+                        onclick="likeDrink('{{ d.idDrink }}', this,true)" data-is-liked="true">unlike</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endblock %}
+
+    {% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    {% endblock %}
+
+    {% block styles %}
+    {{ super() }}
+    <style>
+        .custom-scroll {
+            max-height: 300px;
+            overflow-y: scroll;
+        }
+    </style>
+    {% endblock %}

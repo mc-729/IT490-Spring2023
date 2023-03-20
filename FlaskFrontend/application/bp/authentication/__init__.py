@@ -49,7 +49,6 @@ def login():
      
         # Check if login was successful
         if resp['login_status']==True:
-          
             session['firstName']=resp['first_name']
             session['lastName']=resp['last_name']
             session['sessionID']=resp['session_id']
@@ -57,8 +56,7 @@ def login():
             session['email']=resp['email']
             session['city']=resp['city']
             session['state']=resp['state']
-        
-         
+            session['user_id']=resp['user_id']
             return redirect('/dashboard')
         else:
             flash('Login unsuccessful. Please check your username and password.', 'danger')
@@ -176,3 +174,7 @@ def registration():
             return redirect(url_for('authentication.registration'))
     return render_template('registration.html',form=form)
 
+@authentication.route('/myliquorcabinet')
+def myliquorcabinet():
+
+    return render_template('myliquorcabinet.html')

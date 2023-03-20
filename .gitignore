@@ -12,3 +12,4 @@ env/*
 Lib/*
 flask_session
 pyvenv.cfg
+__pycache__/*

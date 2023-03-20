@@ -8,7 +8,6 @@ function sendLog ($message){
 
     $encodedMessage = json_encode($message);    
 
-
     $connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test','testHost');
 
     $channel = $connection->channel();

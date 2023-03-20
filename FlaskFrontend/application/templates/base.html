@@ -11,7 +11,7 @@
             {{ bootstrap.load_css() }}
         {% endblock %}
 
-        <title>Your page title</title>
+        <title>My Liquor Cabinet</title>
     {% endblock %}
 </head>
 
@@ -31,15 +31,16 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <div class="navbar-nav mr-auto">
                     {{ render_nav_item('homepage.about','About' ) }}
+                    {{ render_nav_item('events.events','Search for Events' ) }}
                     {{ render_nav_item('drinkwithyoureyes.drinkwithyoureyes','Drink with your eyes' ) }}
                     {{ render_nav_item('apiSearch.apiSearch','cocktail search' ) }}
-                    {{ render_nav_item('homepage.create_cocktail','search by ingredients' ) }}
-                   
+                    {{ render_nav_item('jqueryExample.jquerytestFunct','dynamic update test' ) }}
                     {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
                     {{ render_nav_item('authentication.registration','Register' ) }}
                     {% endif %}
                     {% if session.sessionID %}
+                    {{ render_nav_item('myliquorcabinet.liquorcabinet','My Liquor Cabinet' ) }}
                     {{ render_nav_item('authentication.edit_profile','Edit Profile' ) }}
                     {{ render_nav_item('authentication.logout', 'Logout', button=True) }}
                     {% endif %}
@@ -59,9 +60,8 @@
 <footer>
     Footer Goes Here
 </footer>
-{% block scripts %}
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-
+{% block scripts %}<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="/static/main.js"></script>
     <!-- Optional JavaScript -->
     {{ bootstrap.load_js() }}
 {% endblock %}

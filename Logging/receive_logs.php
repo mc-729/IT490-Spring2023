@@ -6,10 +6,10 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 $connection = new AMQPStreamConnection('localhost', 5672, 'test', 'test','testHost');
 $channel = $connection->channel();
 
-$channel->exchange_declare('eventFanout1', 'fanout', false, false, false);
+$channel->exchange_declare('eventFanout', 'fanout', false, true, false);
 
 list($queue_name, ,) = $channel->queue_declare("", false, false, true, false);
-$channel->queue_bind($queue_name,'eventFanout1');
+$channel->queue_bind($queue_name,'eventFanout');
 
 echo "Starting Logs Server".PHP_EOL;
 function doLog($msg,$type,$origin)
@@ -32,6 +32,10 @@ $callback = function ($msg) {
 
         case "frontend":
             $originator = 'Frontend Server:';
+            return doLog($decodedMsg['message'], $decodedMsg['type'], $originator,);
+
+        case "API":
+            $originator = 'API Server:';
             return doLog($decodedMsg['message'], $decodedMsg['type'], $originator,);
         
         }

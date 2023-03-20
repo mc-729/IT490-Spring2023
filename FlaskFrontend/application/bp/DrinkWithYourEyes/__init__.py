@@ -45,7 +45,12 @@ def drinkwithyoureyes():
     else:
 
         client = RabbitMQClient('logServer')
-        client.publish("Front end: DrinkWithYourEyes could not render template" )
+        request2 = {}
+        request2['type'] = "error"
+        request2['service'] = "frontend"
+        request2['message'] = "DrinkWithYourEyes could not render the template: "
+        json.dumps(request2)
+        client.publish(request2)
 
         return "something broke" 
 

@@ -95,11 +95,9 @@ def apiSearch():
             }
 
             try:
-                request2 = {'type': searchtype,
-                            'operation': 's',
-                            'searchTerm': searchTerm}
+
                 response = client.send_request(request_dict)
-                
+             
                 #return response
                 response = json.loads(response)
                 
@@ -114,7 +112,12 @@ def apiSearch():
             except Exception as e:
 
                 client = RabbitMQClient('logServer')
-                client.publish("Front end: " + str(e))
+                request2 = {}
+                request2['type'] = "error"
+                request2['service'] = "frontend"
+                request2['message'] = "Something went wrong in API search : "+ str(e)
+                json.dumps(request2)
+                client.publish(request2)
                 print(str(e))
 
                 print('Something went wrong in API search : '+ str(e))

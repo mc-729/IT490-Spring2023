@@ -28,6 +28,18 @@ def getServer(servername:str):
             'EXCHANGE_TYPE': 'topic',
             'AUTO_DELETE': True
         }
+    elif servername == 'logServer':
+        return {
+            'BROKER_HOST': '127.0.0.1',
+            'BROKER_PORT': '5672',
+            'USER': 'test',
+            'PASSWORD': 'test',
+            'VHOST': 'testHost',
+            'EXCHANGE': 'eventFanout',
+            'QUEUE': 'Queue1',
+            'EXCHANGE_TYPE': 'fanout',
+            'AUTO_DELETE': True
+        }
     else:
         raise ValueError(f"Invalid server name: {servername}")
 

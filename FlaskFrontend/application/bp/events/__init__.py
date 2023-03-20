@@ -34,6 +34,8 @@ def events():
                 #return jsonify(response)
                 data = response
             except Exception as e:
+                client = RabbitMQClient('logServer')
+                client.publish("Front end: Events have an error" + str(e))
                 print(str(e))
     else:
         response = []

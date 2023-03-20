@@ -7,7 +7,6 @@ require_once 'rabbitMQLib.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
 
 
-
 function loginAuth($username, $password)
 {
     $conn = dbConnection();
@@ -188,6 +187,7 @@ function logout($sessionid)
 }
 
 
+
 function eventInsert($name, $UID, $description, $date, $url, $image)
 {
     $conn = dbConnection();
@@ -245,6 +245,7 @@ function eventDelete($name, $UID)
 
 function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName)
 {
+
     // Connect to the database
     $conn = dbConnection();
 
@@ -488,6 +489,7 @@ function retrieveRecipes($sessionid)
         return $resp;
     }
 }
+
 function DeleteRecipe($sessionID, $drinkName)
 {
     $conn = dbconnection();
@@ -518,9 +520,7 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
         //$recipedata = str_replace("'", '"', $recipedata);
         // $recipedata = str_replace("None", "null", $recipedata);
         // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
-
-
-        echo $recipedata . PHP_EOL;
+            echo $recipedata . PHP_EOL;
         $recipedata = json_encode($recipedata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $conn = dbConnection();
         $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
@@ -539,10 +539,63 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
 }
 
 
-function myLiquorCabinetUpdateIngredients($sessionid, $user_ID, $recipeName, $ingredients)
-{
-    // Connect to the database
-    $conn = dbConnection();
+
+function requestEvents($timeleft){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
+	$result = mysqli_query($conn, $query);
+	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+	mysqli_close($conn);
+	return $rows;
+}
+
+
+
+function updateDates(){
+	$conn = dbConnection();
+    $query = "SELECT * FROM IT490.events";
+	$result = mysqli_query($conn, $query);
+    $today = date("Y-m-d");
+    while ($rows = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+        $eventId = $rows['id'];
+        $eventDate = $rows['startdate'];
+        $timeleft = (strtotime($eventDate) - strtotime($today));
+        $days = floor($timeleft / (60 * 60 *24));
+        $query = "UPDATE IT490.events SET timeleft = $days WHERE id = $eventId";
+
+        if (mysqli_query($conn, $query)) {
+            echo 'Timeleft updated' . PHP_EOL;
+        } else {
+            echo "we failed to update bbby" . PHP_EOL;
+            return false;
+        }
+    }
+	mysqli_close($conn);
+	return true;
+
+} // End requestEvents
+
+function fetchSearchResultsCached($query)
+
+
+{  
+    try{
+     echo"did we make it here?". PHP_EOL;
+    
+     $strQuery=implode(',',$query);
+	$conn=dbConnection();
+	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
+	$result = mysqli_query($conn, $sql);
+	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+	$count = mysqli_num_rows($result);
+	
+
+
+
+	if ($count == 0) {
+		echo "it was not in cache";
+        $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
+
 
     //from function UpdateProfile
     if (doValidate($sessionid)) {
@@ -624,14 +677,13 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
 
 function requestProcessor($request)
 {
-
     echo 'received request' . PHP_EOL;
     var_dump($request);
     if (!isset($request['type'])) {
         return 'ERROR: unsupported message type';
     }
-    switch ($request['type']) {
-        case 'Login':
+    switch ($request['type']) 
+       { case 'Login':
             return loginAuth($request['username'], $request['password']);
         case 'Register':
             return registrationInsert(
@@ -642,11 +694,11 @@ function requestProcessor($request)
                 $request['lastName']
             );
         case 'validate_session':
-
             return doValidate($request['sessionID']);
         case 'Logout':
             return logout($request['sessionID']);
         case 'API_CALL':
+
             return fetchSearchResultsCached($request['key'],$request['loginStatus']);
         case "Update":
 			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
@@ -665,7 +717,8 @@ function requestProcessor($request)
 
         case "updateMLC":
             return updateUserMLC($request['sessionID'], $request['ingName'], $request['amount'], $request['measurementType']);
-
+             case "UpdateStartDates":
+            return updateDates();
         case "deleteRecipe":
             return DeleteRecipe($request['sessionID'], $request['drinkName']);
         
@@ -674,11 +727,12 @@ function requestProcessor($request)
     
 
     }
-    //$callLogin = array($callLogin => doLogin($username,$password)
+   
     return [
         'returnCode' => '0',
         'message' => 'Server received the request and processed it.',
     ];
+
 } // End requestProcessor
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');

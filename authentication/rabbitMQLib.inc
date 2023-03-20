@@ -127,6 +127,7 @@ class rabbitMQServer
 			{
 				$channel->wait();
 			}
+			
 		}
 		catch (Exception $e)
 		{

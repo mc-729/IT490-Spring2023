@@ -540,14 +540,6 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
 
 
 
-function requestEvents($timeleft){
-	$conn = dbConnection();
-    $query = "SELECT * FROM IT490.events WHERE timeleft <= '$timeleft'";
-	$result = mysqli_query($conn, $query);
-	$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-	mysqli_close($conn);
-	return $rows;
-}
 
 
 
@@ -575,74 +567,7 @@ function updateDates(){
 
 } // End requestEvents
 
-function fetchSearchResultsCached($query)
 
-
-{  
-    try{
-     echo"did we make it here?". PHP_EOL;
-    
-     $strQuery=implode(',',$query);
-	$conn=dbConnection();
-	$sql="SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
-	$result = mysqli_query($conn, $sql);
-	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-	
-
-
-
-	if ($count == 0) {
-		echo "it was not in cache";
-        $client = new rabbitMQClient('RabbitMQConfig.ini', 'APIServer');
-
-
-    //from function UpdateProfile
-    if (doValidate($sessionid)) {
-        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
-        $result = mysqli_query($conn, $sql);
-        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-        $userid = $row['UID'];
-
-
-        //SQL select statement to then update said ingredients
-        $sql2 = "SELECT Ingredients FROM IT490.Cocktails WHERE User_ID = $user_ID";
-        $result2 = $conn->query($sql2);
-        $row2 = $result2->fetch_assoc();
-        $currentIngredients = json_decode($row2['Ingredients'], true);
-
-        //Update Ingredients
-        foreach ($ingredients as $ingredientName => $updatedIngredients) {
-            if ($updatedIngredients > 0) { //Change the current Ingredient quantity to its updated one
-                $currentIngredients[$ingredientName] = $updatedIngredients;
-            } else {
-                unset($currentIngredients[$ingredientName]); //if 0 then unset to remove
-            }
-        }
-
-        //Update cocktails table with updated Ingredeints
-        $updatedIngredients = json_encode($currentIngredients);
-        $sql3 = "UPDATE IT490.Cocktails SET Ingredients = '$updatedIngredients' WHERE User_ID = $user_ID";
-        if ($conn->query($sql3) === FALSE) {
-            echo "Error, could not update ingredients: " . $conn->error . PHP_EOL;
-        }
-    }
-
-
-    /*
-   //Get information/data from the JSON file
-   $info = json_decode(file_get_contents('ingredients.json'), true);
-   
-   //Update and or remove Ingredient(s)
-   if ($ingredientQuantity > 0) { //if ingredient quantity exists, then update the quantity by adding or removing
-       $info[$ingredientName] = $ingredientQuantity;
-   } else {
-       unset($info[$ingredientName]); //completely remove ingredient if it becomes 0
-   }
-   
-   file_put_contents('ingredients.json', json_encode($info));
-   */
-}
 
 
 function updateUserMLC($sessionid, $ingName, $amount, $measurementType){

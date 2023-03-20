@@ -205,8 +205,8 @@ function eventInsert($name, $UID, $description, $date, $url, $image)
     if (mysqli_query($conn, $sqlInsert)) {
         echo 'Event Saved';
         echo $sqlInsert;
-        $resp = ['login_status' => true];
-        return $resp;
+        
+        return true;
     } else {
         $msg = 'Error with query';
         $request = [];
@@ -215,10 +215,33 @@ function eventInsert($name, $UID, $description, $date, $url, $image)
         $request['message'] = $msg;
         sendLog($request);
         echo "we failed to insert bbby";
+        return false;
     }
 } // End eventInsert
 
+function eventDelete($name, $UID)
+{
+    $conn = dbConnection();
+    echo "DB connected";
 
+    $sql = "DELETE FROM IT490.events WHERE name = '$name' AND UID = '$UID'";
+
+    if (mysqli_query($conn, $sql)) {
+        echo 'Event Deleted' . PHP_EOL;
+        echo $sql;
+        
+        return true;
+    } else {
+        $msg = 'Error with query' . PHP_EOL;
+        $request = [];
+        $request['type'] = 'error';
+        $request['service'] = 'database';
+        $request['message'] = $msg;
+        sendLog($request);
+        echo "we failed to delete bbby" . PHP_EOL;
+        return false;
+    }
+} // End eventDelete
 
 function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName)
 {
@@ -645,6 +668,10 @@ function requestProcessor($request)
 
         case "deleteRecipe":
             return DeleteRecipe($request['sessionID'], $request['drinkName']);
+        
+        case "DeleteEvent":
+            return eventDelete($request['name'], $request['UID']);
+    
 
     }
     //$callLogin = array($callLogin => doLogin($username,$password)

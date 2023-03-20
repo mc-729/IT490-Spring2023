@@ -11,6 +11,7 @@ bp_events = Blueprint('events', __name__, template_folder='templates')
 
 @bp_events.route('/sendEventData', methods=['GET', 'POST'])
 def sendEventData():
+    action = request.args.get('action')
     data = request.get_json()
     UID = session["user_id"]
 
@@ -23,16 +24,26 @@ def sendEventData():
     eventDate = ast.literal_eval(data)["date"]["start_date"]
 
     client = RabbitMQClient('testServer')
-    request_dict = {
-        'type': 'SaveEvent',
-        'name': eventName,
-        'date': eventDate,
-        'image': eventImage,
-        'description': eventDescription,
-        'URL': eventURL,
-        'UID': UID
-    }
-
+    
+    if action == 'save':
+        request_dict = {
+            'type': 'SaveEvent',
+            'name': eventName,
+            'date': eventDate,
+            'image': eventImage,
+            'description': eventDescription,
+            'URL': eventURL,
+            'UID': UID
+        }        
+    elif action == 'unsave':
+        request_dict = {
+            'type': 'DeleteEvent',
+            'name': eventName,
+            'UID': UID
+        }
+    else:
+        return jsonify({"status": "error", "message": "Invalid action"})
+    
     response = client.send_request(request_dict)
     if (response):
         response = {"status": "success",

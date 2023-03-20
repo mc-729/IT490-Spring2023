@@ -10,7 +10,7 @@
         {% for d in data %}
         <div class="col-sm-4">
             <div class="card" data-event-id="{{ d.title }}">
-                    <img class="card-img-top" src="{{ d.image }}" alt="">
+                <img class="card-img-top h-100 object-fit-cover" src="{{ d.image }}" alt="Card image cap">
                     <div class="card-body">
                         <h5 class="card-title">{{ d.title }}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">{{ d.description }}</h6>

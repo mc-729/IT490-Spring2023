@@ -74,16 +74,12 @@ $(document).ready(function() {
 
     // Toggle the like status for both the card button and the modal button
     
-    const targetUrl = '/sendEventData';
+    const targetUrl = '/sendEventData?action=' + (isLiked ? 'save' : 'unsave')
 
     // Construct the ID of the hidden input field based on the idDrink
     const hiddenEventId = 'hidden-event-' + idEvent;
-    const hiddenDateId = 'hidden-date-' + idEvent;
     const hiddenEvent = document.getElementById(hiddenEventId);
-    const hiddenDate = document.getElementById(hiddenDateId);
     const eventData = hiddenEvent.value;  // Assuming the value is a JSON string
-    const dateData = hiddenDate.value;
-    const combinedData = {event:eventData, date:dateData}
 
     $.ajax({
       url: targetUrl,
@@ -93,7 +89,7 @@ $(document).ready(function() {
       success: function(response) {
         const successMessage = 'Data sent successfully!';
         $('#success-message').html(successMessage).fadeIn(500).delay(3000).fadeOut(500);
-        toggleLikeStatus(cardButton, isLiked);
+        saveStatus(cardButton, isLiked);
       },
       error: function(xhr) {
         // Handle failed POST request (e.g., show an error message)
@@ -101,6 +97,7 @@ $(document).ready(function() {
       }
     });
   };
+
   window.submitIngredient = function(buttonElement) {
     const listItem = $(buttonElement).closest('.list-group-item');
     const ingredient = listItem.find('.ingredient-name').text();

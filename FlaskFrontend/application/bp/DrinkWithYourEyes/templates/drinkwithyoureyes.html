@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
+{% from 'pagination.html' import render_pagination %}
 
 {% block content %}
 <h1>Drink with your eyes</h1>
@@ -9,32 +10,34 @@
   <head>
     <title>Countdown Timer</title>
     <script>
-      function countdown() {
-        var timer = 30;
-        var interval = setInterval(function() {
-          timer--;
-          document.getElementById("timer").innerHTML = timer;
-          if (timer === 0) {
-            clearInterval(interval);
-            location.reload();
-          }
-        }, 1000);
-      }
-      window.onload = countdown;
+      var count = 30;
+      var countdown = setInterval(function() {
+        count--;
+        document.getElementById("countdown").innerHTML = count;
+        if (count == 0) {
+          clearInterval(countdown);
+          var currentPage = {{ pagination.page }};
+          console.log(currentPage);
+          var nextPage = currentPage + 1;
+          window.location.href = "{{ url_for('drinkwithyoureyes.your_view_function', page=nextPage) }}";
+        }
+      }, 1000);
     </script>
-  </head>
-  <body>
-    <h2>Time until new drinks: <span id="timer"></span></h2>
-  </body>
+    
+    <p>You will be redirected to the next page in <span id="countdown">30</span> seconds.</p>
+    
+    {{ pagination.links }}
+    
 </html>
 
+
+
 {% if data %}
-<div class="container">
     <div class="row" id="card-container">
         {% for d in data %}
         <div class="col-sm-4">
             <div class="card">
-                <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                <img class="card-img-top" id="{{ d.strDrinkThumb }}"src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                 <div class="card-body">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#modal-{{ d.idDrink }}">Details</button>
@@ -44,6 +47,12 @@
         {% endfor %}
     </div>
 </div>
+<div id="wrapper" style="display: none;">
+  <div id="pagination" class="d-flex justify-content-center">
+    {{ render_pagination(pagination, 'drinkwithyoureyes.your_view_function', pagination.page) }}
+  </div>
+</div>
+
 {% for d in data %}
 <div class="modal fade" id="modal-{{ d.idDrink }}" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}-label"
             aria-hidden="true">

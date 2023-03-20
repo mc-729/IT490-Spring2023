@@ -1,6 +1,6 @@
 
 import json
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, session
 #from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton, EventsForm
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
@@ -17,6 +17,8 @@ def events():
         location = city +', '+ state
 
         if search and location:
+            sessionID=None
+            if 'sessionID' in session: sessionID=session['sessionID']
             client = RabbitMQClient('testServer')
             try:
                 request_dict = {
@@ -26,7 +28,9 @@ def events():
                         'operation': 's',
                         'searchTerm': search,
                         'location' : location
-                    }
+                        
+                    },
+                     'loginStatus':sessionID
                 }
                 response = client.send_request(request_dict)
                 response = json.loads(json.loads(response))[0]

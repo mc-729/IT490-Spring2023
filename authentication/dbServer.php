@@ -38,7 +38,9 @@ function loginAuth($username, $password)
                 'first_name' => $row['F_Name'],
                 'last_name' => $row['L_Name'],
                 'username' => $row['Username'],
-                'email' => $row['Email']
+                'email' => $row['Email'],
+                'city' => $row['City'],
+                'state' => $row['State']
             );
             return $resp;
         } else {
@@ -50,7 +52,9 @@ function loginAuth($username, $password)
                 'first_name' => null,
                 'last_name' => null,
                 'username' => null,
-                'email' => null
+                'email' => null,
+                'city' => null,
+                'state' => null
             );
             return $resp;
         }
@@ -63,7 +67,9 @@ function loginAuth($username, $password)
             'first_name' => null,
             'last_name' => null,
             'username' => null,
-            'email' => null
+            'email' => null,
+            'city' => null,
+            'state' => null
         );
         return $resp;
     }
@@ -98,7 +104,7 @@ function dbConnection()
     }
     return $conn;
 } // End dbConnection
-function registrationInsert($username, $password, $email, $firstName, $lastName)
+function registrationInsert($username, $password, $email, $firstName, $lastName, $city, $state)
 {
     $conn = dbConnection();
 
@@ -117,8 +123,8 @@ function registrationInsert($username, $password, $email, $firstName, $lastName)
     }
     //If Username/Email is not found in database/doesn't exist, do this
     else {
-        $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, Email, Password)
-                        VALUES ('$username','$firstName','$lastName','$email','$hashPassword')";
+        $sqlInsert = "INSERT into IT490.Users (Username,F_Name, L_Name, City, State, Email, Password)
+                        VALUES ('$username','$firstName','$lastName','$city', '$state', '$email','$hashPassword')";
 
         if (mysqli_query($conn, $sqlInsert)) {
             echo 'New user registered, welcome. ';
@@ -243,8 +249,8 @@ function eventDelete($name, $UID)
     }
 } // End eventDelete
 
-function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName)
-{
+
+function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName, $city, $state) {
 
     // Connect to the database
     $conn = dbConnection();
@@ -283,7 +289,22 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
         if (!empty($lastName)) {
             $sql .= " l_name='" . mysqli_real_escape_string($conn, $lastName) . "',";
         }
-
+          if (!empty($city)) {
+        $sql .= " city='".mysqli_real_escape_string($conn, $city)."',";
+    }
+    if (!empty($state)) {
+        $sql .= " state='".mysqli_real_escape_string($conn, $state)."',";
+    }
+    
+    // Remove the trailing comma from the SQL statement
+    $sql = rtrim($sql, ",");
+    
+    // Add the WHERE clause to the SQL statement
+    $sql .= " WHERE User_ID=".$userid;
+    
+    // Execute the SQL statement
+    $result = mysqli_query($conn, $sql);
+	if($result){return true;}
         // Remove the trailing comma from the SQL statement
         $sql = rtrim($sql, ",");
 
@@ -459,6 +480,7 @@ function getDrinkTotalRating($drinks,$loginStatus)
 
 
     }
+
     print_r($totalLikes) . PHP_EOL;
     return $drinks;
 }
@@ -641,7 +663,9 @@ function requestProcessor($request)
                 $request['password'],
                 $request['email'],
                 $request['firstName'],
-                $request['lastName']
+                $request['lastName'],
+                $request['city'],
+                $request['state']
             );
         case 'validate_session':
             return doValidate($request['sessionID']);
@@ -651,10 +675,15 @@ function requestProcessor($request)
 
             return fetchSearchResultsCached($request['key'],$request['loginStatus']);
         case "Update":
-			return updateProfile($request['sessionID'],$request['username'],$request['newPW'],$request['oldPW'],$request['email'],$request['firstName'],$request['lastName']);
+
+				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
+				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName'],$request['city'],$request['state']);
+
+		
         case 'SaveEvent':
             return eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['URL'], $request['image']);	
         case "Email":
+
             return requestEmail($request['userid']);
         case "Events":
             return requestEvents($request['timeleft']);

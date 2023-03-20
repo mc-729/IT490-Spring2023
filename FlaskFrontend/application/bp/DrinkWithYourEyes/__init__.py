@@ -4,6 +4,7 @@ import json
 import random
 from flask import Blueprint, jsonify, render_template, request, session
 from flask_modals import render_template_modal
+
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from application.jsonPgaination.JSONPagination import JSONPagination

@@ -49,14 +49,14 @@ def login():
      
         # Check if login was successful
         if resp['login_status']==True:
-          
             session['firstName']=resp['first_name']
             session['lastName']=resp['last_name']
             session['sessionID']=resp['session_id']
             session['username']=resp['username']
             session['email']=resp['email']
+            session['city']=resp['city']
+            session['state']=resp['state']
             session['user_id']=resp['user_id']
-         
             return redirect('/dashboard')
         else:
             flash('Login unsuccessful. Please check your username and password.', 'danger')
@@ -98,7 +98,9 @@ def edit_profile():
     form = EditProfileForm(first_name_placeholder= session["firstName"] 
                            , last_name_placeholder= session["lastName"] 
                             , username_placeholder=  session["username"]
-                            , email_placeholder=session["email"] )
+                            , email_placeholder=session["email"]
+                             , city_placeholder=session["city"]
+                             , state_placeholder=session["state"])
     
     
     if form.validate_on_submit():
@@ -110,7 +112,9 @@ def edit_profile():
             "lastName": form.last_name.data,
             "email": form.email.data,
             "username": form.username.data
-            , "newPW":form.new_password.data , "oldPW": form.old_password.data 
+            , "newPW":form.new_password.data , "oldPW": form.old_password.data,
+            "city": form.city.data,
+            "state": form.state.data 
 
         }
 
@@ -120,12 +124,15 @@ def edit_profile():
 
         if response:
            print("the form first name: "+ form.first_name.data+": last name "+form.last_name.data
-                 +": the email is  " + form.email.data + ": the username is" + form.username.data)
+                 +": the email is  " + form.email.data + ": the username is" + form.username.data
+                 + ":the city is " +form.city.data + ": the state is" + form.state.data)
             # Update session data with new values
            if form.first_name.data != "":session["firstName"] = form.first_name.data
            if form.last_name.data != "": session["lastName"] = form.last_name.data
            if form.email.data != "": session["email"] = form.email.data
            if form.username.data != "": session["username"] = form.username.data
+           if form.city.data != "": session["city"] = form.city.data
+           if form.state.data != "": session["state"] = form.state.data
 
            flash("Profile information updated successfully", "success")
            return redirect(url_for("authentication.edit_profile"))
@@ -143,6 +150,8 @@ def registration():
         password = request.form['password']
         first_name = request.form['fname']
         last_name = request.form['lname']
+        city = request.form['city']
+        state = request.form['state']
 
         client = RabbitMQClient('testServer')
         request_data = {
@@ -151,7 +160,9 @@ def registration():
             'password': password,
             'email': email,
             'firstName': first_name,
-            'lastName': last_name
+            'lastName': last_name,
+            'city': city,
+            'state': state
         }
         response = client.send_request(request_data)
       

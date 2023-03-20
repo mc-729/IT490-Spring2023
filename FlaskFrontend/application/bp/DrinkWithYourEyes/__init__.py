@@ -10,9 +10,12 @@ bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder=
 @bp_drinkwithyoureyes.route('/drinkwithyoureyes', methods=['GET','POST'])
 def drinkwithyoureyes():
     data = {}
+    like = LikeButton()
 
     searchtype = 'SearchByName'
     searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
+    sessionID=None
+    if 'sessionID' in session: sessionID=session['sessionID']
     if searchtype:
         client = RabbitMQClient('testServer')
         request_dict = {
@@ -21,14 +24,15 @@ def drinkwithyoureyes():
                     'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
-                }
+                },
+                'loginStatus':sessionID
             }           
         paginated_data , pagination = get_data()
         objLen = len(data)
         response = client.send_request(request_dict)
              
-        response= json.loads(json.loads(response))[0]
-        response= json.loads(response)["drinks"]
+      
+        response= json.loads(response)
 
    # if searchtype:
         
@@ -36,7 +40,7 @@ def drinkwithyoureyes():
    #     objLen = len(data)
       
     if(paginated_data):   
-        return render_template('drinkwithyoureyes.html', data=paginated_data, pagination=pagination )
+        return render_template('drinkwithyoureyes.html', data=paginated_data, pagination=pagination ,like=like)
     else:
 
         client = RabbitMQClient('logServer')
@@ -57,6 +61,8 @@ def get_data():
     searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
     session['searchtype'] = searchtype
     session['searchterm'] = searchTerm
+    sessionID=None
+    if 'sessionID' in session: sessionID=session['sessionID']
 
     client = RabbitMQClient('testServer')
     request_dict = {
@@ -65,12 +71,11 @@ def get_data():
                     'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
-                }
+                },
+                 'loginStatus':sessionID
             }   
     response = client.send_request(request_dict)
-    response= json.loads(json.loads(response))[0]
-    response= json.loads(response)["drinks"]
-
+    response= json.loads(response)
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Change this to the desired number of items per page
     pagination = JSONPagination(response, page, per_page)
@@ -81,6 +86,8 @@ def get_data():
 
 @bp_drinkwithyoureyes.route('/refreshOptions', methods=['GET', 'POST'])
 def your_view_function():
+    like = LikeButton()
+
     searchtype = 'SearchByName'
     searchTerm = random.choice('abcdefghijklmnopqrstuvwyxz')
     session['searchtype'] = searchtype
@@ -90,6 +97,9 @@ def your_view_function():
     pagination = None
 
     if('searchtype' in session and 'searchterm' in session):
+        sessionID=None
+        if 'sessionID' in session: sessionID=session['sessionID']
+        
         client = RabbitMQClient('testServer')
         request_dict = {
                 'type': 'API_CALL',
@@ -97,16 +107,17 @@ def your_view_function():
                     'type': searchtype,
                     'operation': 's',
                     'searchTerm': searchTerm
-                }
+                },
+                'loginStatus':sessionID
             }
         response = client.send_request(request_dict)
-        response = json.loads(json.loads(response))[0]
-        response = json.loads(response)["drinks"]
+   
+        response = json.loads(response)
         pagination = JSONPagination(response, page=page, per_page=10)
         paginated_response = pagination.get_page_items()
         
 
-    return render_template('drinkwithyoureyes.html',data = paginated_response ,pagination=pagination, page=page)
+    return render_template('drinkwithyoureyes.html',data = paginated_response ,pagination=pagination,like=like, page=page)
 
 
  

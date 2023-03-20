@@ -36,11 +36,17 @@
     <div class="row" id="card-container">
         {% for d in data %}
         <div class="col-sm-4">
-            <div class="card">
+            <div class="card" data-drink-id="{{ d.idDrink }}">
                 <img class="card-img-top" id="{{ d.strDrinkThumb }}"src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                 <div class="card-body">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#modal-{{ d.idDrink }}">Details</button>
+                 
+                    {% if not d.userLikes and  session.sessionID %}
+                    <button type="button" class="btn btn-secondary like-button"
+                    onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">like</button>
+                    {% endif %}
+                 
                 </div>
             </div>
         </div>
@@ -77,10 +83,13 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-                        <button type="button" class="btn btn-outline-secondary">
-                            <i class="bi bi-heart"></i> Like
-                        </button>
+                        {{ render_field(like.like, id='hidden-input-' + d.idDrink|string, value=d, hidden=True) }}
+                
+                        {% if not d.userLikes and  session.sessionID %}
+                        <button type="button" class="btn btn-secondary like-button"
+                        onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">like</button>
+                        {% endif %}
+                     
                     </div>
                 </div>
             </div>

@@ -447,7 +447,8 @@ function getDrinkTotalRating($drinks,$loginStatus)
     $totalLikes = array();
     $drinks = json_decode($drinks, true);
     $drinks = $drinks[0];
-    $drinks = json_decode($drinks, true);
+    if(is_string($drinks)){
+    $drinks = json_decode($drinks, true);}
     $drinks = $drinks['drinks'];
 
     $length = count($drinks);

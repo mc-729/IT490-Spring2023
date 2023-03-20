@@ -55,7 +55,7 @@ def login():
             session['sessionID']=resp['session_id']
             session['username']=resp['username']
             session['email']=resp['email']
-        
+            session['user_id']=resp['user_id']
          
             return redirect('/dashboard')
         else:

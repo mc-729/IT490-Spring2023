@@ -77,12 +77,13 @@ function loginAuth($username, $password)
 
 function dbConnection()
 {
-    $servername = 'localhost';
+    $servername = '192.168.191.69';
     $uname = 'testuser';
     $pw = '12345';
     $dbname = 'IT490';
+    $port = '2222';
     // Create connection
-    $conn = new mysqli($servername, $uname, $pw, $dbname);
+    $conn = new mysqli($servername, $uname, $pw, $dbname, $port);
 
     // Check connection
     if ($conn->connect_error) {

@@ -20,7 +20,7 @@ $sql = "CREATE TABLE IT490.UserCocktails(
     DrinkName VARCHAR(255) NOT NULL,
     Recipe JSON DEFAULT NULL,
 	  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	  PRIMARY KEY (DrinkName),
+	  PRIMARY KEY (DrinkName, User_ID), 
     FOREIGN KEY (User_ID) REFERENCES IT490.Users(User_ID)
     )";
 

@@ -117,3 +117,4 @@ def events():
     if form.validate_on_submit():
         pass
     return render_template('events.html', form=form, data=data, start_dates=start_dates, like=like)
+

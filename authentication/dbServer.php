@@ -644,7 +644,103 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
 }
 
 
+function GetSearch($sessionid){
+    // Connect to the database
+    $conn = dbConnection();
 
+    if (doValidate($sessionid)) {
+        echo "After the validate" . PHP_EOL;
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+    
+    $sql2 = "SELECT * FROM IT490.Users WHERE User_ID = '$userid'";
+    $result2 = mysqli_query($conn, $sql2);
+    $count = mysqli_num_rows($result2);
+    if ($count == 0 ) {
+            echo "An error occurred while getting results" . PHP_EOL;
+        } else {
+            $array1=mysqli_fetch_array($result2, MYSQLI_ASSOC);
+        }   
+    
+    $rumlist = array('Rum', 'Light rum', 'Dark rum', 'Anejo rum');
+    $whiskeylist = array('Whiskey', 'Blended whiskey', 'Bourbon', 'Irish whiskey');
+    $ginlist = array('Gin');
+    $brandylist = array('Brandy', 'Apricot Brandy', 'Apple Brandy', 'Cherry Brandy');
+    $vodkalist = array('Vodka', 'Lemon vodka', 'Peach vodka');
+    $tequilalist = array('Tequila');
+    $winelist = array('Red wine', 'White wine');
+    $rum = 0;
+    $whiskey = 0;
+    $gin = 0;
+    $brandy = 0;
+    $vodka = 0;
+    $tequila = 0;
+    $wine = 0;
+
+    $sql3 = "SELECT Recipe FROM IT490.UserCocktails";
+    $result3 = mysqli_query($conn, $sql3);
+    $count = mysqli_num_rows($result3);
+    if ($count == 0 ) {
+            echo "An error occurred while getting results" . PHP_EOL;
+        } else {
+            $array2=mysqli_fetch_all($result3, MYSQLI_ASSOC);
+        }   
+    }
+
+   
+    $output = array();
+    $Recipelist = array();
+    foreach ($array2 as $recipe){
+        array_push($Recipelist, $recipe['Recipe']);
+    }
+    /*
+    $Recipelist = array_map(function($value) {
+        return str_replace("'", "\"", $value);
+    }, $recipe['Recipe']);
+    $Recipelist = array_map(function($value) {
+        return str_replace("None", "null", $value);
+    }, $recipe['Recipe']);*/
+   
+    print_r($Recipelist);
+    
+    for ($i=0; $i<count($array2); $i++){
+        //$current = explode(",", $Recipelist[$i], true);
+        //echo gettype($current);
+        //print_r($current);
+
+        for ($j=0; $j<=15; $j++){
+            
+           
+            $strIngredient = "strIngredient" . $j;
+            
+            if (isset($current[$strIngredient])){
+                
+                if (in_array($Recipelist[$i][$strIngredient], $rumlist)){
+                    
+                    $rum = $rum + 1;
+                } elseif (in_array($Recipelist[$i][$strIngredient], $whiskeylist)){
+                    $whiskey = $whiskey + 1;
+                } elseif (in_array($Recipelist[$i][$strIngredient], $ginlist)){
+                    $gin = $gin + 1;
+                } elseif (in_array($Recipelist[$i][$strIngredient], $brandylist)){
+                    $brandy = $brandy + 1;
+                } elseif (in_array($Recipelist[$i][$strIngredient], $vodkalist)){
+                    $vodka = $vodka + 1;
+                } elseif (in_array($Recipelist[$i][$strIngredient], $tequilalist)){
+                    $tequila = $tequila + 1;
+                } elseif (in_array($Recipelist[$i][$strIngredient], $winelist)){
+                    $wine = $wine + 1;
+                } else {
+                    echo "No ingredient found" . PHP_EOL;
+                }
+            }
+        }
+    }
+    echo "vodka count:" . PHP_EOL;
+    print_r($vodka);
+}
 
 
 
@@ -706,6 +802,9 @@ function requestProcessor($request)
         
         case "DeleteEvent":
             return eventDelete($request['name'], $request['UID']);
+
+        //case "GetSearch":
+            //return getSearch($request['loginStatus']);
     
 
     }

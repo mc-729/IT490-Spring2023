@@ -89,11 +89,11 @@ class EventsForm(FlaskForm):
     class Meta:
         csrf = False
     
-    search = StringField('Search', validators=[DataRequired()])
-    city = StringField('City', validators=[DataRequired()])
-    state = StringField('State', validators=[DataRequired()])
+    search = StringField('Search')
+    city = StringField('City')
+    state = StringField('State')
     submit = SubmitField("search for events")
-    submit2 = SubmitField("recommend events")
+    #submit2 = SubmitField("recommend events")
 
 class IngredientsForm(FlaskForm):
     class SpiritCategory(FlaskForm):

@@ -385,7 +385,7 @@ function requestEvents($timeleft)
     return $rows;
 } // End requestEvents
 
-function fetchSearchResultsCached($query, $loginStatus)
+function fetchSearchResultsCached($query, $loginStatus,$filterby)
 
 
 {
@@ -420,7 +420,7 @@ function fetchSearchResultsCached($query, $loginStatus)
                 } else {
                     $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
                     echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
-                    $drinksList = getDrinkTotalRating($row['Results'], $loginStatus);
+                    $drinksList = getDrinkTotalRating($row['Results'], $loginStatus,$filterby);
 
 
                     return $drinksList;
@@ -432,7 +432,7 @@ function fetchSearchResultsCached($query, $loginStatus)
             if ($query['type'] == 'GoogleEventSearch') {
                 return $row['Results'];
             } else {
-                $drinksList = getDrinkTotalRating($row['Results'], $loginStatus);
+                $drinksList = getDrinkTotalRating($row['Results'], $loginStatus,$filterby);
                 return $drinksList;
             }
         }
@@ -443,7 +443,7 @@ function fetchSearchResultsCached($query, $loginStatus)
 }
 
 
-function getDrinkTotalRating($drinks, $loginStatus)
+function getDrinkTotalRating($drinks, $loginStatus,$filterby)
 
 {
     $conn = dbconnection();
@@ -483,10 +483,10 @@ function getDrinkTotalRating($drinks, $loginStatus)
             } else $drinks[$i]['userLikes'] = false;
            
         }
-
+        if($filterby){
         $test = ReccommendMe($userid, $drinks, $length);
         return $test;
-    }
+    }}
 
     print_r($totalLikes) . PHP_EOL;
     return $drinks;
@@ -503,7 +503,7 @@ function ReccommendMe($userID, $DrinkList, $length)
       
         array_push($ingredientList, $ingredient["ING_Name"]);
     }
-
+    $ReturnDrinkList=array();
 
 
     for ($i = 0; $i < $length; $i++) {
@@ -516,13 +516,17 @@ function ReccommendMe($userID, $DrinkList, $length)
                
                     echo  "we made itpast bool". $DrinkList[$i][$strIngredient] . PHP_EOL;
                     $DrinkList[$i]['show'] = true;
+                    array_push($ReturnDrinkList,$DrinkList[$i]);
                     break;
               
             }
+
+
         }
-     
+      
+      
     }
-    return $DrinkList;
+    return $ReturnDrinkList;
 }
 function retrieveRecipes($sessionid)
 
@@ -711,7 +715,7 @@ function requestProcessor($request)
             return logout($request['sessionID']);
         case 'API_CALL':
 
-            return fetchSearchResultsCached($request['key'], $request['loginStatus']);
+            return fetchSearchResultsCached($request['key'], $request['loginStatus'],$request['filterby']);
         case "Update":
 
             return updateProfile(

@@ -72,16 +72,12 @@ class RecipeForm(FlaskForm):
 class SearchForm(FlaskForm):
     class Meta:
         csrf = False
-    
     ans = RadioField('Search Type', choices=[
-        ('SearchByName', 'Search By Name'),
-        ('SearchBySingleIngredient', 'Search By Ingredient'),
-        ('GetCocktailDetailsByID', 'Search by ID'),
-        ('Random10Cocktails', 'Random 10 Cocktails'),
-        ('FilterByCategory', 'Filter by Category'),
-        ('ListIngredients', 'List Ingredients'),
-        ('SearchIngredientInfo', 'Search Ingredients Info')
-    ])
+           ('searchByName', 'search By Name'),
+        ('Feelin Lucky + Recommend', 'Feelin Lucky + Recommend'),
+        ('Feeling Lucky', 'Feeling Lucky'),
+        ('Recommend and Search by Name', 'Recommend and Search by Name')
+        ])
     searchValue = StringField('Search Value')
     submit = SubmitField("search for drinks")
 

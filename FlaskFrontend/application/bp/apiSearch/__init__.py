@@ -1,6 +1,7 @@
 
 import ast
 import json
+import random
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 
@@ -70,49 +71,78 @@ def apiSearch():
     page = int(request.args.get('page', 1))
     pagination = None
 
-    if form.validate_on_submit() and form.ans.data and form.searchValue.data:
-        session['searchtype'] = request.form['ans']
+    if form.validate_on_submit():
         session['searchTerm'] = request.form['searchValue']
-        return redirect(url_for('apiSearch.apiSearch', ans=session['searchtype'], searchValue=session['searchTerm'], page=1))
+       
+        if form.ans.data and'sessionID' in session:
+            SearchData=request.form['ans']
+            match  SearchData:
+                        case "Feelin Lucky + Recommend":
+                             session['searchTerm']= random.choice('abcdefghijklmnopqrstuvwyxz')
+                             session['filter']=True
+                        case "Feeling Lucky":
+                            session['searchTerm']= random.choice('abcdefghijklmnopqrstuvwyxz')
+                            session['filter']=False
+                        case"Recommend and Search by Name":
+                              session['filter']=True
+                        case"searchByName":
+                             session['filter']=False
+        elif form.ans.data=="searchByName":
+             session['searchTerm'] = request.form['searchValue']
+        elif form.ans.data  =="Feeling Lucky":
+             session['searchTerm']= random.choice('abcdefghijklmnopqrstuvwyxz')
+        else:
+             flash("You have to be logged in to use the other search functions", "error")
+        
+            
+   
+            
+        return redirect(url_for('apiSearch.apiSearch',  searchValue=session['searchTerm'], page=1))
 
-    if 'searchtype' in session and 'searchTerm' in session:
-        searchtype = session['searchtype']
+    if 'searchTerm'   in session:
+       
         searchTerm = session['searchTerm']
         sessionID=None
         if 'sessionID' in session: sessionID=session['sessionID']
         
 
-        if searchtype and searchTerm:
-            client = RabbitMQClient('testServer')
+      
+        client = RabbitMQClient('testServer')
+        if 'filter' in session:
             request_dict = {
                 'type': 'API_CALL',
                 'key': {
-                    'type': searchtype,
+                    'type': 'SearchByName',
                     'operation': 's',
                     'searchTerm': searchTerm
                 },
-                'loginStatus':sessionID
+                'loginStatus':sessionID,
+                'filterby': session['filter']
+            }
+        else:      
+            request_dict = {
+                'type': 'API_CALL',
+                'key': {
+                    'type': 'SearchByName',
+                    'operation': 's',
+                    'searchTerm': searchTerm
+                },
+                'loginStatus':sessionID,
+                'filterby':False
             }
 
-            try:
-                request2 = {'type': searchtype,
-                            'operation': 's',
-                            'searchTerm': searchTerm}
+        try:
+              
                 response = client.send_request(request_dict)
-                
                 #return response
                 response = json.loads(response)
-             
-                
-            
-                
                 #print(json.dumps(pageDrinkList, indent=2))
                 page = request.args.get('page', 1, type=int)
                 per_page = 10  # Change this to the desired number of items per page
                 pagination = JSONPagination(response, page, per_page)
                 paginated_response = pagination.get_page_items()
 
-            except Exception as e:
+        except Exception as e:
 
                 client = RabbitMQClient('logServer')
                 client.publish("Front end: " + str(e))

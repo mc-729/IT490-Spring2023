@@ -1,7 +1,6 @@
 import json
 import random
 from flask import Blueprint, jsonify, render_template, request, session
-from flask_modals import render_template_modal
 
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
@@ -45,7 +44,12 @@ def drinkwithyoureyes():
     else:
 
         client = RabbitMQClient('logServer')
-        client.publish("Front end: DrinkWithYourEyes could not render template" )
+        request2 = {}
+        request2['type'] = "error"
+        request2['service'] = "frontend"
+        request2['message'] = "DrinkWithYourEyes could not render the template: "
+        json.dumps(request2)
+        client.publish(request2)
 
         return "something broke" 
 

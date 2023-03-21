@@ -106,8 +106,12 @@ def events():
 
             except Exception as e:
                 client = RabbitMQClient('logServer')
-                client.publish("Front end: Events have an error" + str(e))
-                print(str(e))
+                request2 = {}
+                request2['type'] = "error"
+                request2['service'] = "frontend"
+                request2['message'] = "Something went wrong in Events Search: "+ str(e)
+                json.dumps(request2)
+                client.publish(request2)               
     else:
         response = []
     if form.validate_on_submit():

@@ -1,4 +1,4 @@
-import sys
+"import sys
 sys.path.insert(0,'/var/www/MyLiqourCabinet')
 activate_this='/home/jonathan/.local/share/virtualenvs/MyLiqourCabinet-hAq9yTIV/bin/activate_this.py'
 with open (activate_this) as file_:

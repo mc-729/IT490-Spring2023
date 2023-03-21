@@ -211,7 +211,7 @@ function eventInsert($name, $UID, $description, $date, $url, $image)
     if (mysqli_query($conn, $sqlInsert)) {
         echo 'Event Saved';
         echo $sqlInsert;
-        
+
         return true;
     } else {
         $msg = 'Error with query';
@@ -235,7 +235,7 @@ function eventDelete($name, $UID)
     if (mysqli_query($conn, $sql)) {
         echo 'Event Deleted' . PHP_EOL;
         echo $sql;
-        
+
         return true;
     } else {
         $msg = 'Error with query' . PHP_EOL;
@@ -250,7 +250,8 @@ function eventDelete($name, $UID)
 } // End eventDelete
 
 
-function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName, $city, $state) {
+function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email, $firstName, $lastName, $city, $state)
+{
 
     // Connect to the database
     $conn = dbConnection();
@@ -289,22 +290,24 @@ function updateProfile($sessionid, $username, $newpassword, $oldpassword, $email
         if (!empty($lastName)) {
             $sql .= " l_name='" . mysqli_real_escape_string($conn, $lastName) . "',";
         }
-          if (!empty($city)) {
-        $sql .= " city='".mysqli_real_escape_string($conn, $city)."',";
-    }
-    if (!empty($state)) {
-        $sql .= " state='".mysqli_real_escape_string($conn, $state)."',";
-    }
-    
-    // Remove the trailing comma from the SQL statement
-    $sql = rtrim($sql, ",");
-    
-    // Add the WHERE clause to the SQL statement
-    $sql .= " WHERE User_ID=".$userid;
-    
-    // Execute the SQL statement
-    $result = mysqli_query($conn, $sql);
-	if($result){return true;}
+        if (!empty($city)) {
+            $sql .= " city='" . mysqli_real_escape_string($conn, $city) . "',";
+        }
+        if (!empty($state)) {
+            $sql .= " state='" . mysqli_real_escape_string($conn, $state) . "',";
+        }
+
+        // Remove the trailing comma from the SQL statement
+        $sql = rtrim($sql, ",");
+
+        // Add the WHERE clause to the SQL statement
+        $sql .= " WHERE User_ID=" . $userid;
+
+        // Execute the SQL statement
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            return true;
+        }
         // Remove the trailing comma from the SQL statement
         $sql = rtrim($sql, ",");
 
@@ -382,7 +385,7 @@ function requestEvents($timeleft)
     return $rows;
 } // End requestEvents
 
-function fetchSearchResultsCached($query,$loginStatus)
+function fetchSearchResultsCached($query, $loginStatus,$filterby)
 
 
 {
@@ -411,26 +414,26 @@ function fetchSearchResultsCached($query,$loginStatus)
                 $sql = "SELECT * FROM IT490.Cache WHERE SearchKey = '$strQuery'";
                 $result = mysqli_query($conn, $sql);
                 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
- 
-                if ($query['type'] == 'GoogleEventSearch'){
+
+                if ($query['type'] == 'GoogleEventSearch') {
                     return $row['Results'];
                 } else {
-                $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
-                echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
-                $drinksList = getDrinkTotalRating($row['Results'],$loginStatus);
-              
-               
-                return $drinksList;
+                    $drinks = mysqli_fetch_array($result, MYSQLI_ASSOC);
+                    echo "ADDING LIKES TO RESPONSE ARRAY" . PHP_EOL;
+                    $drinksList = getDrinkTotalRating($row['Results'], $loginStatus,$filterby);
+
+
+                    return $drinksList;
                 }
             }
         } else if ($count != 0) {
             echo "it was in cache" . PHP_EOL;
 
-            if ($query['type'] == 'GoogleEventSearch'){
+            if ($query['type'] == 'GoogleEventSearch') {
                 return $row['Results'];
             } else {
-            $drinksList = getDrinkTotalRating($row['Results'],$loginStatus);
-            return $drinksList;
+                $drinksList = getDrinkTotalRating($row['Results'], $loginStatus,$filterby);
+                return $drinksList;
             }
         }
     } catch (Exception $e) {
@@ -440,15 +443,16 @@ function fetchSearchResultsCached($query,$loginStatus)
 }
 
 
-function getDrinkTotalRating($drinks,$loginStatus)
+function getDrinkTotalRating($drinks, $loginStatus,$filterby)
 
 {
     $conn = dbconnection();
     $totalLikes = array();
     $drinks = json_decode($drinks, true);
     $drinks = $drinks[0];
-    if(is_string($drinks)){
-    $drinks = json_decode($drinks, true);}
+    if (is_string($drinks)) {
+        $drinks = json_decode($drinks, true);
+    }
     $drinks = $drinks['drinks'];
 
     $length = count($drinks);
@@ -462,7 +466,7 @@ function getDrinkTotalRating($drinks,$loginStatus)
         $num_likes = count($rows);
         $drinks[$i]['likes'] = $num_likes;
     }
-    if(isset($loginStatus)){
+    if (isset($loginStatus)) {
         $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$loginStatus'";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -470,22 +474,60 @@ function getDrinkTotalRating($drinks,$loginStatus)
         for ($i = 0; $i < $length; $i++) {
             $drinkName = $drinks[$i]["strDrink"];
             $drinkName = mysqli_real_escape_string($conn, $drinkName);
-            $sql = "SELECT DrinkName FROM IT490.UserCocktails WHERE DrinkName = '$drinkName' and User_ID='$userid'" ;
+            $sql = "SELECT DrinkName FROM IT490.UserCocktails WHERE DrinkName = '$drinkName' and User_ID='$userid'";
             $result = $conn->query($sql);
             $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
             $num_likes = count($rows);
-            if($num_likes>0){
-            $drinks[$i]['userLikes'] = true;}
-            else $drinks[$i]['userLikes'] = false;
+            if ($num_likes > 0) {
+                $drinks[$i]['userLikes'] = true;
+            } else $drinks[$i]['userLikes'] = false;
+           
         }
-
-
-    }
+        if($filterby){
+        $test = ReccommendMe($userid, $drinks, $length);
+        return $test;
+    }}
 
     print_r($totalLikes) . PHP_EOL;
     return $drinks;
 }
+function ReccommendMe($userID, $DrinkList, $length)
+{
+    $conn = dbConnection();
+    $sql = "SELECT ING_Name from UserMLC where User_ID ='$userID'";
+    $result = $conn->query($sql);
+    $response = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    $ingredientList=array();
+    foreach ($response as $ingredient)
+    {
+      
+        array_push($ingredientList, $ingredient["ING_Name"]);
+    }
+    $ReturnDrinkList=array();
 
+
+    for ($i = 0; $i < $length; $i++) {
+        $DrinkList[$i]['show'] = false;
+
+        for ($x = 0; $x <= 15; $x++) {
+            $strIngredient = "strIngredient" . $x;
+            if (isset($DrinkList[$i][$strIngredient]) && in_array($DrinkList[$i][$strIngredient],   $ingredientList)) {
+           
+               
+                    echo  "we made itpast bool". $DrinkList[$i][$strIngredient] . PHP_EOL;
+                    $DrinkList[$i]['show'] = true;
+                    array_push($ReturnDrinkList,$DrinkList[$i]);
+                    break;
+              
+            }
+
+
+        }
+      
+      
+    }
+    return $ReturnDrinkList;
+}
 function retrieveRecipes($sessionid)
 
 {
@@ -503,26 +545,26 @@ function retrieveRecipes($sessionid)
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
-        $userIngredients=GetUsieringredients($userid);
+        $userIngredients = GetUsieringredients($userid);
         print_r($ingredients);
         $resp = array(
             'ingredients' => $ingredients,
             'drinkList' => $drinkList,
-            'userIngredients'=> $userIngredients
+            'userIngredients' => $userIngredients
 
         );
         return $resp;
     }
 }
 
-function GetUsieringredients($userID){
+function GetUsieringredients($userID)
+{
 
- $conn=dbConnection();
- $sql="SELECT ING_Name, Amount,Measurement_Type from UserMLC where User_ID ='$userID'";
- $result = $conn->query($sql);
- $response=mysqli_fetch_all($result, MYSQLI_ASSOC);
- return $response;
-
+    $conn = dbConnection();
+    $sql = "SELECT ING_Name, Amount,Measurement_Type from UserMLC where User_ID ='$userID'";
+    $result = $conn->query($sql);
+    $response = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    return $response;
 }
 
 function DeleteRecipe($sessionID, $drinkName)
@@ -535,12 +577,10 @@ function DeleteRecipe($sessionID, $drinkName)
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
         $sql = "DELETE FROM IT490.UserCocktails where User_ID=$userid and DrinkName='$drinkName'";
-        
+
 
         if ($conn->query($sql))  return  ['Status' => true];
         else  return  ['Status' => false];
-
-
     }
 }
 
@@ -555,7 +595,7 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
         //$recipedata = str_replace("'", '"', $recipedata);
         // $recipedata = str_replace("None", "null", $recipedata);
         // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
-            echo $recipedata . PHP_EOL;
+        echo $recipedata . PHP_EOL;
         $recipedata = json_encode($recipedata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $conn = dbConnection();
         $stmt = $conn->prepare('INSERT INTO IT490.UserCocktails (User_ID,Recipe,DrinkName) VALUES (?,?,?)');
@@ -578,16 +618,17 @@ function updateRecipeList($sessionid, $recipedata, $drinkname)
 
 
 
-function updateDates(){
-	$conn = dbConnection();
+function updateDates()
+{
+    $conn = dbConnection();
     $query = "SELECT * FROM IT490.events";
-	$result = mysqli_query($conn, $query);
+    $result = mysqli_query($conn, $query);
     $today = date("Y-m-d");
-    while ($rows = mysqli_fetch_array($result, MYSQLI_ASSOC)){
+    while ($rows = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
         $eventId = $rows['id'];
         $eventDate = $rows['startdate'];
         $timeleft = (strtotime($eventDate) - strtotime($today));
-        $days = floor($timeleft / (60 * 60 *24));
+        $days = floor($timeleft / (60 * 60 * 24));
         $query = "UPDATE IT490.events SET timeleft = $days WHERE id = $eventId";
 
         if (mysqli_query($conn, $query)) {
@@ -597,16 +638,16 @@ function updateDates(){
             return false;
         }
     }
-	mysqli_close($conn);
-	return true;
-
+    mysqli_close($conn);
+    return true;
 } // End requestEvents
 
 
 
 
 
-function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
+function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
+{
     // Connect to the database
     $conn = dbConnection();
 
@@ -615,32 +656,32 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType){
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
         $userid = $row['UID'];
-    
-    //Check
-    $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
-    $result = mysqli_query($conn, $sqlCheck);
-    $count = mysqli_num_rows($result);
-    if ($count == 0 ) {
 
-        $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
+        //Check
+        $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
+        $result = mysqli_query($conn, $sqlCheck);
+        $count = mysqli_num_rows($result);
+        if ($count == 0) {
+
+            $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
         VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
         } else {
-    $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
+            $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
     WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
         }
-    $result = mysqli_query($conn,$sql);
-    
-    if ($result) {
-        echo "UserMLC table updated successfully" . PHP_EOL;
-        
-        $sql = "SELECT * FROM UserMLC WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
-        $result = mysqli_query($conn,$sql);
-        $return = mysqli_fetch_array($result);
-        return $return;
-    } else {
-        echo "An error occurred while updating the table" . PHP_EOL;
+        $result = mysqli_query($conn, $sql);
+
+        if ($result) {
+            echo "UserMLC table updated successfully" . PHP_EOL;
+
+            $sql = "SELECT * FROM UserMLC WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+            $result = mysqli_query($conn, $sql);
+            $return = mysqli_fetch_array($result);
+            return $return;
+        } else {
+            echo "An error occurred while updating the table" . PHP_EOL;
+        }
     }
-}
 }
 
 
@@ -655,8 +696,8 @@ function requestProcessor($request)
     if (!isset($request['type'])) {
         return 'ERROR: unsupported message type';
     }
-    switch ($request['type']) 
-       { case 'Login':
+    switch ($request['type']) {
+        case 'Login':
             return loginAuth($request['username'], $request['password']);
         case 'Register':
             return registrationInsert(
@@ -674,15 +715,24 @@ function requestProcessor($request)
             return logout($request['sessionID']);
         case 'API_CALL':
 
-            return fetchSearchResultsCached($request['key'],$request['loginStatus']);
+            return fetchSearchResultsCached($request['key'], $request['loginStatus'],$request['filterby']);
         case "Update":
 
-				return updateProfile($request['sessionID'],$request['username'],$request['newPW']
-				,$request['oldPW'],$request['email'],$request['firstName'],$request['lastName'],$request['city'],$request['state']);
+            return updateProfile(
+                $request['sessionID'],
+                $request['username'],
+                $request['newPW'],
+                $request['oldPW'],
+                $request['email'],
+                $request['firstName'],
+                $request['lastName'],
+                $request['city'],
+                $request['state']
+            );
 
-		
+
         case 'SaveEvent':
-            return eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['URL'], $request['image']);	
+            return eventInsert($request['name'], $request['UID'], $request['description'], $request['date'], $request['URL'], $request['image']);
         case "Email":
 
             return requestEmail($request['userid']);
@@ -690,7 +740,7 @@ function requestProcessor($request)
             return requestEvents($request['timeleft']);
 
         case "totallikes":
-            return getDrinkTotalRating($request['drinks'],$request['sessionID']);
+            return getDrinkTotalRating($request['drinks'], $request['sessionID']);
 
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
@@ -699,22 +749,19 @@ function requestProcessor($request)
 
         case "updateMLC":
             return updateUserMLC($request['sessionID'], $request['ingName'], $request['amount'], $request['measurementType']);
-             case "UpdateStartDates":
+        case "UpdateStartDates":
             return updateDates();
         case "deleteRecipe":
             return DeleteRecipe($request['sessionID'], $request['drinkName']);
-        
+
         case "DeleteEvent":
             return eventDelete($request['name'], $request['UID']);
-    
-
     }
-   
+
     return [
         'returnCode' => '0',
         'message' => 'Server received the request and processed it.',
     ];
-
 } // End requestProcessor
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');

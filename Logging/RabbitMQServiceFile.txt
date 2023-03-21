@@ -1,13 +1,40 @@
+Service instructions
+
+cd to /etc/system/systemd
+
+sudo touch rabbitMQLogs.service
+
+sudo vim rabbitMQLogs.service 
+
+paste 
+
 [Unit]
 Description=Log server for RabbitMQ Logs
 
 [Service]
 User=root
-ExecStart =/usr/bin/php /home/{INSERT YOUR USERNAME}/git/IT490-Spring2023/Logging/receive_logs.php
+ExecStart =/usr/bin/php /home/{add your username here}/git/IT490-Spring2023/Logging/receive_logs.php
 ;Restart =always
 StandardOutput=append:/var/log/rabbitMQLogs.log
 StandardError=append:/var/log/rabbitMQErrorLogs.log
 
 [Install]
 WantedBy=multi-user.target
-                          
+
+
+Make note of output dir /var/log/rabbitMQLogs.log this is where you will find output Logs
+
+
+Commands for working with the service:
+
+    sudo systemctl daemon-reload 
+    sudo systemctl start rabbitMQLogs.service
+    sudo systemctl restart rabbitMQLogs.service
+    sudo systemctl reload rabbitMQLogs.service
+
+
+cd /var/log
+
+sudo touch rabbitMQLogs.log
+
+sudo touch rabbitMQLogsErrorLogs.log 

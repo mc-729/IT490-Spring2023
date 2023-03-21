@@ -6,7 +6,7 @@ import uuid
 def getServer(servername:str):
     if servername == "testServer":
         return {
-            'BROKER_HOST': '192.168.191.69',
+            'BROKER_HOST': '192.168.191.200',
             'BROKER_PORT': '5672',
             'USER': 'test',
             'PASSWORD': 'test',
@@ -30,7 +30,7 @@ def getServer(servername:str):
         }
     elif servername == 'logServer':
         return {
-            'BROKER_HOST': '127.0.0.1',
+            'BROKER_HOST': '192.168.191.200',
             'BROKER_PORT': '5672',
             'USER': 'test',
             'PASSWORD': 'test',

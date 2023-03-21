@@ -77,7 +77,7 @@ function loginAuth($username, $password)
 
 function dbConnection()
 {
-    $servername = '192.168.191.15';
+    $servername = '192.168.191.69';
     $uname = 'testuser';
     $pw = '12345';
     $dbname = 'IT490';

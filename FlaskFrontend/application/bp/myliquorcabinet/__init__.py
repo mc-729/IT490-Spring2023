@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, render_template, request, session
 #from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton, EventsForm, submitBtn
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
+from application.jsonPgaination.JSONPagination import JSONPagination
 bp_liquorcabinet = Blueprint('myliquorcabinet', __name__, template_folder='templates')
 
 @bp_liquorcabinet.route('/liquorcabinet', methods=['GET', 'POST'])
@@ -43,11 +44,15 @@ def liquorcabinet():
          val3=json.loads(val2)
          new_word=ast.literal_eval(val3)
          RecipeList.append(new_word)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Change this to the desired number of items per page
+    pagination = JSONPagination(RecipeList, page, per_page)
+    paginated_response = pagination.get_page_items()
     
     
    
     
-    return render_template('myliquorcabinet.html',data=RecipeList,MasterIngredients=MasterIngredients,like=like,UserIng=UserIng)
+    return render_template('myliquorcabinet.html',data=paginated_response,MasterIngredients=MasterIngredients,like=like,UserIng=UserIng,pagination=pagination)
 
 @bp_liquorcabinet.route('/submit_ingredient', methods=['GET', 'POST'])
 def submit_ingredient():

@@ -9,7 +9,7 @@ function dbConnection()
     $servername = 'localhost';
     $uname = 'testuser';
     $pw = '12345';
-    $dbname = 'Deployment';
+    $dbname = 'deployment';
     
     // Create connection
     $conn = new mysqli($servername, $uname, $pw, $dbname);
@@ -91,8 +91,30 @@ echo $output;
     return true;
 }
 
-function getVersion($packageName){
+function getLastVersion($packageName){
+  $conn = dbConnection();
+  $version = 1.0;
+  // lookup package in database
 
+  $sql = "SELECT * FROM deployment.packagelist WHERE name = '$packageName'";
+  $result = mysqli_query($conn, $sql);
+  $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+  $count = mysqli_num_rows($result);
+
+  if ($count != 0) {
+    echo 'Package Found' . PHP_EOL;
+
+    // Verify password
+    $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' ORDER BY version DESC LIMIT 1";
+    $result2 = mysqli_query($conn, $sql2);
+    $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+    $version = $row2['version'];
+    return $version;
+  } else {
+    echo 'Package Not Found' . PHP_EOL;
+    return $version;
+  }
+  
 }
 
 function requestProcessor($request)

@@ -9,7 +9,7 @@ function dbConnection()
     $servername = 'localhost';
     $uname = 'testuser';
     $pw = '12345';
-    $dbname = 'Deployment';
+    $dbname = 'Deployment2';
     
     // Create connection
     $conn = new mysqli($servername, $uname, $pw, $dbname);

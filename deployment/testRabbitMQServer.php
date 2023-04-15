@@ -4,6 +4,36 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+function dbConnection()
+{
+    $servername = 'localhost';
+    $uname = 'testuser';
+    $pw = '12345';
+    $dbname = 'IT490';
+    
+    // Create connection
+    $conn = new mysqli($servername, $uname, $pw, $dbname);
+
+    // Check connection
+    if ($conn->connect_error) {
+        echo 'Failed to connect to MySQL: ' . $conn->connect_error;
+        $request = [];
+        $request['type'] = 'error';
+        $request['service'] = 'database';
+        $request['message'] = 'DB CONNECTION FAILED';
+        //$conn->connect_error;
+        //sendLog($request);
+        exit();
+    } else {
+        $request = [];
+        $request['type'] = 'error';
+        $request['service'] = 'database';
+        $request['message'] = 'DB CONNECTION SUCCESSFUL';
+        //sendLog($request);
+        echo 'Successfully Connected!' . PHP_EOL;
+    }
+    return $conn;
+} // End dbConnection
 function doLogin($username,$password)
 {
     // lookup username in databas
@@ -59,6 +89,10 @@ chmod($scriptFilename, 0755);
 $output = shell_exec("./$scriptFilename");
 echo $output;
     return true;
+}
+
+function getVersion($packageName){
+
 }
 
 function requestProcessor($request)

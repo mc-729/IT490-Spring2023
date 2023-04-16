@@ -34,13 +34,7 @@ function dbConnection()
     }
     return $conn;
 } // End dbConnection
-function doLogin($username,$password)
-{
-    // lookup username in databas
-    // check password
-    return true;
-    //return false if not valid
-}
+
 function deployment($senderUser, $senderHost, $sourceDir, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
 {echo "we made it here";
     $bashScript = <<<BASH
@@ -98,13 +92,10 @@ function getLastVersion($packageName){
 
   $sql = "SELECT * FROM deployment.packagelist WHERE name = '$packageName'";
   $result = mysqli_query($conn, $sql);
-  $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
   $count = mysqli_num_rows($result);
 
   if ($count != 0) {
     echo 'Package Found' . PHP_EOL;
-
-    // Verify password
     $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' ORDER BY version DESC LIMIT 1";
     $result2 = mysqli_query($conn, $sql2);
     $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
@@ -113,8 +104,23 @@ function getLastVersion($packageName){
   } else {
     echo 'Package Not Found' . PHP_EOL;
     return $version;
+  } 
+}
+
+Function insertPackageDB($packageName, $version){
+  $conn = dbConnection();
+
+  $sqlInsert = "INSERT into deployment.packagelist (name, version)
+                        VALUES ('$packageName','$version')";
+
+  if (mysqli_query($conn, $sqlInsert)){
+    echo 'Package insert in db';
+    echo $sqlInsert;
+    $resp = ['login_status' => true];
+    return $resp;
+  } else {
+    echo "Package insert failed";
   }
-  
 }
 
 function requestProcessor($request)
@@ -127,9 +133,6 @@ function requestProcessor($request)
   }
   switch ($request['type'])
   {
-    case "login":
-      return doLogin($request['username'],$request['password']);
-
     case"deploy":
       return deployment($request['sendUser']   ,$request['senderHost'] ,$request['sourceDir']   ,$request['zipName'],$request['receiverUser']   ,$request['receiverHost'],$request['receiverFolder']   ,$request['receiverDir']);
   }

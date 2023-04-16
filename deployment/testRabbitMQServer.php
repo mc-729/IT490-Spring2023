@@ -36,7 +36,8 @@ function dbConnection()
 } // End dbConnection
 
 function deployment($senderUser, $senderHost, $sourceDir, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
-{echo "we made it here";
+{
+    echo "we made it here";
     $bashScript = <<<BASH
 #!/bin/bash
 
@@ -52,16 +53,26 @@ RECEIVER_HOST="$receiverHost"
 RECEIVER_FOLDER="$receiverFolder"
 RECEIVER_DIR="$receiverDir"
 
-# SSH into sender VM, zip files, transfer files to receiver VM, and unzip files on the receiver VM
-echo "Running commands on sender VM and transferring files to receiver VM..."
+# Control VM folder to save zip
+CONTROL_VM_ZIP_DIR="./saved_zips"
+
+# Create the folder to save zip on control VM if it doesn't exist
+mkdir -p \$CONTROL_VM_ZIP_DIR
+
+# SSH into sender VM, zip files, transfer files to receiver VM, save files on control VM, and unzip files on the receiver VM
+echo "Running commands on sender VM and transferring files to receiver VM and control VM..."
 ssh -t \$SENDER_USER@\$SENDER_HOST << EOF
   # Zip files
   echo "Zipping files..."
   cd \$SOURCE_DIR && zip -r \$ZIP_NAME *
 
-  # Transfer zipped file using SSH keys
-  echo "Transferring files..."
+  # Transfer zipped file using SSH keys to the receiver VM
+  echo "Transferring files to receiver VM..."
   scp \$SOURCE_DIR/\$ZIP_NAME \$RECEIVER_USER@\$RECEIVER_HOST:\$RECEIVER_DIR
+
+  # Transfer zipped file using SSH keys to the control VM
+  echo "Transferring files to control VM..."
+  scp \$SOURCE_DIR/\$ZIP_NAME \$USER@localhost:\$CONTROL_VM_ZIP_DIR
 
   # Unzip files on remote server
   echo "Unzipping files on remote server..."

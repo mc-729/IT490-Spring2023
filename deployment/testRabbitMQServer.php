@@ -35,13 +35,7 @@ function dbConnection()
     return $conn;
 } // End dbConnection
 
-function doLogin($username,$password)
-{
-    // lookup username in databas
-    // check password
-    return true;
-    //return false if not valid
-}function sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $localPath)
+function sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $localPath)
 {
 
     $bashScript = <<<BASH
@@ -138,12 +132,18 @@ The function performs the following steps:
   
     $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
   
-    $ZIP_NAME="archive.zip"; // note this will be set with version control db
-    // Call the sendToControlVM function to create a zip and send it to the control VM
-    if(sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH))
+    //Get new package name with the latest version number concactenated
+    $newZipName = renameFile($zipName);
 
-    // Call the sendToReceiverVM function to pull the zip from the control VM folder and send it to the receiving VM, then unpack it
-   {sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
+    // Call the sendToControlVM function to create a zip and send it to the control VM
+    if(sendToControlVM($senderUser, $senderHost, $sourceDir, $newZipName, $LOCAL_PATH)){
+
+      //Insert the package name and version into the deploymentdb
+      $newVersion = getLastVersion($zipName) + 0.01;
+      insertPackageDB($zipName, $newVersion);
+
+      // Call the sendToReceiverVM function to pull the zip from the control VM folder and send it to the receiving VM, then unpack it
+      sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
   
   
   }
@@ -187,6 +187,12 @@ Function insertPackageDB($packageName, $version){
   } else {
     echo "Package insert failed";
   }
+}
+
+function renameFile($packageName){
+  $latestVersion = getLastVersion($packageName) + 0.01;
+  $newName = $packageName."_".$latestVersion; 
+  return $newName;
 }
 
 function requestProcessor($request)

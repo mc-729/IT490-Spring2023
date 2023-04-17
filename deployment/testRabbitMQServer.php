@@ -103,7 +103,7 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
     $output = shell_exec("./$scriptFilename");
     echo $output;
 }
-function deployment($senderUser, $senderHost, $sourceDir, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
+function deployment($clusterName, $listnerName)
 
 {
 
@@ -131,16 +131,25 @@ The function performs the following steps:
 
   
     $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
-  
+    $zipName=$clusterName."_".$listnerName.".zip";
     //Get new package name with the latest version number concactenated
     $newZipName = renameFile($zipName);
 
+    $receiverUser="jonathan";
+    $senderUser="jonathan";
+    $DeploymentDetails=getDeploymentInfo($clusterName,$listnerName);
+    $senderHost=$DeploymentDetails['senderHost'];
+    $sourceDir=$DeploymentDetails['sourceDir'];
+    $receiverHost=$DeploymentDetails['receiverHost'];
+    $receiverFolder=$DeploymentDetails['receiverFolder'];
+    $receiverDir = $DeploymentDetails['receiverDir'];
+  
     // Call the sendToControlVM function to create a zip and send it to the control VM
-    if(sendToControlVM($senderUser, $senderHost, $sourceDir, $newZipName, $LOCAL_PATH)){
+    if(sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH)){
 
       //Insert the package name and version into the deploymentdb
-      $newVersion = getLastVersion($zipName) + 0.01;
-      insertPackageDB($zipName, $newVersion);
+      //$newVersion = getLastVersion($zipName) + 0.01;
+     // insertPackageDB($zipName, $newVersion);
 
       // Call the sendToReceiverVM function to pull the zip from the control VM folder and send it to the receiving VM, then unpack it
       sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
@@ -149,6 +158,17 @@ The function performs the following steps:
   }
 
     return true;
+}
+function getDeploymentInfo($clusterName, $listnerName){
+
+
+if($clusterName="dev" & $listnerName="DB"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+
+
+
 }
 
 function getLastVersion($packageName){
@@ -206,7 +226,7 @@ function requestProcessor($request)
   switch ($request['type'])
   {
     case"deploy":
-      return deployment($request['sendUser']   ,$request['senderHost'] ,$request['sourceDir']   ,$request['zipName'],$request['receiverUser']   ,$request['receiverHost'],$request['receiverFolder']   ,$request['receiverDir']);
+      return deployment($request['clusterName']   ,$request['listnerName']);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

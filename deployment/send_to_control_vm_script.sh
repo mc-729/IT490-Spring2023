@@ -4,7 +4,7 @@
 REMOTE_USER="jonathan"
 REMOTE_PATH="/home/jonathan/git/IT490-Spring2023/authentication"
 LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo"
-ZIP_NAME="files.zip"
+ZIP_NAME="dev_DB.zip"
 REMOTE_HOST="192.168.191.15"
 # Zip files on the remote server
 ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd ${REMOTE_PATH} && zip -r ${ZIP_NAME} ."

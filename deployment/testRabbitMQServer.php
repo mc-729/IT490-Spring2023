@@ -131,9 +131,9 @@ The function performs the following steps:
 
   
     $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
-    $zipName=$clusterName."_".$listnerName.".zip";
+    $packageName=$clusterName."_".$listnerName;
     //Get new package name with the latest version number concactenated
-    $newZipName = renameFile($zipName);
+    $zipName = renameFile($packageName);
 
     $receiverUser="jonathan";
     $senderUser="jonathan";
@@ -149,7 +149,7 @@ The function performs the following steps:
 
       //Insert the package name and version into the deploymentdb
       //$newVersion = getLastVersion($zipName) + 0.01;
-     // insertPackageDB($zipName, $newVersion);
+      //insertPackageDB($packageName, $newVersion);
 
       // Call the sendToReceiverVM function to pull the zip from the control VM folder and send it to the receiving VM, then unpack it
       sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
@@ -209,9 +209,9 @@ Function insertPackageDB($packageName, $version){
   }
 }
 
-function renameFile($packageName){
+function renameFile($packageName, ){
   $latestVersion = getLastVersion($packageName) + 0.01;
-  $newName = $packageName."_".$latestVersion; 
+  $newName = $packageName."_".$latestVersion.".zip"; 
   return $newName;
 }
 

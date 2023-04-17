@@ -78,6 +78,7 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
   #!/bin/bash
   
   # Configuration
+  
   LOCAL_PATH="$localPath"
   ZIP_NAME="$zipName"
   RECEIVER_USER="$receiverUser"
@@ -107,9 +108,32 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
     echo $output;
 }
 function deployment($senderUser, $senderHost, $sourceDir, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
+
 {
-    // Control VM folder to save zip
-    $controlVmZipDir = "./saved_zips";
+
+/**
+
+This function deploys an application package between two virtual machines (VMs). It takes the following parameters:
+  1.$senderUser: The username for the sending VM (to be hardcoded in the next refactor)
+  2.$senderHost: The IP address or hostname of the sending VM
+  3.$sourceDir: The directory path on the sending VM containing the files to be packaged.(to be hardcoded in the next refactor)
+  4.$zipName: The name of the zip file to be created for the application package  (this will be retrieved from versiom control database)
+  5.$receiverUser: The username for the receiving VM (to be hardcoded in the next refactor)
+  6.$receiverHost: The IP address or hostname of the receiving VM
+  7.$receiverFolder: The directory path on the receiving VM where the package will be stored.(to be hardcoded in the next refactor)
+  8.$receiverDir: The directory path on the receiving VM where the package will be extracted.(to be hardcoded in the next refactor)
+
+The function performs the following steps:
+  1.Creates a zip archive of the specified source directory on the sending VM
+  2.Sends the zip archive to a control VM, which acts as an intermediary
+  3.Retrieves the zip archive from the control VM
+  4.Sends the zip archive to the specified folder on the receiving VM
+  5.Extracts the zip archive to the specified directory on the receiving VM
+  6.In the final version of this function, the user will only need to provide the cluster name and the VM IP.
+  7.The IP address will be used to determine the remaining variables (e.g., paths, folders, etc.) based on the type of VM (e.g., devDB).
+*/
+
+  
     $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
   
     $ZIP_NAME="archive.zip"; // note this will be set with version control db

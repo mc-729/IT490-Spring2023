@@ -40,65 +40,88 @@ function doLogin($username,$password)
     // check password
     return true;
     //return false if not valid
-}
-function deployment($senderUser, $senderHost, $sourceDir, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
-{
-    echo "we made it here";
+}function sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $localPath)
+{$receiverDir = "/home/it490/git/IT490-Spring2023/";
     $bashScript = <<<BASH
 #!/bin/bash
 
-# Sender VM variables
-SENDER_USER="$senderUser"
-SENDER_HOST="$senderHost"
-SOURCE_DIR="$sourceDir"
+# Configuration
+REMOTE_USER="$senderUser"
+REMOTE_PATH="$sourceDir"
+LOCAL_PATH="$localPath"
 ZIP_NAME="$zipName"
+REMOTE_HOST="$senderHost"
+# Zip files on the remote server
+ssh "\${REMOTE_USER}@\${REMOTE_HOST}" "cd \${REMOTE_PATH} && zip -r \${ZIP_NAME} ."
 
-# Receiver VM variables
-RECEIVER_USER="$receiverUser"
-RECEIVER_HOST="$receiverHost"
-RECEIVER_FOLDER="$receiverFolder"
-RECEIVER_DIR="$receiverDir"
+# Rsync the zipped file to the local machine
+rsync -avzP --remove-source-files "\${REMOTE_USER}@\${REMOTE_HOST}:\${REMOTE_PATH}/\${ZIP_NAME}" "\${LOCAL_PATH}/\${ZIP_NAME}"
 
-# Control VM folder to save zip
-CONTROL_VM_ZIP_DIR="./saved_zips"
 
-# Create the folder to save zip on control VM if it doesn't exist
-mkdir -p \$CONTROL_VM_ZIP_DIR
+BASH;
+    $scriptFilename = "send_to_control_vm_script.sh";
+    file_put_contents($scriptFilename, $bashScript);
 
-# SSH into sender VM, zip files, transfer files to receiver VM, save files on control VM, and unzip files on the receiver VM
-echo "Running commands on sender VM and transferring files to receiver VM and control VM..."
-ssh -t \$SENDER_USER@\$SENDER_HOST << EOF
-  # Zip files
-  echo "Zipping files..."
-  cd \$SOURCE_DIR && zip -r \$ZIP_NAME *
+    // Make the script executable
+    chmod($scriptFilename, 0755);
 
-  # Transfer zipped file using SSH keys to the receiver VM
+    // Execute the generated script
+    $output = shell_exec("./$scriptFilename");
+    echo $output;
+    return true;
+}
+
+
+function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
+{
+  $bashScript = <<<BASH
+  #!/bin/bash
+  
+  # Configuration
+  LOCAL_PATH="$localPath"
+  ZIP_NAME="$zipName"
+  RECEIVER_USER="$receiverUser"
+  RECEIVER_HOST="$receiverHost"
+  RECEIVER_FOLDER="$receiverFolder"
+  RECEIVER_DIR="$receiverDir"
+  
+  # Transfer zipped file using Rsync to the receiver VM
   echo "Transferring files to receiver VM..."
-  scp \$SOURCE_DIR/\$ZIP_NAME \$RECEIVER_USER@\$RECEIVER_HOST:\$RECEIVER_DIR
-
-  # Transfer zipped file using SSH keys to the control VM
-  echo "Transferring files to control VM..."
-  scp \$SOURCE_DIR/\$ZIP_NAME \$USER@localhost:\$CONTROL_VM_ZIP_DIR
-
+  rsync -avzP "\${LOCAL_PATH}/\${ZIP_NAME}" "\${RECEIVER_USER}@\${RECEIVER_HOST}:\${RECEIVER_DIR}"
+  
   # Unzip files on remote server
   echo "Unzipping files on remote server..."
-  ssh \$RECEIVER_USER@\$RECEIVER_HOST "cd \$RECEIVER_DIR && unzip -o \$ZIP_NAME -d \$RECEIVER_FOLDER && rm \$ZIP_NAME"
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "cd \${RECEIVER_DIR} && unzip -o \${ZIP_NAME} -d \${RECEIVER_FOLDER} && rm \${ZIP_NAME}"
+  
+  echo "File transfer and unzip complete."
+  
+  BASH;
+    $scriptFilename = "send_to_receiver_vm_script.sh";
+    file_put_contents($scriptFilename, $bashScript);
 
-  # Cleanup: Remove zip file on sender VM
-  rm \$SOURCE_DIR/\$ZIP_NAME
+    // Make the script executable
+    chmod($scriptFilename, 0755);
 
-  echo "File transfer complete."
-EOF
-BASH;
-$scriptFilename = "transfer_script.sh";
-file_put_contents($scriptFilename, $bashScript);
+    // Execute the generated script
+    $output = shell_exec("./$scriptFilename");
+    echo $output;
+}
+function deployment($senderUser, $senderHost, $sourceDir, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
+{
+    // Control VM folder to save zip
+    $controlVmZipDir = "./saved_zips";
+    $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
+  
+    $ZIP_NAME="archive.zip"; // note this will be set with version control db
+    // Call the sendToControlVM function to create a zip and send it to the control VM
+    if(sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH))
 
-// Make the script executable
-chmod($scriptFilename, 0755);
+    // Call the sendToReceiverVM function to pull the zip from the control VM folder and send it to the receiving VM, then unpack it
+   {sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
+  
+  
+  }
 
-// Execute the generated script
-$output = shell_exec("./$scriptFilename");
-echo $output;
     return true;
 }
 

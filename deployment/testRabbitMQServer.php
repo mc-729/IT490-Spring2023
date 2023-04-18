@@ -3,7 +3,8 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
-
+global $LOCAL_PATH;
+$LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
 function dbConnection()
 {
     $servername = 'localhost';
@@ -48,7 +49,8 @@ LOCAL_PATH="$localPath"
 ZIP_NAME="$zipName"
 REMOTE_HOST="$senderHost"
 # Zip files on the remote server
-ssh "\${REMOTE_USER}@\${REMOTE_HOST}" "cd \${REMOTE_PATH} && zip -r \${ZIP_NAME} ."
+ssh "\${REMOTE_USER}@\${REMOTE_HOST}" "cd \${REMOTE_PATH} && zip -r \${ZIP_NAME} . --exclude *.ini"
+"
 
 # Rsync the zipped file to the local machine
 rsync -avzP --remove-source-files "\${REMOTE_USER}@\${REMOTE_HOST}:\${REMOTE_PATH}/\${ZIP_NAME}" "\${LOCAL_PATH}/\${ZIP_NAME}"
@@ -63,7 +65,7 @@ BASH;
 
     // Execute the generated script
     $output = shell_exec("./$scriptFilename");
-    echo $output;
+   // echo $output;
     return true;
 }
 
@@ -101,7 +103,7 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
 
     // Execute the generated script
     $output = shell_exec("./$scriptFilename");
-    echo $output;
+   echo $output;
 }
 function deployment($clusterName, $listnerName)
 
@@ -130,10 +132,12 @@ The function performs the following steps:
 */
 
   
-    global $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
+    global $LOCAL_PATH;
     $packageName=$clusterName."_".$listnerName;
     //Get new package name with the latest version number concactenated
-    $zipName = renameFile($packageName);
+    $versionDetails= renameFile($packageName);
+    $zipName=$versionDetails["name"];
+    $versionNum=$versionDetails["version"];
 
     $receiverUser="jonathan";
     $senderUser="jonathan";
@@ -145,19 +149,21 @@ The function performs the following steps:
     $receiverDir = $DeploymentDetails['receiverDir'];
   
     // Call the sendToControlVM function to create a zip and send it to the control VM
-    if(sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH)){
-
+    $var=sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH);
+if($var){
       //Insert the package name and version into the deploymentdb
-      //$newVersion = getLastVersion($zipName) + 0.01;
-      //insertPackageDB($packageName, $newVersion);
+     // $newVersion = getLastVersion($zipName) + 0.01;
+      //echo 'new version '.$newVersion . PHP_EOL;
+   
+       //insertPackageDB($packageName, $versionNum);
 
       // Call the sendToReceiverVM function to pull the zip from the control VM folder and send it to the receiving VM, then unpack it
-      sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
+     sendToReceiverVM($LOCAL_PATH,$zipName ,$receiverUser,$receiverHost, $receiverFolder, $receiverDir );
+     
   
   
-  }
 
-    return true;
+    return true;}
 }
 function getDeploymentInfo($clusterName, $listnerName){
 
@@ -168,7 +174,7 @@ if($clusterName="dev" & $listnerName="DB"){
 }
 if($clusterName="dev" & $listnerName="API"){
 
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/API",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"API");
 }
 if($clusterName="dev" & $listnerName="frontend"){
 
@@ -205,7 +211,7 @@ if($clusterName="prod" & $listnerName="frontend"){
 
 function getLastVersion($packageName){
   $conn = dbConnection();
-  $version = 1.0;
+
   // lookup package in database
 
   $sql = "SELECT * FROM deployment.packagelist WHERE name = '$packageName'";
@@ -221,18 +227,18 @@ function getLastVersion($packageName){
     return $version;
   } else {
     echo 'Package Not Found' . PHP_EOL;
-    return $version;
+    return 1.0;
   } 
 }
 
 Function insertPackageDB($packageName, $version){
   $conn = dbConnection();
-
+ 
   $sqlInsert = "INSERT into deployment.packagelist (name, version)
                         VALUES ('$packageName','$version')";
 
   if (mysqli_query($conn, $sqlInsert)){
-    echo 'Package insert in db';
+    echo 'Package insert in db hello';
     echo $sqlInsert;
     $resp = ['login_status' => true];
     return $resp;
@@ -243,62 +249,71 @@ Function insertPackageDB($packageName, $version){
 
 function renameFile($packageName, ){
   $latestVersion = getLastVersion($packageName) + 0.01;
+  echo $latestVersion." latest version ". PHP_EOL;
   $newName = $packageName."_".$latestVersion.".zip"; 
-  return $newName;
+  echo $newName." new package name". PHP_EOL;
+  insertPackageDB($packageName, $latestVersion);
+  return array("name"=>$newName,"version"=>$latestVersion);
 }
 
 function getStableVersion($clusterName, $listnerName){
   $deploymentDetails = getDeploymentInfo($clusterName,$listnerName);
   $packageName=$clusterName."_".$listnerName;
+
   $conn = dbConnection();
   
  // lookup package in database
 
- $sql = "SELECT * FROM deployment.packagelist WHERE name = '$packageName'";
- $result = mysqli_query($conn, $sql);
- $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
- $count = mysqli_num_rows($result);
 
- if ($count != 0) {
-   echo 'Package Found' . PHP_EOL;
+
+
+ 
 
    
    $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' AND status = 1 ORDER BY version DESC LIMIT 1";
+   echo "sql query".$sql2.PHP_EOL;
    $result2 = mysqli_query($conn, $sql2);
    $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+   print_r($row2);
    $name = $row2['name'];
+
    $version = $row2['version'];
+
    $packageDetails = array('name'=> $name, 'latestStableVersion'=> $version);
+   echo "package details in getStable ".$packageDetails.PHP_EOL;
    return $packageDetails;
- } else {
-   echo 'Package Not Found' . PHP_EOL;
-   
- } 
+  
 }
 function addStatus($clusterName, $listnerName, $status){
   // 0 for fail and 1 for success
   $conn = dbConnection();
   $packageName=$clusterName."_".$listnerName; 
-  $sql = "INSERT INTO deployment.packagelist (status) VALUES ('$status') 
-          WHERE name = '$packageName'";
+  $version=getLastVersion($packageName);
+  $sql = "UPDATE deployment.packagelist SET status = '$status' WHERE name = '$packageName' and version='$version'";
+
   if (mysqli_query($conn, $sql)){
       echo 'Package status insert in db'. PHP_EOL;
       echo $sql;
+      return true;
     } else {
       echo "Package status insert failed". PHP_EOL;
+      return false;
     }
+  
 }
 function rollBack($clusterName, $listnerName){
   echo "Checking latest stable packages". PHP_EOL;
-
+  global $LOCAL_PATH;
   $latestStable=getStableVersion($clusterName, $listnerName);
+  print_r($latestStable);
   $zipName = $latestStable['name']."_".$latestStable['latestStableVersion'].".zip";
+  echo "zip name ".$zipName.PHP_EOL;
   $DeploymentDetails = getDeploymentInfo($clusterName, $listnerName);
   $receiverUser='jonathan';
   $receiverHost=$DeploymentDetails['receiverHost'];
   $receiverFolder=$DeploymentDetails['receiverFolder'];
   $receiverDir = $DeploymentDetails['receiverDir'];
-  sendToReceiverVM($GLOBALS['localPath'], $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir);
+  sendToReceiverVM($LOCAL_PATH, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir);
 }
 
 
@@ -318,7 +333,7 @@ function requestProcessor($request)
     case"addStatus":
         return addStatus($request['clusterName']   ,$request['listnerName'], $request['status']);
     case"rollback":
-      return rollBack($request['clusterName'], $request['listenerName']);
+      return rollBack($request['clusterName'], $request['listnerName']);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

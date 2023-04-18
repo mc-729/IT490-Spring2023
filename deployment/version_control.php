@@ -59,11 +59,13 @@ function getStableVersion($packageName){
     $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' AND status = 1 ORDER BY version DESC LIMIT 1";
     $result2 = mysqli_query($conn, $sql2);
     $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+    $name = $row2['name'];
     $version = $row2['version'];
-    return $version;
+    $packageDetails = array('name'=> $name, 'latestStableVersion'=> $version);
+    return $packageDetails;
   } else {
     echo 'Package Not Found' . PHP_EOL;
-    return $version;
+    
   } 
 }
 
@@ -81,6 +83,8 @@ function addStatus($packageName, $status){
       }
 }
 
+
+
 function requestProcessor($request)
 {
   echo "received request".PHP_EOL;
@@ -93,6 +97,8 @@ function requestProcessor($request)
   {
     case"verify":
         return getStableVersion($request['zipName']);
+    case"addStatus":
+        return addStatus($request['zipName'],$request['status']);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

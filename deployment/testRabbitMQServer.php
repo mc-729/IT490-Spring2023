@@ -130,7 +130,7 @@ The function performs the following steps:
 */
 
   
-    $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
+    global $LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo";
     $packageName=$clusterName."_".$listnerName;
     //Get new package name with the latest version number concactenated
     $zipName = renameFile($packageName);
@@ -163,6 +163,38 @@ function getDeploymentInfo($clusterName, $listnerName){
 
 
 if($clusterName="dev" & $listnerName="DB"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="dev" & $listnerName="API"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="dev" & $listnerName="frontend"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="qa" & $listnerName="DB"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="qa" & $listnerName="API"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="qa" & $listnerName="frontend"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="prod" & $listnerName="DB"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="prod" & $listnerName="API"){
+
+  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+}
+if($clusterName="prod" & $listnerName="frontend"){
 
   return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
 }
@@ -215,6 +247,62 @@ function renameFile($packageName, ){
   return $newName;
 }
 
+function getStableVersion($clusterName, $listnerName){
+  $deploymentDetails = getDeploymentInfo($clusterName,$listnerName);
+  $packageName=$clusterName."_".$listnerName;
+  $conn = dbConnection();
+  
+ // lookup package in database
+
+ $sql = "SELECT * FROM deployment.packagelist WHERE name = '$packageName'";
+ $result = mysqli_query($conn, $sql);
+ $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+ $count = mysqli_num_rows($result);
+
+ if ($count != 0) {
+   echo 'Package Found' . PHP_EOL;
+
+   
+   $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' AND status = 1 ORDER BY version DESC LIMIT 1";
+   $result2 = mysqli_query($conn, $sql2);
+   $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+   $name = $row2['name'];
+   $version = $row2['version'];
+   $packageDetails = array('name'=> $name, 'latestStableVersion'=> $version);
+   return $packageDetails;
+ } else {
+   echo 'Package Not Found' . PHP_EOL;
+   
+ } 
+}
+function addStatus($clusterName, $listnerName, $status){
+  // 0 for fail and 1 for success
+  $conn = dbConnection();
+  $packageName=$clusterName."_".$listnerName; 
+  $sql = "INSERT INTO deployment.packagelist (status) VALUES ('$status') 
+          WHERE name = '$packageName'";
+  if (mysqli_query($conn, $sql)){
+      echo 'Package status insert in db'. PHP_EOL;
+      echo $sql;
+    } else {
+      echo "Package status insert failed". PHP_EOL;
+    }
+}
+function rollBack($clustername, $listnerName){
+  echo "Checking latest stable packages". PHP_EOL;
+
+  $latestStable=getStableVersion($clusterName, $listnerName);
+  $zipName = $latestStable['name']."_".$latestStable['latestStableVersion'].".zip";
+  $DeploymentDetails = getDeploymentInfo($clusterName, $listnerName);
+  $receiverUser='jonathan';
+  $receiverHost=$DeploymentDetails['receiverHost'];
+  $receiverFolder=$DeploymentDetails['receiverFolder'];
+  $receiverDir = $DeploymentDetails['receiverDir'];
+  sendToReceiverVM($GLOBALS['localPath'], $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir);
+}
+
+
+
 function requestProcessor($request)
 {
   echo "received request".PHP_EOL;
@@ -227,6 +315,10 @@ function requestProcessor($request)
   {
     case"deploy":
       return deployment($request['clusterName']   ,$request['listnerName']);
+    case"addStatus":
+        return addStatus($request['clusterName']   ,$request['listnerName'], $request['status']);
+    case"rollback":
+      return rollBack($request['clustername'], $request['listenerName']);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

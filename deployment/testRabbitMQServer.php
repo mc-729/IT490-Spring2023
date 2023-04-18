@@ -288,7 +288,7 @@ function addStatus($clusterName, $listnerName, $status){
       echo "Package status insert failed". PHP_EOL;
     }
 }
-function rollBack($clustername, $listnerName){
+function rollBack($clusterName, $listnerName){
   echo "Checking latest stable packages". PHP_EOL;
 
   $latestStable=getStableVersion($clusterName, $listnerName);
@@ -318,7 +318,7 @@ function requestProcessor($request)
     case"addStatus":
         return addStatus($request['clusterName']   ,$request['listnerName'], $request['status']);
     case"rollback":
-      return rollBack($request['clustername'], $request['listenerName']);
+      return rollBack($request['clusterName'], $request['listenerName']);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

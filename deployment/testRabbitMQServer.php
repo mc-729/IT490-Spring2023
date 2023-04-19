@@ -36,8 +36,13 @@ function dbConnection()
     return $conn;
 } // End dbConnection
 
-function sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $localPath)
+function sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $localPath, $excludePath = '')
 {
+
+  $excludeOption = '';
+  if (!empty($excludePath)) {
+      $excludeOption = " -x '$excludePath/*'";
+  }
 
     $bashScript = <<<BASH
 #!/bin/bash
@@ -48,9 +53,11 @@ REMOTE_PATH="$sourceDir"
 LOCAL_PATH="$localPath"
 ZIP_NAME="$zipName"
 REMOTE_HOST="$senderHost"
+EXCLUDE_OPTION="$excludeOption"
 # Zip files on the remote server
-ssh "\${REMOTE_USER}@\${REMOTE_HOST}" "cd \${REMOTE_PATH} && zip -r \${ZIP_NAME} . --exclude *.ini"
-"
+ssh "\${REMOTE_USER}@\${REMOTE_HOST}" "cd \${REMOTE_PATH} && zip -r \${ZIP_NAME} . --exclude *.ini\${EXCLUDE_OPTION}"
+
+
 
 # Rsync the zipped file to the local machine
 rsync -avzP --remove-source-files "\${REMOTE_USER}@\${REMOTE_HOST}:\${REMOTE_PATH}/\${ZIP_NAME}" "\${LOCAL_PATH}/\${ZIP_NAME}"
@@ -65,9 +72,11 @@ BASH;
 
     // Execute the generated script
     $output = shell_exec("./$scriptFilename");
-   // echo $output;
+    echo $output;
     return true;
 }
+
+
 
 
 function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
@@ -103,7 +112,7 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
 
     // Execute the generated script
     $output = shell_exec("./$scriptFilename");
-   echo $output;
+  // echo $output;
 }
 function deployment($clusterName, $listnerName)
 
@@ -126,7 +135,22 @@ The function performs the following steps:
   2.Sends the zip archive to a control VM, which acts as an intermediary
   3.Retrieves the zip archive from the control VM
   4.Sends the zip archive to the specified folder on the receiving VM
-  5.Extracts the zip archive to the specified directory on the receiving VM
+  5.Extracts the zip archive to the specified directory on the rec#!/bin/bash
+
+# Configuration
+REMOTE_USER="jonathan"
+REMOTE_PATH="/home/jonathan/git/IT490-Spring2023/authentication"
+LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo"
+ZIP_NAME="dev_frontend_1.02.zip"
+REMOTE_HOST="192.168.191.15"
+# Zip files on the remote server
+ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd ${REMOTE_PATH} && zip -r ${ZIP_NAME} . --exclude *.ini"
+"
+
+# Rsync the zipped file to the local machine
+rsync -avzP --remove-source-files "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/${ZIP_NAME}" "${LOCAL_PATH}/${ZIP_NAME}"
+
+iving VM
   6.In the final version of this function, the user will only need to provide the cluster name and the VM IP.
   7.The IP address will be used to determine the remaining variables (e.g., paths, folders, etc.) based on the type of VM (e.g., devDB).
 */
@@ -144,12 +168,13 @@ The function performs the following steps:
     $DeploymentDetails=getDeploymentInfo($clusterName,$listnerName);
     $senderHost=$DeploymentDetails['senderHost'];
     $sourceDir=$DeploymentDetails['sourceDir'];
+    echo $sourceDir. PHP_EOL;;
     $receiverHost=$DeploymentDetails['receiverHost'];
     $receiverFolder=$DeploymentDetails['receiverFolder'];
     $receiverDir = $DeploymentDetails['receiverDir'];
-  
+    $exclude= isset($DeploymentDetails['exclude'])  ?  $DeploymentDetails['exclude']  : null;
     // Call the sendToControlVM function to create a zip and send it to the control VM
-    $var=sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH);
+    $var=sendToControlVM($senderUser, $senderHost, $sourceDir, $zipName, $LOCAL_PATH,$exclude);
 if($var){
       //Insert the package name and version into the deploymentdb
      // $newVersion = getLastVersion($zipName) + 0.01;
@@ -164,47 +189,52 @@ if($var){
   
 
     return true;}
+
 }
 function getDeploymentInfo($clusterName, $listnerName){
 
 
-if($clusterName="dev" & $listnerName="DB"){
 
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="dev" & $listnerName="API"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/API",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"API");
-}
-if($clusterName="dev" & $listnerName="frontend"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="qa" & $listnerName="DB"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="qa" & $listnerName="API"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="qa" & $listnerName="frontend"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="prod" & $listnerName="DB"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="prod" & $listnerName="API"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-if($clusterName="prod" & $listnerName="frontend"){
-
-  return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
-}
-
+  if($clusterName=="dev" and $listnerName=="DB"){
+    echo "hello frontend dev DB";
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+  }
+  if($clusterName=="dev" and $listnerName=="API"){
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/API",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"API");
+  }
+  if($clusterName=="dev" and $listnerName=="frontend"){
+    echo "hello frontend dev";
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/var/www/MyLiqourCabinet/application",'receiverDir'=>"/var/www/MyLiqourCabinet",'receiverFolder'=>"application","exclude"=>"rabbitMQ");
+  }
+  if($clusterName=="qa"and $listnerName=="DB"){
+ 
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+  }
+  if($clusterName=="qa" and $listnerName=="API"){
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/API",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"API");
+  }
+  if($clusterName=="qa" and $listnerName=="frontend"){
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/var/www/MyLiqourCabinet/application",'receiverDir'=>"/var/www/MyLiqourCabinet",'receiverFolder'=>"application","exclude"=>"rabbitMQ");
+  }
+  if($clusterName=="prod" and $listnerName=="DB"){
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/authentication",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"authentication");
+  }
+  if($clusterName=="prod" and $listnerName=="API"){
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/home/jonathan/git/IT490-Spring2023/API",'receiverDir'=>"/home/jonathan/git/IT490-Spring2023/",'receiverFolder'=>"API");
+  }
+  if($clusterName=="prod" and $listnerName=="frontend"){
+  
+    return array("senderHost" => '192.168.191.15', 'receiverHost'=>"192.168.191.172", 'sourceDir'=>"/var/www/MyLiqourCabinet/application",'receiverDir'=>"/var/www/MyLiqourCabinet",'receiverFolder'=>"application","exclude"=>"rabbitMQ");
+  }
+  
+  
 
 
 }

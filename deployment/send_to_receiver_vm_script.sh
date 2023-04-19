@@ -3,11 +3,11 @@
 # Configuration
 
 LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo"
-ZIP_NAME="dev_DB_1.22.zip"
+ZIP_NAME="dev_frontend_1.15.zip"
 RECEIVER_USER="jonathan"
 RECEIVER_HOST="192.168.191.172"
-RECEIVER_FOLDER="authentication"
-RECEIVER_DIR="/home/jonathan/git/IT490-Spring2023/"
+RECEIVER_FOLDER="application"
+RECEIVER_DIR="/var/www/MyLiqourCabinet"
 
 # Transfer zipped file using Rsync to the receiver VM
 echo "Transferring files to receiver VM..."

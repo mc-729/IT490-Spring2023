@@ -13,4 +13,4 @@ Lib/*
 flask_session
 pyvenv.cfg
 __pycache__/*
-package_repo/*
+deployment/package_repo/*

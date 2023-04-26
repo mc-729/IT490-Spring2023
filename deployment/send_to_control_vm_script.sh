@@ -4,7 +4,7 @@
 REMOTE_USER="jonathan"
 REMOTE_PATH="/var/www/MyLiqourCabinet/application"
 LOCAL_PATH="/home/it490/git/IT490-Spring2023/deployment/package_repo"
-ZIP_NAME="dev_frontend_1.15.zip"
+ZIP_NAME="dev_frontend_1.03.zip"
 REMOTE_HOST="192.168.191.15"
 EXCLUDE_OPTION=" -x 'rabbitMQ/*'"
 # Zip files on the remote server

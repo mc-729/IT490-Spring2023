@@ -78,7 +78,6 @@ BASH;
 
 
 
-
 function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $receiverFolder, $receiverDir)
 {
   $bashScript = <<<BASH
@@ -92,6 +91,7 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
   RECEIVER_HOST="$receiverHost"
   RECEIVER_FOLDER="$receiverFolder"
   RECEIVER_DIR="$receiverDir"
+  RECEIVER_PASS="gorrin89"
   
   # Transfer zipped file using Rsync to the receiver VM
   echo "Transferring files to receiver VM..."
@@ -99,9 +99,17 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
   
   # Unzip files on remote server
   echo "Unzipping files on remote server..."
-  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "cd \${RECEIVER_DIR} && unzip -o \${ZIP_NAME} -d \${RECEIVER_FOLDER} && rm \${ZIP_NAME}"
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "cd \${RECEIVER_DIR} && unzip -o \${ZIP_NAME} -d \${RECEIVER_FOLDER} && echo \${RECEIVER_PASS} | sudo -S rm \${ZIP_NAME} "
   
-  echo "File transfer and unzip complete."
+  # Restart the service
+  echo "Restarting the service..."
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "echo \${RECEIVER_PASS} | sudo -S systemctl stop rabbitMQDatabase.service"
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "echo \${RECEIVER_PASS} | sudo -S systemctl start rabbitMQDatabase.service"
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "echo \${RECEIVER_PASS} | sudo -S systemctl stop rabbitMQAPI.service"
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "echo \${RECEIVER_PASS} | sudo -S systemctl start rabbitMQAPI.service"
+  ssh "\${RECEIVER_USER}@\${RECEIVER_HOST}" "echo \${RECEIVER_PASS} | sudo -S service apache2 restart "
+  
+  echo "File transfer, unzip, and service restart complete."
   
   BASH;
     $scriptFilename = "send_to_receiver_vm_script.sh";
@@ -114,6 +122,7 @@ function sendToReceiverVM($localPath, $zipName, $receiverUser, $receiverHost, $r
     $output = shell_exec("./$scriptFilename");
   // echo $output;
 }
+
 function deployment($clusterName, $listnerName)
 
 {
@@ -250,7 +259,7 @@ function getLastVersion($packageName){
 
   if ($count != 0) {
     echo 'Package Found' . PHP_EOL;
-    $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' ORDER BY version DESC LIMIT 1";
+    $sql2 = "SELECT * FROM deployment.packagelist WHERE name = '$packageName' and status = 1 ORDER BY version DESC LIMIT 1";
     $result2 = mysqli_query($conn, $sql2);
     $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
     $version = $row2['version'];
@@ -264,8 +273,8 @@ function getLastVersion($packageName){
 Function insertPackageDB($packageName, $version){
   $conn = dbConnection();
  
-  $sqlInsert = "INSERT into deployment.packagelist (name, version)
-                        VALUES ('$packageName','$version')";
+  $sqlInsert = "INSERT into deployment.packagelist (name, version,status)
+                        VALUES ('$packageName','$version',1)";
 
   if (mysqli_query($conn, $sqlInsert)){
     echo 'Package insert in db hello';

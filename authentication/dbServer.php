@@ -353,7 +353,7 @@ function storeSearchResultsInCache($query, $searchResults)
 
     // Check for errors and return result
     if ($result) {
-        echo "It has been added to the cache " . PHP_EOL;
+        echo "It has been added to the cache hello professor " . PHP_EOL;
 
         return true;
     } else {
@@ -684,8 +684,6 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
         }
     }
 }
-
-
 
 
 

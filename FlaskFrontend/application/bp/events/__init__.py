@@ -2,8 +2,8 @@
 import ast
 import json
 from flask import Blueprint, jsonify, render_template, request, session
-from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton, EventsForm
-from application.bp.authentication.forms import SearchForm, IngredientsForm, LikeButton, EventsForm
+from application.bp.authentication.forms import SearchForm ,LikeButton, EventsForm
+
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 bp_events = Blueprint('events', __name__, template_folder='templates')
 

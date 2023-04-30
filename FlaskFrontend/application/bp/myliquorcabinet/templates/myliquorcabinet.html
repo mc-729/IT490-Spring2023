@@ -2,6 +2,7 @@
 {% from 'bootstrap5/form.html' import render_form, render_field, render_form_row %}
 {% from 'bootstrap4/table.html' import render_table %}
 {% from 'pagination.html' import render_pagination %}
+
 {% block content %}
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -10,14 +11,18 @@
             role="tab" aria-controls="drinks" aria-selected="true">Drinks List</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link " id="ingredient-tab" data-bs-toggle="tab" data-bs-target="#ingredient"
-            type="button" role="tab" aria-controls="ingredient" aria-selected="false">My Ingredient List</button>
+        <button class="nav-link " id="ingredient-tab" data-bs-toggle="tab" data-bs-target="#ingredient" type="button"
+            role="tab" aria-controls="ingredient" aria-selected="false">My Ingredient List</button>
     </li>
-   
+
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="update-ingredients-tab" data-bs-toggle="tab"
-            data-bs-target="#update-ingredients" type="button" role="tab" aria-controls="update-ingredients"
-            aria-selected="false">Update Ingredients</button>
+        <button class="nav-link" id="update-ingredients-tab" data-bs-toggle="tab" data-bs-target="#update-ingredients"
+            type="button" role="tab" aria-controls="update-ingredients" aria-selected="false">Update
+            Ingredients</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="UserRecipes-tab" data-bs-toggle="tab" data-bs-target="#UserRecipes" type="button"
+            role="tab" aria-controls="UserRecipes" aria-selected="false">My Recipes</button>
     </li>
 </ul>
 <div class="tab-content" id="myTabContent">
@@ -46,7 +51,7 @@
         </div>
     </div>
     <div class="tab-pane fade show active" id="drinks" role="tabpanel" aria-labelledby="drinks-tab">
-        <div class="row g-3" id="card-container" >
+        <div class="row g-3" id="card-container">
             {% if data %}
             {% for d in data %}
             <div class="col-sm-4">
@@ -68,7 +73,33 @@
             {{ render_pagination(pagination, 'myliquorcabinet.liquorcabinet', pagination.page) }}
         </div>
     </div>
-    
+    <div class="tab-pane fade" id="UserRecipes" role="tabpanel" aria-labelledby="UserRecipes-tab">
+        <h1>My Recipes dude</h1>
+        <div class="row g-3" id="card-container">
+
+            {% if userRecipe %}
+            {% for d in userRecipe %}
+
+            <div class="col-sm-4">
+                <div class="card" data-drink-id="{{ d.idDrink }}user">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ d.strDrink }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ d.strGlass }}</h6>
+
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#modal-{{ d.idDrink }}user">Details</button>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                            data-bs-target="#edit-modal-{{ loop.index}}user">Edit</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+    </div>
+
     <div class="tab-pane fade" id="update-ingredients" role="tabpanel" aria-labelledby="update-ingredients-tab">
         <div class="container-lg "> <!-- added mt-3 class to add margin top -->
             <h1>Update Ingredients</h1>
@@ -152,10 +183,148 @@
 </div>
 {% endfor %}
 {% endif %}
+
+
+
+{% if userRecipe %}
+{% for d in userRecipe %}
+
+<div class="modal fade" id="modal-{{ d.idDrink }}user" tabindex="-1" aria-labelledby="modal-{{ d.idDrink }}user-label"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="success-message" style="display: none;"></div>
+                <h5 class="modal-title" id="modal-{{ d.idDrink }}user-label">{{ d.strDrink }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img class="img-fluid rounded" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
+                <h6>Instructions:</h6>
+                <p>{{ d.strInstructions }}</p>
+                <h6>Ingredients:</h6>
+                <ul>
+                    {% for i in range(1, 16) %}
+                    {% if d['strIngredient'+i|string] %}
+                    <li>{{ d['strIngredient'+i|string] }} - {{ d['strMeasure'+i|string] }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% for form in edit_recipe_forms %}
+
+<div class="modal fade" id="edit-modal-{{ loop.index}}user" tabindex="-1"
+    aria-labelledby="edit-modal-{{ loop.index}}user-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Recipe </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Your form goes here -->
+                <form method="POST" action="{{ url_for('editRecipe.editrecipe') }}">
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                        <!-- Cocktail Details -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#flush-collapseOne" aria-expanded="true"
+                                    aria-controls="flush-collapseOne">
+                                    Cocktail Details
+                                </button>
+                            </h2>
+                            <div id="flush-collapseOne" class="accordion-collapse collapse show"
+                                aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    <div class="row gx-3 gy-2 align-items-center">
+                                        <div class="col-md-4">
+                                            {{ render_field(form.strGlass) }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ render_field(form.strCategory) }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ render_field(form.strAlcoholic) }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ render_field(form.strDrink) }}
+                                            {{ render_field(form.strDrinkThumb) }}
+                                        </div>
+
+
+                                    </div>
+                                    {{ render_field(form.strInstructions) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ingredients -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#flush-collapseTwo" aria-expanded="false"
+                                    aria-controls="flush-collapseTwo">
+                                    Ingredients
+                                </button>
+                            </h2>
+                            <div id="flush-collapseTwo" class="accordion-collapse collapse"
+                                aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+
+                                 
+                                    <table class="table" id="editRecipeTable">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Amount</th>
+                                                <th scope="col">Measurement Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for ingredient in form.ingredients %}
+                                            <tr >
+                                                <th scope="row">{{ loop.index }}</th>
+                                                <td> {{ render_field(ingredient.ingredient) }}</td>
+                                                <td> {{ render_field(ingredient.measurement) }}</td>
+                                                <td> {{ render_field(ingredient.measurement_type) }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                 
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Measurements -->
+
+                    </div>
+                    {{ render_field(form.submit, class_="btn btn-primary") }}
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 {% endblock %}
-

@@ -541,17 +541,20 @@ function retrieveRecipes($sessionid)
         $userid = $row['UID'];
         $sql = "SELECT name FROM IT490.ingredients";
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
+        $sql4 = "SELECT Recipe,id FROM IT490.UserRecipes WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
-
+        $UserRecipeQuery= $conn->query($sql4);
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
+        $UserRecipe=mysqli_fetch_all($UserRecipeQuery, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
         $userIngredients = GetUsieringredients($userid);
         print_r($ingredients);
         $resp = array(
             'ingredients' => $ingredients,
             'drinkList' => $drinkList,
-            'userIngredients' => $userIngredients
+            'userIngredients' => $userIngredients,
+            'userRecipes'=> $UserRecipe
 
         );
         return $resp;
@@ -685,9 +688,64 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
     }
 }
 
+function addUserRecipe($recipe,$drinkname,$username,$sessionid){
+    $conn = dbConnection();
+    if (doValidate($sessionid)) {
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        //$recipedata = str_replace("'", '"', $recipedata);
+        // $recipedata = str_replace("None", "null", $recipedata);
+        // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
+        print_r( $recipe);
+        $recipedata = json_encode($recipe, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $conn = dbConnection();
+        $stmt = $conn->prepare('INSERT INTO IT490.UserRecipes (User_ID,Recipe,Drink_Name ,Username) VALUES (?,?,?,?)');
+        $stmt->bind_param('ssss', $userid, $recipedata, $drinkname,$username);
+        $result = $stmt->execute();
+        echo $result;
+        $stmt->close();
+        $conn->close();
+
+        if ($result) {
+            echo "Recipe updated successfully" . PHP_EOL;
+            return  ['Status' => true];
+        } else {
+            echo "An error occurred while updating the recipe" . PHP_EOL;
+            return  ['Status' => false];
+        }
+    }
 
 
 
+
+}
+
+function retrieveAllUserRecipes(){
+    $conn = dbConnection();
+    $sql = "SELECT Username,Recipe FROM IT490.UserRecipes";
+
+    $result = $conn->query($sql);
+    if($result){
+    $drinkList = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+    print_r($drinkList);
+    $resp = array(
+       
+        'drinkList' => $drinkList,
+      
+
+    );
+    return $resp;}
+    else return  ['Status' => false];
+
+
+
+}
+
+function editUserRecipes(){}
+function deleteUserRecipes(){}
 function requestProcessor($request)
 {
     echo 'received request' . PHP_EOL;
@@ -755,8 +813,12 @@ function requestProcessor($request)
 
         case "DeleteEvent":
             return eventDelete($request['name'], $request['UID']);
+        case "addRecipe":
+            return addUserRecipe($request['recipe'],$request['drink_name'],$request['Username'],$request['sessionid']); 
+        case "retrieveAllUserRecipes":
+            return  retrieveAllUserRecipes();   
     }
-
+ 
     return [
         'returnCode' => '0',
         'message' => 'Server received the request and processed it.',

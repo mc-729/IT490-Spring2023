@@ -724,28 +724,56 @@ function addUserRecipe($recipe,$drinkname,$username,$sessionid){
 
 function retrieveAllUserRecipes(){
     $conn = dbConnection();
-    $sql = "SELECT Username,Recipe FROM IT490.UserRecipes";
-
+    $sql = "SELECT * FROM IT490.UserRecipes";
     $result = $conn->query($sql);
     if($result){
     $drinkList = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-    print_r($drinkList);
-    $resp = array(
-       
-        'drinkList' => $drinkList,
-      
-
-    );
-    return $resp;}
-    else return  ['Status' => false];
-
-
-
+    return $drinkList;
+    } else {
+        return  ['Status' => false];
+    }
 }
 
-function editUserRecipes(){}
-function deleteUserRecipes(){}
+function retrieveUserRecipes($userID){
+    $conn = dbConnection();
+    $sql = "SELECT * FROM IT490.UserRecipes WHERE User_ID = '$userID'";
+    $result = $conn->query($sql);
+    if($result){
+    $drinkList = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    return $drinkList;
+    } else {
+        return  ['Status' => false];
+    }
+}
+
+function editUserRecipes($recipeID, $changes, $sessionid){
+    $conn = dbConnection();
+    if (doValidate($sessionid)) {
+        $sql = "UPDATE IT490.UserRecipes SET Recipe = '$changes' WHERE id = '$recipeID'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            echo "Recipe updated successfully" . PHP_EOL;
+            return true;
+        } else {
+        echo "Recipe updated successfully" . PHP_EOL;
+        return false;
+        }
+    }
+}
+function deleteUserRecipes($recipeID, $sessionid){
+    $conn = dbConnection();
+    if (doValidate($sessionid)) {
+        $sql = "DELETE FROM IT490.UserRecipes WHERE id = '$recipeID'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            echo "Recipe deleted successfully" . PHP_EOL;
+            return true;
+        } else {
+        echo "Recipe deleted successfully" . PHP_EOL;
+        return false;
+        }
+    }
+}
 function requestProcessor($request)
 {
     echo 'received request' . PHP_EOL;
@@ -797,7 +825,7 @@ function requestProcessor($request)
             return requestEvents($request['timeleft']);
 
         case "totallikes":
-            return getDrinkTotalRating($request['drinks'], $request['sessionID']);
+            return getDrinkTotalRating($request['drinks'], $request['sessionID'], $request['filterby']);
 
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
@@ -816,7 +844,13 @@ function requestProcessor($request)
         case "addRecipe":
             return addUserRecipe($request['recipe'],$request['drink_name'],$request['Username'],$request['sessionid']); 
         case "retrieveAllUserRecipes":
-            return  retrieveAllUserRecipes();   
+            return retrieveAllUserRecipes(); 
+        case "retrieveUserRecipes":
+            return retrieveUserRecipes($request['userID']);   
+        case "DeleteUserRecipe":
+            return deleteUserRecipes($request['recipeID'], $request['sessionid']); 
+        case "EditUserRecipe":
+            return editUserRecipes($request['recipeID'], $request['changes'] ,$request['sessionid']);
     }
  
     return [

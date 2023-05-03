@@ -685,7 +685,6 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
 function MFAGen($user_ID)
 {
     $conn = dbConnection();
-
     $check = "SELECT * from IT490.MFA where UID = $user_ID";
     $query = mysqli_query($conn, $check);
     $count = mysqli_num_rows($query);
@@ -693,6 +692,35 @@ function MFAGen($user_ID)
         $MFANum = rand(1000, 99999999);
         $query2 = "INSERT into IT490.MFA(UID,MFA)VALUES('$user_ID','$MFANum')";
         $result = mysqli_query($conn, $query2);
+
+    
+        $config = json_decode(file_get_contents('/home/jonathan/git/IT490-Spring2023/authentication/numbers.json'), true);  
+        $number = $config['phone1'];
+        $mail = new PHPMailer();
+        // configure an SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'cocktailsearch@gmail.com';
+        $mail->Password = 'tbhokigmqdobsbey';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+        
+        $mail->setFrom('cocktailsearch@gmail.com', 'Cocktail Search');
+        $mail->addAddress($number, 'Me');
+        $mail->Subject = 'MFA CODE!';
+        // Set HTML 
+        $mail->isHTML(TRUE);
+        $mail->Body = '<p>Hi there,</p><p>Here is your MFA code {MFANum}, Please enter it within 60 seconds</p>';
+        $mail->Body = str_replace('{MFANum}', $MFANum, $mail->Body);
+    
+    // send the message
+    if(!$mail->send()){
+        echo 'Message could not be sent.'.PHP_EOL;
+        echo 'Mailer Error: ' . $mail->ErrorInfo.PHP_EOL;
+    } else {
+        echo 'Message has been sent'.PHP_EOL;
+        }
         return $MFANum;
     } else {
         return null;

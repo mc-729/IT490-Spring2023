@@ -47,14 +47,16 @@ def editrecipe():
                 break  # Break the loop if any key is not present
 
         if ingredients:
+            alcoholic=False
+            if "strAlcoholic" in request.form: alcoholic=True
             recipe = {
-                "strAlcoholic": request.form['strAlcoholic'],
+                "strAlcoholic":  alcoholic,
                 "strCategory": request.form['strCategory'],
                 "strDrink": request.form['strDrink'],
                 "strDrinkThumb": request.form['strDrinkThumb'],
                 "strGlass": request.form['strGlass'],
                 "strInstructions": request.form['strInstructions'],
-                
+                'id':request.form['id'],
                 "username": session['username']
             }
             for i, ingredient in enumerate(ingredients, start=1):
@@ -62,8 +64,24 @@ def editrecipe():
                 measurementName = "strMeasure" + str(i)
                 recipe[ingredientName] = ingredient['ingredient']
                 recipe[measurementName] = str(ingredient['measurement']) + " " + ingredient['measurement_type']
-
-            return jsonify(recipe)
+                
+            request_dict = {
+            'type': 'EditUserRecipe',
+            'recipeID':request.form['id'],
+            'changes':recipe,
+            'sessionid': session['sessionID'],
+            'drinkNane':request.form['strDrink']
+            
+        }
+                
+            client = RabbitMQClient('testServer')
+            response = client.send_request(request_dict)
+            if(response):
+               
+                print(response)
+                    
+                flash(f'you have successfully updated the recipe {recipe.get("strDrink")}','success')
+            
         else:
               flash('You are missing data.', 'danger')
     

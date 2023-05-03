@@ -17,6 +17,7 @@ from application.bp.addrecipe import bp_addrecipe
 from application.bp.userRecipeSearch import bp_userRecipeSearch
 from flask import Flask, render_template, redirect, request, session
 from application.bp.editRecipe import bp_editRecipe
+from application.bp.singleRecipe import bp_singleRecipe
 
 csrf = CSRFProtect()
 
@@ -32,7 +33,12 @@ csrf.exempt('application.bp.myliquorcabinet.submit_ingredient')
 csrf.exempt('application.bp.myliquorcabinet.deleteRecipe')
 csrf.exempt('application.bp.addrecipe.addrecipe')
 csrf.exempt('application.bp.editRecipe.editrecipe')
+csrf.exempt('application.bp.singleRecipe.singleRecipe')
+csrf.exempt('application.bp.singleRecipe.UsersingleRecipe')
+csrf.exempt('application.bp.myliquorcabinet.deleteMyRecipe')
+
 def init_app():
+    
     """Initialize the core application."""
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(config.Config())
@@ -46,7 +52,7 @@ def init_app():
 
     with app.app_context():
 
-        blueprints = [bp_homepage,bp_editRecipe, bp_userRecipeSearch ,authentication, bp_addrecipe,bp_liquorcabinet,bp_apiSearch,bp_drinkwithyoureyes,bp_jqueryExample,bp_pagination,bp_events]
+        blueprints = [bp_singleRecipe,bp_homepage,bp_editRecipe, bp_userRecipeSearch ,authentication, bp_addrecipe,bp_liquorcabinet,bp_apiSearch,bp_drinkwithyoureyes,bp_jqueryExample,bp_pagination,bp_events]
 
        
         # Register Blueprints

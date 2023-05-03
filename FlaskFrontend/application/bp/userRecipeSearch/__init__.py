@@ -18,10 +18,9 @@ def userRecipeSearch():
       client = RabbitMQClient('testServer')
       request_dict={'type':'retrieveAllUserRecipes'}
       response = client.send_request(request_dict)
-      print(type(response))
-      response=json.loads(response)["drinkList"]
-
-
+     
+      response=json.loads(response)
+   
       RecipeList=[]
       for recipes in response:
             recipe=  json.loads(recipes["Recipe"])
@@ -29,7 +28,6 @@ def userRecipeSearch():
         
             RecipeList.append(recipe)
             
-     
-          
+   
 
       return render_template('userRecipeSearch.html',data=RecipeList)

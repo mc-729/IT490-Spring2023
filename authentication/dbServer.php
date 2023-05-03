@@ -549,7 +549,7 @@ function retrieveRecipes($sessionid)
         $UserRecipe=mysqli_fetch_all($UserRecipeQuery, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
         $userIngredients = GetUsieringredients($userid);
-        print_r($ingredients);
+        
         $resp = array(
             'ingredients' => $ingredients,
             'drinkList' => $drinkList,
@@ -734,9 +734,9 @@ function retrieveAllUserRecipes(){
     }
 }
 
-function retrieveUserRecipes($userID){
+function retrieveUserRecipes($id){
     $conn = dbConnection();
-    $sql = "SELECT * FROM IT490.UserRecipes WHERE User_ID = '$userID'";
+    $sql = "SELECT Recipe FROM IT490.UserRecipes where id ='$id'";
     $result = $conn->query($sql);
     if($result){
     $drinkList = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -745,21 +745,24 @@ function retrieveUserRecipes($userID){
         return  ['Status' => false];
     }
 }
-
-function editUserRecipes($recipeID, $changes, $sessionid){
+function editUserRecipes($recipeID, $changes, $sessionid,$drinkName){
     $conn = dbConnection();
     if (doValidate($sessionid)) {
-        $sql = "UPDATE IT490.UserRecipes SET Recipe = '$changes' WHERE id = '$recipeID'";
+        $recipedata = json_encode($changes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $sql = "UPDATE IT490.UserRecipes SET Recipe = '$recipedata', Drink_Name ='$drinkName' WHERE id = '$recipeID'";
         $result = mysqli_query($conn, $sql);
         if ($result) {
             echo "Recipe updated successfully" . PHP_EOL;
             return true;
-        } else {
-        echo "Recipe updated successfully" . PHP_EOL;
-        return false;
+        } else {    return false;
+        
+        } // End dbConnection
+     
         }
     }
-}
+
+
+
 function deleteUserRecipes($recipeID, $sessionid){
     $conn = dbConnection();
     if (doValidate($sessionid)) {
@@ -793,6 +796,7 @@ function requestProcessor($request)
                 $request['lastName'],
                 $request['city'],
                 $request['state']
+            
             );
         case 'validate_session':
             return doValidate($request['sessionID']);
@@ -846,11 +850,11 @@ function requestProcessor($request)
         case "retrieveAllUserRecipes":
             return retrieveAllUserRecipes(); 
         case "retrieveUserRecipes":
-            return retrieveUserRecipes($request['userID']);   
+            return retrieveUserRecipes($request['id']);   
         case "DeleteUserRecipe":
             return deleteUserRecipes($request['recipeID'], $request['sessionid']); 
         case "EditUserRecipe":
-            return editUserRecipes($request['recipeID'], $request['changes'] ,$request['sessionid']);
+            return editUserRecipes($request['recipeID'], $request['changes'] ,$request['sessionid'] ,$request['drinkNane']);
     }
  
     return [
@@ -858,6 +862,7 @@ function requestProcessor($request)
         'message' => 'Server received the request and processed it.',
     ];
 } // End requestProcessor
+
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
 

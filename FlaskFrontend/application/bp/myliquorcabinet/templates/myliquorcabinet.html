@@ -82,17 +82,43 @@
 
             <div class="col-sm-4">
                 <div class="card" data-drink-id="{{ d.idDrink }}user">
+                    <img class="card-img-top" src="{{ d.strDrinkThumb }}" alt="{{ d.strDrink }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ d.strDrink }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ d.strCategory }}</h6>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ d.strGlass }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted"> Category {{ d.strCategory }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted"> Glass: {{ d.strGlass }}</h6>
 
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                             data-bs-target="#modal-{{ d.idDrink }}user">Details</button>
                         <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
                             data-bs-target="#edit-modal-{{ loop.index}}user">Edit</button>
+                          
+                            <form method="POST" action="{{ url_for('myliquorcabinet.deleteMyRecipe') }}">
+                                <input type="hidden" id="drinkID" name="drinkID" value="{{ d.id }}">
+                                <button type="submit" class="btn btn-primary">delete</button>
+                            </form>
+                            <div class="col mt-2">
+                                <p class="card-text">Share this Recipe! </p>
+                                <a class="btn text-white btn-floating m-1" style="background-color: #3b5998;"
+                                href="https://www.facebook.com/sharer/sharer.php?u={{ url_for('singleRecipe.UsersingleRecipe', _external=True, searchValue=d.id)|urlencode }}"
+                                role="button" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn text-white btn-floating m-1" style="background-color: #55acee;"
+                            href="https://twitter.com/intent/tweet?url={{ url_for('singleRecipe.UsersingleRecipe', _external=True, searchValue=d.id)|urlencode }}&text=Check%20out%20this%20amazing%20{{ d.strDrink }}%20cocktail!"
+                            role="button" target="_blank"><i class="fab fa-twitter"></i></a>
+                        
+                        <!-- LinkedIn -->
+                        <a class="btn text-white btn-floating m-1" style="background-color: #0082ca;"
+                            href="https://www.linkedin.com/shareArticle?mini=true&url={{ url_for('singleRecipe.UsersingleRecipe', _external=True, searchValue=d.id)|urlencode }}&title={{ d.strDrink }}"
+                            role="button" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        
+                        <!-- Reddit -->
+                        <a class="btn text-white btn-floating m-1" style="background-color: #ff5700;"
+                            href="https://reddit.com/submit?url={{ url_for('singleRecipe.UsersingleRecipe', _external=True, searchValue=d.id)|urlencode }}&title={{ d.strDrink }}"
+                            role="button" target="_blank"><i class="fab fa-reddit"></i></a>
+                        </div>
                     </div>
                 </div>
+            
             </div>
             {% endfor %}
             {% endif %}
@@ -263,7 +289,7 @@
                                             {{ render_field(form.strDrink) }}
                                             {{ render_field(form.strDrinkThumb) }}
                                         </div>
-
+                                        {{render_field(form.id)}}
 
                                     </div>
                                     {{ render_field(form.strInstructions) }}

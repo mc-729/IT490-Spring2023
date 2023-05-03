@@ -1,6 +1,6 @@
 import ast
 import json
-from flask import Blueprint, jsonify, render_template, request, session
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 #from flask_modals import render_template_modal
 from application.bp.authentication.forms import SearchForm , Ingredient_Form, LikeButton, EventsForm,  RecipeForm
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
@@ -30,13 +30,15 @@ def liquorcabinet():
     #response=json.loads(response)
     #return jsonify(response)
     UserRecipe=json.loads(response)["userRecipes"]
-    print(type(UserRecipe))
+
     RecipeResponseList=json.loads(response)["drinkList"]
     IngredientList= json.loads(response)["ingredients"]
     UserIng=json.loads(response)["userIngredients"]
     for thing in UserRecipe:
+     
         recipe=json.loads(thing['Recipe'])
-        print(type(recipe))
+        recipe['id']=thing['id']
+     
         UserRecipeList.append(recipe)
         
     MasterIngredients=[]
@@ -62,6 +64,7 @@ def liquorcabinet():
                           strDrinkThumb_default=recipe.get('strDrinkThumb') ,
                           strGlass_default=recipe.get('strGlass'),
                           strInstructions_default=recipe.get('strInstructions'),
+                          id_default=recipe.get('id')
                     )
       
     # ... fill in the rest of the fields as necessary ...
@@ -72,7 +75,6 @@ def liquorcabinet():
      
         
         edit_recipe_forms.append(form)
-        print(str(type(edit_recipe_forms[0])) +" edit form type")
      
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Change this to the desired number of items per page
@@ -111,5 +113,15 @@ def submit_ingredient():
 
 
 
-
-
+@bp_liquorcabinet.route('/deleteMyRecipe', methods=['GET', 'POST'])
+def deleteMyRecipe():
+    id= request.form.get('drinkID')
+    print(id)
+    client = RabbitMQClient('testServer')
+    request_dict={'type':'DeleteUserRecipe','recipeID':id, 'sessionid':session['sessionID']}
+    
+    response = client.send_request(request_dict)
+    if(response):
+                flash(f'You have deleted the Recipe', 'success')
+                print(response)
+    return redirect(url_for('myliquorcabinet.liquorcabinet'))

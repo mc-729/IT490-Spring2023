@@ -15,17 +15,23 @@ if ($conn->connect_error) {
 	echo "Successfully Connected!".PHP_EOL;
 }
 
-//sql to alter table Users
+//sql to create sessions table
 
-$sql = "ALTER TABLE IT490.Users
-ADD COLUMN MFA VARCHAR(60) UNIQUE;"; 
+$sql = "CREATE TABLE IT490.MFA(
+	id INT NOT NULL AUTO_INCREMENT,
+	UID int NOT NULL,
+	MFA int NOT NULL,
+	created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id),
+	UNIQUE (MFA),
+	FOREIGN KEY (UID) REFERENCES Users(User_ID)
+	)";
 
 if ($conn->query($sql) === TRUE) {
-        echo "Table Users altered successfully, added MFA column/field".PHP_EOL;
+	echo "Table MFA created successfully".PHP_EOL;
 } else {
-        echo "Error altering table Users: " .$conn->error;
+	echo "Error creating table MFA: " .$conn->error;
 }
 
 $conn->close();
-
 ?>

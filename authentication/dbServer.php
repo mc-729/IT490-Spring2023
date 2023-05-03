@@ -762,7 +762,7 @@ function MFAAuth($userid, $MFANum)
             );
             return $resp;
         } else {
-            echo 'Login Failed' . PHP_EOL;
+            echo 'MFA Failed' . PHP_EOL;
             $resp = array(
                 'login_status' => false,
                 'session_id' => null,
@@ -777,7 +777,7 @@ function MFAAuth($userid, $MFANum)
             return $resp;
         }
     } else {
-        echo 'Login Failed' . PHP_EOL;
+        echo 'MFA Not Found' . PHP_EOL;
         $resp = array(
             'login_status' => false,
             'session_id' => null,

@@ -861,6 +861,8 @@ function requestProcessor($request)
 
         case "DeleteEvent":
             return eventDelete($request['name'], $request['UID']);
+        case 'MFA':
+            return MFAAuth($request['userid'], $request['MFA']);
     }
 
     return [

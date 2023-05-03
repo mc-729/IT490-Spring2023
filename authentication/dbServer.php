@@ -693,11 +693,77 @@ function MFAGen($user_ID)
         $result = mysqli_query($conn, $query2);
         return $MFANum;
     } else {
-
+        return null;
     }
 } // End MFAGen
 
+function MFAAuth($username, $password)
+{
+    $conn = dbConnection();
 
+    // lookup username in database
+
+    $sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
+    $result = mysqli_query($conn, $sql);
+    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    $count = mysqli_num_rows($result);
+
+    if ($count != 0) {
+        echo 'User Found' . PHP_EOL;
+
+        // Verify password
+        $sql2 = "SELECT Password FROM IT490.Users WHERE Email = '$username'";
+        $result2 = mysqli_query($conn, $sql2);
+        $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+        $hashedpass = $row2['Password'];
+
+        echo $hashedpass . PHP_EOL;
+
+        if (password_verify($password, $hashedpass)) {
+            echo 'Login Successful' . PHP_EOL;
+            $resp = array(
+                'login_status' => true,
+                'session_id' => SessionGen($row['User_ID']),
+                'user_id' => $row['User_ID'],
+                'first_name' => $row['F_Name'],
+                'last_name' => $row['L_Name'],
+                'username' => $row['Username'],
+                'email' => $row['Email'],
+                'city' => $row['City'],
+                'state' => $row['State']
+            );
+            return $resp;
+        } else {
+            echo 'Login Failed' . PHP_EOL;
+            $resp = array(
+                'login_status' => false,
+                'session_id' => null,
+                'user_id' => null,
+                'first_name' => null,
+                'last_name' => null,
+                'username' => null,
+                'email' => null,
+                'city' => null,
+                'state' => null
+            );
+            return $resp;
+        }
+    } else {
+        echo 'Login Failed' . PHP_EOL;
+        $resp = array(
+            'login_status' => false,
+            'session_id' => null,
+            'user_id' => null,
+            'first_name' => null,
+            'last_name' => null,
+            'username' => null,
+            'email' => null,
+            'city' => null,
+            'state' => null
+        );
+        return $resp;
+    }
+} //End MFAAuth
 
 
 function requestProcessor($request)

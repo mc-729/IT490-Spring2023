@@ -33,7 +33,8 @@ function loginAuth($username, $password)
             echo 'Login Successful' . PHP_EOL;
             $resp = array(
                 'login_status' => true,
-                'session_id' => SessionGen($row['User_ID']),
+                #'session_id' => SessionGen($row['User_ID']),
+                'session_id' => false,
                 'user_id' => $row['User_ID'],
                 'first_name' => $row['F_Name'],
                 'last_name' => $row['L_Name'],
@@ -679,7 +680,22 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
     }
 }
 
+function MFAGen($user_ID)
+{
+    $conn = dbConnection();
 
+    $check = "SELECT * from IT490.MFA where UID = $user_ID";
+    $query = mysqli_query($conn, $check);
+    $count = mysqli_num_rows($query);
+    if ($count) {
+        $MFANum = rand(1000, 99999999);
+        $query2 = "INSERT into IT490.MFA(UID,SessionID)VALUES('$user_ID','$MFANum')";
+        $result = mysqli_query($conn, $query2);
+        return $MFANum;
+    } else {
+
+    }
+} // End MFAGen
 
 
 

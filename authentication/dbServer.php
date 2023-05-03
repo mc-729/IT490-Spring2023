@@ -33,7 +33,7 @@ function loginAuth($username, $password)
             echo 'Login Successful' . PHP_EOL;
             $resp = array(
                 'login_status' => true,
-                #'session_id' => SessionGen($row['User_ID']),
+                'MFA_status' => MFAGen($row['User_ID']),
                 'session_id' => false,
                 'user_id' => $row['User_ID'],
                 'first_name' => $row['F_Name'],
@@ -48,6 +48,7 @@ function loginAuth($username, $password)
             echo 'Login Failed' . PHP_EOL;
             $resp = array(
                 'login_status' => false,
+                'MFA_status' => null,
                 'session_id' => null,
                 'user_id' => null,
                 'first_name' => null,
@@ -63,6 +64,7 @@ function loginAuth($username, $password)
         echo 'Login Failed' . PHP_EOL;
         $resp = array(
             'login_status' => false,
+            'MFA_status' => null,
             'session_id' => null,
             'user_id' => null,
             'first_name' => null,
@@ -689,7 +691,7 @@ function MFAGen($user_ID)
     $count = mysqli_num_rows($query);
     if ($count) {
         $MFANum = rand(1000, 99999999);
-        $query2 = "INSERT into IT490.MFA(UID,SessionID)VALUES('$user_ID','$MFANum')";
+        $query2 = "INSERT into IT490.MFA(UID,MFA)VALUES('$user_ID','$MFANum')";
         $result = mysqli_query($conn, $query2);
         return $MFANum;
     } else {
@@ -697,30 +699,28 @@ function MFAGen($user_ID)
     }
 } // End MFAGen
 
-function MFAAuth($username, $password)
+function MFAAuth($userid, $MFANum)
 {
     $conn = dbConnection();
 
-    // lookup username in database
+    // lookup userid in MFA table
 
-    $sql = "SELECT * FROM IT490.Users WHERE Email = '$username'";
+    $sql = "SELECT * FROM IT490.MFA WHERE UID = '$userid'";
     $result = mysqli_query($conn, $sql);
     $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
     $count = mysqli_num_rows($result);
 
     if ($count != 0) {
-        echo 'User Found' . PHP_EOL;
+        echo 'MFA Found' . PHP_EOL;
 
-        // Verify password
-        $sql2 = "SELECT Password FROM IT490.Users WHERE Email = '$username'";
+        // Verify MFA
+        $sql2 = "SELECT Password FROM IT490.MFA WHERE MFA = '$MFANum'";
         $result2 = mysqli_query($conn, $sql2);
         $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
-        $hashedpass = $row2['Password'];
+        $MFANum2 = $row2['Password'];
 
-        echo $hashedpass . PHP_EOL;
-
-        if (password_verify($password, $hashedpass)) {
-            echo 'Login Successful' . PHP_EOL;
+        if ($MFANum == $MFANum2) {
+            echo 'MFA Confirmed' . PHP_EOL;
             $resp = array(
                 'login_status' => true,
                 'session_id' => SessionGen($row['User_ID']),

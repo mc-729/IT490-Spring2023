@@ -1,0 +1,14 @@
+[Unit]
+Description=Database server for RabbitMQ 
+
+[Service]
+;User=justin (please change to your username)
+User=root
+ExecStart =/usr/bin/php /home/jonathan/git/IT490-Spring2023/authentication/dbServer.php
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+
+

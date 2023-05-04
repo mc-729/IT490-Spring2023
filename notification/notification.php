@@ -3,12 +3,19 @@
 //Load Composer's autoloader
 require '../vendor/autoload.php';
 
+//Twilio integration
+use Twilio\Rest\Client;
+
 //Import PHPMailer classes into the global namespace
 use PHPMailer\PHPMailer\PHPMailer;
+
 
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+
+
+
 
 function sendEmail($email, $event, $days){
     $mail = new PHPMailer();
@@ -23,6 +30,35 @@ function sendEmail($email, $event, $days){
     
     $mail->setFrom('cocktailsearch@gmail.com', 'Cocktail Search');
     $mail->addAddress($email, 'Me');
+    $mail->Subject = 'Upcoming Event!';
+    // Set HTML 
+    $mail->isHTML(TRUE);
+    $mail->Body = '<p>Hi there,</p><p>We are happy to inform you that {event} is coming up in {days} days.</p>';
+
+    $mail->Body = str_replace('{event}', $event, $mail->Body);
+    $mail->Body = str_replace('{days}', $days, $mail->Body);
+
+    // send the message
+    if(!$mail->send()){
+        echo 'Message could not be sent.'.PHP_EOL;
+        echo 'Mailer Error: ' . $mail->ErrorInfo.PHP_EOL;
+    } else {
+        echo 'Message has been sent'.PHP_EOL;
+    }
+}
+function sendSMS($number,$event, $days){
+    $mail = new PHPMailer();
+    // configure an SMTP
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'cocktailsearch@gmail.com';
+    $mail->Password = 'tbhokigmqdobsbey';
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
+    
+    $mail->setFrom('cocktailsearch@gmail.com', 'Cocktail Search');
+    $mail->addAddress($number, 'Me');
     $mail->Subject = 'Upcoming Event!';
     // Set HTML 
     $mail->isHTML(TRUE);
@@ -57,6 +93,10 @@ print_r($eventResponse);
 echo "\n\n";
 echo "client received response: ".PHP_EOL;
 
+// getting keys from file
+$config = json_decode(file_get_contents('/home/jonathan/git/IT490-Spring2023/notification/keys.json'), true);
+$number = $config['Number'];
+
 if (isset($eventResponse)){
     foreach ($eventResponse as $value){
         // Sending request to get email addresses for each event
@@ -67,6 +107,7 @@ if (isset($eventResponse)){
         $eventName = $value['name'];
         $daysLeft = $value['timeleft'];
         sendEmail($emailResponse, $eventName, $daysLeft);
+        sendSMS($number,$eventName, $daysLeft);
     }
 } else {
     print_r("No events");

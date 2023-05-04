@@ -49,7 +49,9 @@
                     {{ render_nav_item('events.events','Search for Events' ) }}
                     {{ render_nav_item('drinkwithyoureyes.drinkwithyoureyes','Drink with your eyes' ) }}
                     {{ render_nav_item('apiSearch.apiSearch','cocktail search' ) }}
+
                     {{ render_nav_item('userRecipeSearch.userRecipeSearch','User Cocktail Showcase' ) }}
+
               
                     {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
@@ -114,7 +116,9 @@
         <a
           class="btn text-white btn-floating m-1"
           style="background-color: #ff5700;"
-          href="https://www.reddit.com/submit?url=http://www.myliqourcabinet.com/apiSearch?searchValue=Cuba+Libre&page=1"
+
+          href="https://www.reddit.com/submit?url=http://www.myliqourcabinet.com/"
+
           role="button"
           target="_blank"
           ><i class="fab fa-reddit"></i

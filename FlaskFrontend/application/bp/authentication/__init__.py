@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from flask import session
-from application.bp.authentication.forms import RegisterForm , LoginForm, EditProfileForm
+from application.bp.authentication.forms import RegisterForm , LoginForm, EditProfileForm, MFAForm
 
 
 import json
@@ -29,6 +29,44 @@ def user_by_id(user_id):
 
     return render_template('user.html')
 
+@authentication.route('/MFA', methods=['GET', 'POST'])
+def MFA():
+    form = MFAForm()
+    if form.validate_on_submit():
+        MFA = request.form['MFA']
+
+        # Send request to RabbitMQ server
+        client = RabbitMQClient('testServer')
+        request_data = {
+            'type': 'MFA',
+            'MFANumber':MFA
+        }
+        response = client.send_request(request_data)
+    
+        resp=json.loads(response.decode("utf-8").replace("'",'"'))
+        
+        # Check if login was successful
+        if resp['MFA_status']==True:
+            session['firstName']=resp['first_name']
+            session['lastName']=resp['last_name']
+            session['sessionID']=resp['session_id']
+            session['username']=resp['username']
+            session['email']=resp['email']
+            session['city']=resp['city']
+            session['state']=resp['state']
+            session['user_id']=resp['user_id']
+            return redirect('/dashboard')
+        elif resp['MFA_status']==False:
+            return redirect('/login')
+        else:
+            
+            flash('Login unsuccessful. Please check your username and password.', 'danger')
+
+    return render_template('login.html', form=form)
+
+
+    """return render_template('MFA.html', form=form)"""
+
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -46,24 +84,16 @@ def login():
         response = client.send_request(request_data)
     
         resp=json.loads(response.decode("utf-8").replace("'",'"'))
-     
+        
         # Check if login was successful
         if resp['login_status']==True:
-            session['firstName']=resp['first_name']
-            session['lastName']=resp['last_name']
-            session['sessionID']=resp['session_id']
-            session['username']=resp['username']
-            session['email']=resp['email']
-            session['city']=resp['city']
-            session['state']=resp['state']
-            session['user_id']=resp['user_id']
-            return redirect('/dashboard')
+            return redirect('/MFA')            
         else:
             
             flash('Login unsuccessful. Please check your username and password.', 'danger')
 
     return render_template('login.html', form=form)
-
+        
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

@@ -77,7 +77,7 @@ function loginAuth($username, $password)
 
 function dbConnection()
 {
-    $servername = '192.168.191.69';
+    $servername = 'localhost';
     $uname = 'testuser';
     $pw = '12345';
     $dbname = 'IT490';
@@ -353,7 +353,7 @@ function storeSearchResultsInCache($query, $searchResults)
 
     // Check for errors and return result
     if ($result) {
-        echo "It has been added to the cache " . PHP_EOL;
+        echo "It has been added to the cache hello professor " . PHP_EOL;
 
         return true;
     } else {
@@ -662,13 +662,7 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
         $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
         $result = mysqli_query($conn, $sqlCheck);
         $count = mysqli_num_rows($result);
-        if ($count == 0) {
-
-            $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
-        VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
-        } else {
-            $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
-    WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        if ($count == 0) {s
         }
         $result = mysqli_query($conn, $sql);
 
@@ -684,8 +678,6 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
         }
     }
 }
-
-
 
 
 

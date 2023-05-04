@@ -5,9 +5,24 @@
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta property="og:title" content="My Liquor Cabinet">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="http://www.myliqourcabinet.com/">
+        <meta property="og:image" content="https://media.discordapp.net/attachments/1093279676618772591/1101224155564752936/sockmannnnn_Create_a_logo_that_captures_the_spirit_of_adventure_76060227-b8ff-48a2-9776-f3131e289950.png?width=96&height=96">
+        <meta property="og:description" content="Welcome to My Liquor Cabinet, the ultimate online resource for liquor enthusiasts.">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@myliqourcabinet">
+        <meta name="twitter:title" content="My Liquor Cabinet">
+        <meta name="twitter:description" content="Welcome to My Liquor Cabinet, the ultimate online resource for liquor enthusiasts.">
+        <meta name="twitter:image" content="https://media.discordapp.net/attachments/1093279676618772591/1101224155564752936/sockmannnnn_Create_a_logo_that_captures_the_spirit_of_adventure_76060227-b8ff-48a2-9776-f3131e289950.png?width=96&height=96">
+        <title>My Liquor Cabinet</title>
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+        
         {% block styles %}
             <!-- Bootstrap CSS -->
+          
+              
             {{ bootstrap.load_css() }}
         {% endblock %}
 
@@ -34,7 +49,7 @@
                     {{ render_nav_item('events.events','Search for Events' ) }}
                     {{ render_nav_item('drinkwithyoureyes.drinkwithyoureyes','Drink with your eyes' ) }}
                     {{ render_nav_item('apiSearch.apiSearch','cocktail search' ) }}
-                    {{ render_nav_item('jqueryExample.jquerytestFunct','dynamic update test' ) }}
+              
                     {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
                     {{ render_nav_item('authentication.registration','Register' ) }}
@@ -44,6 +59,7 @@
                     {{ render_nav_item('authentication.edit_profile','Edit Profile' ) }}
                     {{ render_nav_item('authentication.logout', 'Logout', button=True) }}
                     {% endif %}
+                   
                 </div>
             </div>
 
@@ -56,10 +72,61 @@
 </div>
 <!-- Your page content -->
 {% block content %}{% endblock %}
-
-<footer>
-    Footer Goes Here
-</footer>
+<!-- Footer -->
+<footer class="bg-light text-center text-white">
+    <div class="container p-4 pb-0">
+      <section class="mb-4">
+        <!-- Facebook -->
+        <a
+          class="btn text-white btn-floating m-1"
+          style="background-color: #3b5998;"
+          href="https://www.facebook.com/sharer/sharer.php?u=http://www.myliqourcabinet.com/"
+          role="button"
+          target="_blank"
+          ><i class="fab fa-facebook-f"></i
+        ></a>
+  
+        <!-- Twitter -->
+        <a
+          class="btn text-white btn-floating m-1"
+          style="background-color: #55acee;"
+          href="https://twitter.com/intent/tweet?url=http://www.myliqourcabinet.com/&text=Check%20this%20out!"
+          role="button"
+          target="_blank"
+          ><i class="fab fa-twitter"></i
+        ></a>
+  
+  
+        <!-- Linkedin -->
+        <a
+          class="btn text-white btn-floating m-1"
+          style="background-color: #0082ca;"
+          href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.myliqourcabinet.com/"
+          role="button"
+          target="_blank"
+          ><i class="fab fa-linkedin-in"></i
+        ></a>
+  
+  
+        <!-- Reddit -->
+        <a
+          class="btn text-white btn-floating m-1"
+          style="background-color: #ff5700;"
+          href="https://www.reddit.com/submit?url=http://www.myliqourcabinet.com/"
+          role="button"
+          target="_blank"
+          ><i class="fab fa-reddit"></i
+        ></a>
+      </section>
+    </div>
+  
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+      © 2023 Copyright:
+      <a class="text-white" href="http://www.myliqourcabinet.com/">MyLiquorCabinet.com</a>
+    </div>
+  </footer>
+  
+  <!-- Footer -->
 {% block scripts %}<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="/static/main.js"></script>
     <!-- Optional JavaScript -->

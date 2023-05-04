@@ -49,6 +49,9 @@
                     {{ render_nav_item('events.events','Search for Events' ) }}
                     {{ render_nav_item('drinkwithyoureyes.drinkwithyoureyes','Drink with your eyes' ) }}
                     {{ render_nav_item('apiSearch.apiSearch','cocktail search' ) }}
+
+                    {{ render_nav_item('userRecipeSearch.userRecipeSearch','User Cocktail Showcase' ) }}
+
               
                     {% if not session.sessionID %}
                     {{ render_nav_item('authentication.login','Login' ) }}
@@ -57,6 +60,7 @@
                     {% if session.sessionID %}
                     {{ render_nav_item('myliquorcabinet.liquorcabinet','My Liquor Cabinet' ) }}
                     {{ render_nav_item('authentication.edit_profile','Edit Profile' ) }}
+                    {{ render_nav_item('addrecipe.addrecipe','add a cocktail recipe' ) }}
                     {{ render_nav_item('authentication.logout', 'Logout', button=True) }}
                     {% endif %}
                    
@@ -112,7 +116,9 @@
         <a
           class="btn text-white btn-floating m-1"
           style="background-color: #ff5700;"
+
           href="https://www.reddit.com/submit?url=http://www.myliqourcabinet.com/"
+
           role="button"
           target="_blank"
           ><i class="fab fa-reddit"></i

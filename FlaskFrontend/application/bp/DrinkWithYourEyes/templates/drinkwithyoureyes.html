@@ -47,8 +47,30 @@
                     <button type="button" class="btn btn-secondary like-button"
                     onclick="likeDrink('{{ d.idDrink }}', this,false)" data-is-liked="false">like</button>
                     {% endif %}
-                 
+                    <div class="col mt-2">
+                        <p class="card-text">Share this Recipe! </p>
+                        <a class="btn text-white btn-floating m-1" style="background-color: #3b5998;"
+                        href="https://www.facebook.com/sharer/sharer.php?u={{ url_for('singleRecipe.singleRecipe', _external=True, searchValue=d.strDrink)|urlencode }}"
+                        role="button" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    
+                    <!-- Twitter -->
+                    <a class="btn text-white btn-floating m-1" style="background-color: #55acee;"
+                        href="https://twitter.com/intent/tweet?url={{ url_for('singleRecipe.singleRecipe', _external=True, searchValue=d.strDrink)|urlencode }}&text=Check%20out%20this%20amazing%20{{ d.strDrink }}%20cocktail!"
+                        role="button" target="_blank"><i class="fab fa-twitter"></i></a>
+                    
+                    <!-- LinkedIn -->
+                    <a class="btn text-white btn-floating m-1" style="background-color: #0082ca;"
+                        href="https://www.linkedin.com/shareArticle?mini=true&url={{ url_for('singleRecipe.singleRecipe', _external=True, searchValue=d.strDrink)|urlencode }}&title={{ d.strDrink }}"
+                        role="button" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                    
+                    <!-- Reddit -->
+                    <a class="btn text-white btn-floating m-1" style="background-color: #ff5700;"
+                        href="https://reddit.com/submit?url={{ url_for('singleRecipe.singleRecipe', _external=True, searchValue=d.strDrink)|urlencode }}&title={{ d.strDrink }}"
+                        role="button" target="_blank"><i class="fab fa-reddit"></i></a>
+
                 </div>
+                </div>
+              
             </div>
         </div>
         {% endfor %}

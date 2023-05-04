@@ -75,8 +75,10 @@ def get_search_term(form):
                 session['searchTerm'] = random.choice('abcdefghijklmnopqrstuvwyxz')
                 session['filter'] = False
             case "Recommend and Search by Name":
+                session['searchTerm'] = request.form['searchValue']
                 session['filter'] = True
             case "searchByName":
+                session['searchTerm'] = request.form['searchValue']
                 session['filter'] = False
             case _:
                 flash("You have to be logged in to use the other search functions", "error")

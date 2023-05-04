@@ -523,17 +523,20 @@ function retrieveRecipes($sessionid)
         $userid = $row['UID'];
         $sql = "SELECT name FROM IT490.ingredients";
         $sql2 = "SELECT Recipe FROM IT490.UserCocktails WHERE User_ID = $userid";
+        $sql4 = "SELECT Recipe,id FROM IT490.UserRecipes WHERE User_ID = $userid";
         $result2 = $conn->query($sql2);
-
+        $UserRecipeQuery= $conn->query($sql4);
         $result3 = $conn->query($sql);
         $ingredients = mysqli_fetch_all($result3, MYSQLI_ASSOC);
+        $UserRecipe=mysqli_fetch_all($UserRecipeQuery, MYSQLI_ASSOC);
         $drinkList = mysqli_fetch_all($result2, MYSQLI_ASSOC);
         $userIngredients = GetUsieringredients($userid);
-        print_r($ingredients);
+        
         $resp = array(
             'ingredients' => $ingredients,
             'drinkList' => $drinkList,
-            'userIngredients' => $userIngredients
+            'userIngredients' => $userIngredients,
+            'userRecipes'=> $UserRecipe
 
         );
         return $resp;
@@ -667,6 +670,36 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
     }
 }
 
+
+function addUserRecipe($recipe,$drinkname,$username,$sessionid){
+    $conn = dbConnection();
+    if (doValidate($sessionid)) {
+        $sql = "SELECT UID FROM IT490.sessions WHERE sessionID = '$sessionid'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $userid = $row['UID'];
+        //$recipedata = str_replace("'", '"', $recipedata);
+        // $recipedata = str_replace("None", "null", $recipedata);
+        // $recipelist =json_encode($recipelist,  JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT). "\n";
+        print_r( $recipe);
+        $recipedata = json_encode($recipe, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $conn = dbConnection();
+        $stmt = $conn->prepare('INSERT INTO IT490.UserRecipes (User_ID,Recipe,Drink_Name ,Username) VALUES (?,?,?,?)');
+        $stmt->bind_param('ssss', $userid, $recipedata, $drinkname,$username);
+        $result = $stmt->execute();
+        echo $result;
+        $stmt->close();
+        $conn->close();
+
+        if ($result) {
+            echo "Recipe updated successfully" . PHP_EOL;
+            return  ['Status' => true];
+        } else {
+            echo "An error occurred while updating the recipe" . PHP_EOL;
+            return  ['Status' => false];
+        }
+    }
+
 function MFAGen($user_ID)
 {
     $conn = dbConnection();
@@ -704,6 +737,7 @@ function MFAGen($user_ID)
         }
         return True;
     }// End MFAGen
+
 
 
 function MFAAuth($MFANum)
@@ -755,7 +789,63 @@ function MFAAuth($MFANum)
     
 } //End MFAAuth
 
+}
 
+function retrieveAllUserRecipes(){
+    $conn = dbConnection();
+    $sql = "SELECT * FROM IT490.UserRecipes";
+    $result = $conn->query($sql);
+    if($result){
+    $drinkList = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    return $drinkList;
+    } else {
+        return  ['Status' => false];
+    }
+}
+
+function retrieveUserRecipes($id){
+    $conn = dbConnection();
+    $sql = "SELECT Recipe FROM IT490.UserRecipes where id ='$id'";
+    $result = $conn->query($sql);
+    if($result){
+    $drinkList = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    return $drinkList;
+    } else {
+        return  ['Status' => false];
+    }
+}
+function editUserRecipes($recipeID, $changes, $sessionid,$drinkName){
+    $conn = dbConnection();
+    if (doValidate($sessionid)) {
+        $recipedata = json_encode($changes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $sql = "UPDATE IT490.UserRecipes SET Recipe = '$recipedata', Drink_Name ='$drinkName' WHERE id = '$recipeID'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            echo "Recipe updated successfully" . PHP_EOL;
+            return true;
+        } else {    return false;
+        
+        } // End dbConnection
+     
+        }
+    }
+
+
+
+function deleteUserRecipes($recipeID, $sessionid){
+    $conn = dbConnection();
+    if (doValidate($sessionid)) {
+        $sql = "DELETE FROM IT490.UserRecipes WHERE id = '$recipeID'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            echo "Recipe deleted successfully" . PHP_EOL;
+            return true;
+        } else {
+        echo "Recipe deleted successfully" . PHP_EOL;
+        return false;
+        }
+    }
+}
 function requestProcessor($request)
 {
     echo 'received request' . PHP_EOL;
@@ -775,6 +865,7 @@ function requestProcessor($request)
                 $request['lastName'],
                 $request['city'],
                 $request['state']
+            
             );
         case 'validate_session':
             return doValidate($request['sessionID']);
@@ -807,7 +898,7 @@ function requestProcessor($request)
             return requestEvents($request['timeleft']);
 
         case "totallikes":
-            return getDrinkTotalRating($request['drinks'], $request['sessionID']);
+            return getDrinkTotalRating($request['drinks'], $request['sessionID'], $request['filterby']);
 
         case "like":
             return updateRecipeList($request['sessionID'], $request['drink'], $request['drinkName']);
@@ -823,15 +914,29 @@ function requestProcessor($request)
 
         case "DeleteEvent":
             return eventDelete($request['name'], $request['UID']);
+
+        case "addRecipe":
+            return addUserRecipe($request['recipe'],$request['drink_name'],$request['Username'],$request['sessionid']); 
+        case "retrieveAllUserRecipes":
+            return retrieveAllUserRecipes(); 
+        case "retrieveUserRecipes":
+            return retrieveUserRecipes($request['id']);   
+        case "DeleteUserRecipe":
+            return deleteUserRecipes($request['recipeID'], $request['sessionid']); 
+        case "EditUserRecipe":
+            return editUserRecipes($request['recipeID'], $request['changes'] ,$request['sessionid'] ,$request['drinkNane']);
+
         case 'MFA':
             return MFAAuth($request['MFANumber']);
-    }
 
+    }
+ 
     return [
         'returnCode' => '0',
         'message' => 'Server received the request and processed it.',
     ];
 } // End requestProcessor
+
 
 $server = new rabbitMQServer('RabbitMQConfig.ini', 'testServer');
 

@@ -1,11 +1,9 @@
-
-
 from wtforms import validators
 from wtforms.fields import *
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, HiddenField
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms import Form,StringField, PasswordField, SubmitField, HiddenField, FormField, FieldList
+from wtforms.validators import DataRequired, Email, EqualTo,  NumberRange, Optional
 
 class LoginForm(FlaskForm):
     email = StringField('Email', [
@@ -64,11 +62,162 @@ class EditProfileForm(FlaskForm):
 class IngredientForm(FlaskForm):
     name = StringField('Name')
     selected = BooleanField('Selected')
+class Ingredient_Form(FlaskForm):
+   
 
+ 
+    ingredient = SelectField('Ingredient', choices=[(ingredient, ingredient) for ingredient in [
+        "Light rum",
+        "Applejack",
+        "Gin",
+        "Dark rum",
+        "Sweet Vermouth",
+        "Strawberry schnapps",
+        "Scotch",
+        "Apricot brandy",
+        "Triple sec",
+        "Southern Comfort",
+        "Orange bitters",
+        "Brandy",
+        "Lemon vodka",
+        "Blended whiskey",
+        "Dry Vermouth",
+        "Amaretto",
+        "Tea",
+        "Champagne",
+        "Coffee liqueur",
+        "Bourbon",
+        "Tequila",
+        "Vodka",
+        "Anejo rum",
+        "Bitters",
+        "Sugar",
+        "Kahlua",
+        "demerara Sugar",
+        "Dubonnet Rouge",
+        "Watermelon",
+        "Lime juice",
+        "Irish whiskey",
+        "Apple brandy",
+        "Carbonated water",
+        "Cherry brandy",
+        "Creme de Cacao",
+        "Grenadine",
+        "Port",
+        "Coffee brandy",
+        "Red wine",
+        "Rum",
+        "Grapefruit juice",
+        "Ricard",
+        "Sherry",
+        "Cognac",
+        "Sloe gin",
+        "Apple juice",
+        "Pineapple juice",
+        "Lemon juice",
+        "Sugar syrup",
+        "Milk",
+        "Strawberries",
+        "Chocolate syrup",
+        "Yoghurt",
+        "Mango",
+        "Ginger",
+        "Lime",
+        "Cantaloupe",
+        "Berries",
+        "Grapes",
+        "Kiwi",
+        "Tomato juice",
+        "Cocoa powder",
+        "Chocolate",
+        "Heavy cream",
+        "Galliano",
+        "Peach Vodka"
+    ]], coerce=str)
+    measurement = IntegerField('Measurement', validators=[Optional(), NumberRange(min=1)])
+    measurement_type = SelectField('Measurement Type', choices=[
+        ('ml', 'ml'),
+        ('cl', 'cl'),
+        ('oz', 'oz'),
+        ('cup', 'cup'),
+        ('tbsp', 'tbsp'),
+        ('tsp', 'tsp'),
+        ('dash', 'dash'),
+        ('pinch', 'pinch'),
+        ('part', 'part'),
+        ('piece', 'piece'),
+        ('slice', 'slice'),
+        ('sprig', 'sprig'),
+        ('leaf', 'leaf'),
+        ('can', 'can'),
+        ('bottle', 'bottle'),
+        ('drop', 'drop'),
+    ])
 class RecipeForm(FlaskForm):
-    name = StringField('Name')
-    ingredients = FieldList(FormField(IngredientForm), min_entries=1)
+    # assuming that ingredients is a FieldList of FormFields
+  
+    def __init__(self, strAlcoholic_default=None, strCategory_default=None, strDrink_default=None,
+                 strDrinkThumb_default=None, strGlass_default=None, strInstructions_default=None,
+                 id_default=None):
+        super(RecipeForm, self).__init__()
 
+        if strAlcoholic_default is not None:
+            self.strAlcoholic.default = strAlcoholic_default
+
+        if strCategory_default is not None:
+            self.strCategory.default = strCategory_default
+
+        if strDrink_default is not None:
+            self.strDrink.default = strDrink_default
+
+        if strDrinkThumb_default is not None:
+            self.strDrinkThumb.default = strDrinkThumb_default
+
+        if strGlass_default is not None:
+            self.strGlass.default = strGlass_default
+
+        if strInstructions_default is not None:
+            self.strInstructions.default = strInstructions_default
+        if id_default is not None:
+            self.id.default=id_default
+
+       
+
+        self.process() 
+    
+    strAlcoholic = BooleanField('Alcoholic',)
+    strCategory = SelectField('Category', choices=[
+        ('cocktail', 'Cocktail'),
+        ('mixed_drink', 'Mixed Drink'),
+        ('mocktail', 'Mocktail'),
+        ('beer_cocktail', 'Beer Cocktail'),
+        ('wine_cocktail', 'Wine Cocktail'),
+        ('classic', 'Classic'),
+        ('tiki', 'Tiki'),
+        ('frozen', 'Frozen'),
+        ],)
+    strDrink = StringField('Cocktail Name',)
+    strDrinkThumb = StringField('Drink Thumbnail',)
+    strGlass = SelectField('Glass', choices=[
+        ('cocktail', 'Cocktail Glass'),
+        ('highball', 'Highball Glass'),
+        ('collins', 'Collins Glass'),
+        ('martini', 'Martini Glass'),
+        ('margarita', 'Margarita/Coupette Glass'),
+        ('old_fashioned', 'Old-Fashioned Glass'),
+        ('hurricane', 'Hurricane Glass'),
+        ('wine', 'Wine Glass'),
+        ('shot', 'Shot Glass'),
+        ('punch', 'Punch Bowl'),
+        ('pint', 'Pint Glass'),
+        ('mug', 'Beer Mug'),
+        ],)
+    strInstructions = TextAreaField('Instructions',)
+    ingredients = FieldList(FormField(Ingredient_Form), min_entries=15, max_entries=15)
+    id=HiddenField()
+
+
+    submit = SubmitField("submit")
 class SearchForm(FlaskForm):
     class Meta:
         csrf = False
@@ -157,8 +306,7 @@ class IngredientsForm(FlaskForm):
     mixers = FieldList(FormField(MixerCategory), label='Mixers')
     submit = SubmitField('Submit')
 
-class submitBtn(FlaskForm):
-     submit = SubmitField('Submit')
+
      
 class MFAForm(FlaskForm):
     MFA = IntegerField('MFA', [
@@ -167,3 +315,6 @@ class MFAForm(FlaskForm):
     
     submit = SubmitField()
 
+
+class submitBtn(FlaskForm):
+     submit = SubmitField('Submit')

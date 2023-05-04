@@ -2,7 +2,7 @@ import json
 import random
 from flask import Blueprint, jsonify, render_template, request, session
 
-from application.bp.authentication.forms import SearchForm , IngredientsForm, LikeButton
+from application.bp.authentication.forms import SearchForm , LikeButton
 from application.rabbitMQ.rabbitmqlibPYTHON import RabbitMQClient
 from application.jsonPgaination.JSONPagination import JSONPagination
 bp_drinkwithyoureyes = Blueprint('drinkwithyoureyes', __name__, template_folder='templates')
@@ -81,6 +81,7 @@ def get_data():
             }   
     response = client.send_request(request_dict)
     response= json.loads(response)
+    
     print(str(len(response))+"get data")
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Change this to the desired number of items per page
@@ -120,6 +121,7 @@ def your_view_function():
         response = client.send_request(request_dict)
    
         response = json.loads(response)
+       
         total=int(len(response)/10)
         print(str(total)+"refresh and total is: "+str(len(response)) )
         randomNum=str(random.randrange(total))

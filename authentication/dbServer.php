@@ -665,13 +665,7 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
         $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
         $result = mysqli_query($conn, $sqlCheck);
         $count = mysqli_num_rows($result);
-        if ($count == 0) {
-
-            $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
-        VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
-        } else {
-            $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
-    WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
+        if ($count == 0) {s
         }
         $result = mysqli_query($conn, $sql);
 

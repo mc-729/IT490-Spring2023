@@ -3,7 +3,7 @@ Description=Log server for RabbitMQ Logs
 
 [Service]
 User=justin (please change to your username)
-ExecStart =/usr/bin/python3 /home/justin/git/IT490-Spring2023/API/rabbitMQserver.py
+ExecStart =/usr/bin/python3 /home/jonathan/git/IT490-Spring2023/API/rabbitMQserver.py
 Restart=always
 
 [Install]

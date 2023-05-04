@@ -335,7 +335,7 @@ function storeSearchResultsInCache($query, $searchResults)
 
     // Check for errors and return result
     if ($result) {
-        echo "It has been added to the cache " . PHP_EOL;
+        echo "It has been added to the cache hello professor " . PHP_EOL;
 
         return true;
     } else {
@@ -705,6 +705,7 @@ function MFAGen($user_ID)
         return True;
     }// End MFAGen
 
+
 function MFAAuth($MFANum)
 {
     $conn = dbConnection();
@@ -753,6 +754,7 @@ function MFAAuth($MFANum)
     
     
 } //End MFAAuth
+
 
 function requestProcessor($request)
 {

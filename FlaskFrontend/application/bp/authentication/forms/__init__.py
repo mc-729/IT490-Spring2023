@@ -159,4 +159,11 @@ class IngredientsForm(FlaskForm):
 
 class submitBtn(FlaskForm):
      submit = SubmitField('Submit')
+     
+class MFAForm(FlaskForm):
+    MFA = IntegerField('MFA', [
+        validators.DataRequired()
+    ])
+    
+    submit = SubmitField()
 

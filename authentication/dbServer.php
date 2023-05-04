@@ -6,6 +6,11 @@ require_once 'rabbitMQLib.inc';
 //require_once '../Logging/send_log.inc';
 //require_once __DIR__ . '/../vendor/autoload.php';
 
+//Load Composer's autoloader
+require '../vendor/autoload.php';
+
+//Import PHPMailer classes into the global namespace
+use PHPMailer\PHPMailer\PHPMailer;
 
 function loginAuth($username, $password)
 {
@@ -32,44 +37,21 @@ function loginAuth($username, $password)
         if (password_verify($password, $hashedpass)) {
             echo 'Login Successful' . PHP_EOL;
             $resp = array(
-                'login_status' => true,
-                'session_id' => SessionGen($row['User_ID']),
-                'user_id' => $row['User_ID'],
-                'first_name' => $row['F_Name'],
-                'last_name' => $row['L_Name'],
-                'username' => $row['Username'],
-                'email' => $row['Email'],
-                'city' => $row['City'],
-                'state' => $row['State']
+                'login_status' => true
             );
+            $MFA = MFAGen($row['User_ID']);
             return $resp;
         } else {
             echo 'Login Failed' . PHP_EOL;
             $resp = array(
-                'login_status' => false,
-                'session_id' => null,
-                'user_id' => null,
-                'first_name' => null,
-                'last_name' => null,
-                'username' => null,
-                'email' => null,
-                'city' => null,
-                'state' => null
+                'login_status' => false
             );
             return $resp;
         }
     } else {
         echo 'Login Failed' . PHP_EOL;
         $resp = array(
-            'login_status' => false,
-            'session_id' => null,
-            'user_id' => null,
-            'first_name' => null,
-            'last_name' => null,
-            'username' => null,
-            'email' => null,
-            'city' => null,
-            'state' => null
+            'login_status' => false
         );
         return $resp;
     }
@@ -662,7 +644,13 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
         $sqlCheck = "SELECT * FROM IT490.UserMLC WHERE User_ID = $userid and Ing_Name = '$ingName'";
         $result = mysqli_query($conn, $sqlCheck);
         $count = mysqli_num_rows($result);
-        if ($count == 0) {s
+        if ($count == 0) {
+
+            $sql = "INSERT into IT490.UserMLC (User_ID, Ing_Name, Amount, Measurement_Type) 
+        VALUES ('$userid', '$ingName', '$amount', '$measurementType')";
+        } else {
+            $sql = "UPDATE UserMLC SET Amount = '$amount', Measurement_Type = '$measurementType'
+    WHERE User_ID = '$userid' AND Ing_Name = '$ingName'";
         }
         $result = mysqli_query($conn, $sql);
 
@@ -679,7 +667,93 @@ function updateUserMLC($sessionid, $ingName, $amount, $measurementType)
     }
 }
 
+function MFAGen($user_ID)
+{
+    $conn = dbConnection();
 
+        $MFANum = rand(1000, 99999999);
+        $query2 = "INSERT into IT490.MFA(UID,MFA)VALUES('$user_ID','$MFANum')";
+        $result = mysqli_query($conn, $query2);
+
+    
+        $config = json_decode(file_get_contents('/home/jonathan/git/IT490-Spring2023/authentication/numbers.json'), true);  
+        $number = $config['phone1'];
+        $mail = new PHPMailer();
+        // configure an SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'cocktailsearch@gmail.com';
+        $mail->Password = 'tbhokigmqdobsbey';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+        
+        $mail->setFrom('cocktailsearch@gmail.com', 'Cocktail Search');
+        $mail->addAddress($number, 'Me');
+        $mail->Subject = 'Here is your MFA code';
+        $mail->Body = '{MFANum}';
+        $mail->Body = str_replace('{MFANum}', $MFANum, $mail->Body);
+    
+    // send the message
+    if(!$mail->send()){
+        echo 'Message could not be sent.'.PHP_EOL;
+        echo 'Mailer Error: ' . $mail->ErrorInfo.PHP_EOL;
+        return False;
+    } else {
+        echo 'Message has been sent'.PHP_EOL;
+        }
+        return True;
+    }// End MFAGen
+
+
+function MFAAuth($MFANum)
+{
+    $conn = dbConnection();
+
+    // lookup userid in MFA table
+
+    $sql = "SELECT * FROM IT490.MFA WHERE MFA = '$MFANum'";
+    $result = mysqli_query($conn, $sql);
+    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    $count = mysqli_num_rows($result);
+    $userid = $row['UID'];
+    $sql2 = "SELECT * FROM IT490.Users WHERE User_ID = '$userid'";
+    $result2 = mysqli_query($conn, $sql2);
+    $row2 = mysqli_fetch_array($result2, MYSQLI_ASSOC);
+
+    if ($count != 0) {
+        echo 'MFA Found' . PHP_EOL;
+
+            $resp = array(
+                'MFA_status' => true,
+                'session_id' => SessionGen($userid),
+                'user_id' => $row2['User_ID'],
+                'first_name' => $row2['F_Name'],
+                'last_name' => $row2['L_Name'],
+                'username' => $row2['Username'],
+                'email' => $row2['Email'],
+                'city' => $row2['City'],
+                'state' => $row2['State']
+            );
+            return $resp;
+        } else {
+            echo 'MFA Failed' . PHP_EOL;
+            $resp = array(
+                'MFA_status' => false,
+                'session_id' => null,
+                'user_id' => null,
+                'first_name' => null,
+                'last_name' => null,
+                'username' => null,
+                'email' => null,
+                'city' => null,
+                'state' => null
+            );
+            return $resp;
+        }
+    
+    
+} //End MFAAuth
 
 
 function requestProcessor($request)
@@ -749,6 +823,8 @@ function requestProcessor($request)
 
         case "DeleteEvent":
             return eventDelete($request['name'], $request['UID']);
+        case 'MFA':
+            return MFAAuth($request['MFANumber']);
     }
 
     return [

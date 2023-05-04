@@ -738,7 +738,7 @@ function MFAAuth($MFANum)
         } else {
             echo 'MFA Failed' . PHP_EOL;
             $resp = array(
-                'login_status' => false,
+                'MFA_status' => false,
                 'session_id' => null,
                 'user_id' => null,
                 'first_name' => null,

@@ -1,10 +1,10 @@
 [Unit]
-Description=Database server for RabbitMQ 
+Description=Deployment server for RabbitMQ 
 
 [Service]
 ;User=justin (please change to your username)
 User=root
-ExecStart =/usr/bin/php /home/justin/git/IT490-Spring2023/authentication/dbServer.php
+ExecStart =/usr/bin/php /home/justin/git/IT490-Spring2023/deployment/testRabbitMQServer.php
 Restart=always
 
 [Install]

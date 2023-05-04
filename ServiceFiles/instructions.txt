@@ -20,3 +20,15 @@ Database service
 7. sudo systemctl status rabbitMQDatabase.service
 8. sudo systemctl enable rabbitMQDatabase.service
 
+-----------------------------------------------------------------------------------------------------------
+Deployment
+
+1. cd /etc/systemd/systemd
+2. sudo touch rabbitMQDeployment.service
+3. sudo vim rabbitMQDeployment.service
+4. Copy and paste the contents of rabbitMQDeployment.service file to the systemd file you just made
+5. sudo systemctl daemon-reload
+6. sudo systemctl start rabbitMQDatabase.service
+7. sudo systemctl status rabbitMQDatabase.service
+8. sudo systemctl enable rabbitMQDatabase.service
+
